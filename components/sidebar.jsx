@@ -1,13 +1,23 @@
 // components/Sidebar.jsx
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/actions";
 
-export default function Sidebar() {
+export default function Sidebar({ userRole }) {
   const pathname = usePathname();
+  const [isAdminWithAccess, setIsAdminWithAccess] = useState(false);
+
+  useEffect(() => {
+    // Check if the user role is allowed to access Help Center
+    if (userRole !== "80845621") {
+      setIsAdminWithAccess(true);
+    } else {
+      setIsAdminWithAccess(false);
+    }
+  }, [userRole]);
 
   return (
     <div className="bg-slate-50 w-60 h-screen flex flex-col">
@@ -30,8 +40,15 @@ export default function Sidebar() {
         </div>
       </nav>
       <div className="p-4">
-      <div className={`text-sm rounded px-4 py-2 m-1 mt-4 ${pathname === "/protected/help" ? "bg-indigo-600 text-slate-50 pointer-events-none" : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"} duration-200`}>
+
+      {isAdminWithAccess && (
+        <div className={`text-sm rounded px-4 py-2 m-1 mt-4 ${pathname === "/protected/help" ? "bg-indigo-600 text-slate-50 pointer-events-none" : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"} duration-200`}>
           <Link href="/protected/help">Help Center</Link>
+        </div>
+      )}
+
+        <div className={`text-sm rounded px-4 py-2 m-1 mt-4 ${pathname === "/protected/user-manage" ? "bg-indigo-600 text-slate-50 pointer-events-none" : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"} duration-200`}>
+          <Link href="/protected/user-manage">User Management</Link>
         </div>
         <div className={`text-sm rounded px-4 py-2 m-1 mt-4 ${pathname === "/protected/sign-out" ? "bg-indigo-600 text-slate-50 pointer-events-none" : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"} duration-200`}>
           <form action={signOutAction} method="post">

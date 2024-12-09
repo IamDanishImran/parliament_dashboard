@@ -68,6 +68,7 @@
 //   );
 // }
 
+// C:\Users\User\parlimen\components\header-auth.jsx
 import { signOutAction } from "@/app/actions";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import Link from "next/link";
@@ -100,7 +101,7 @@ export default async function AuthButton() {
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
-              <Link href="/sign-in">Sign in</Link>
+              <Link href="/(auth-pages)/sign-in">Sign in</Link>
             </Button>
             <Button
               asChild
@@ -109,7 +110,7 @@ export default async function AuthButton() {
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
-              <Link href="/sign-up">Sign up</Link>
+              <Link href="/(auth-pages)/sign-up">Sign up</Link>
             </Button>
           </div>
         </div>
@@ -120,6 +121,7 @@ export default async function AuthButton() {
     <div className="flex items-center gap-4">
       Hey, {user.email}!
       <form action={signOutAction}>
+        {/* Change to Enter dashboard */} 
         <Button type="submit" variant={"outline"}>
           Sign out
         </Button>
@@ -128,10 +130,10 @@ export default async function AuthButton() {
   ) : (
     <div className="flex gap-2">
       <Button asChild size="sm" variant={"outline"}>
-        <Link href="/sign-in">Sign in</Link>
+        <Link href="/(auth-pages)/sign-in">Sign in</Link>
       </Button>
       <Button asChild size="sm" variant={"default"}>
-        <Link href="/sign-up">Sign up</Link>
+        <Link href="/(auth-pages)/sign-up">Sign up</Link>
       </Button>
     </div>
   );

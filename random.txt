@@ -1,0 +1,551 @@
+// // app/actions.js
+// "use server";
+// import { encodedRedirect } from "@/utils/utils";
+// import { createClient } from "@/utils/supabase/server";
+// import { headers } from "next/headers";
+// import { redirect } from "next/navigation";
+
+// export const signUpAction = async (formData) => {
+//   const email         = formData.get("email")?.toString();
+//   const password      = formData.get("password")?.toString();
+//   const name          = formData.get("name")?.toString();
+//   const address       = formData.get("address")?.toString();
+//   const phone         = formData.get("phone")?.toString();
+//   const register_code = formData.get("register_code")?.toString();
+
+//   const supabase = createClient();
+//   const origin = headers().get("origin");
+
+//   if (!email || !password || !name || !address || !phone || !register_code) {
+//     return encodedRedirect( "error", "/sign-up", "All fields are required", );
+//   }
+
+//   // Validate the registration code
+//   const { data: registerID, error: dbError } = await supabase
+//     .from("registration")
+//     .select("id")
+//     .eq("role_code", register_code)
+//     .single();
+    
+//     if (dbError) {
+//       console.error(`Database error: ${dbError.message}`);
+//       return encodedRedirect("error", "/sign-up", "Error validating role code.");
+//     } 
+//     if (!registerID) {
+//       return encodedRedirect("error", "/sign-up", "Registration code invalid");
+//     }
+    
+//     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+//       email,
+//       password,
+//       options: {
+//         emailRedirectTo: `${origin}/auth/callback`,
+//       },
+//     });
+
+//     if (signUpError) {
+//       console.error(`Sign-up error: ${signUpError.message}`);
+//       return encodedRedirect("error", "/sign-up", signUpError.message);
+//     }
+
+//     const user_id = signUpData.user?.id;
+//     if (!user_id) {
+//       console.error("Sign-up failed: user ID is missing.");
+//       return encodedRedirect("error", "/sign-up", "Failed to complete sign-up.");
+//     }
+
+//     if (register_code === 25048082 || register_code === 80845621) {
+//       // Insert the user data into the admin table
+//       const { error: insertError } = await supabase.from("admin").insert([
+//         {
+//           user_id: user_id, name, email, phone, address, id_register: registerID.id,
+//         },
+//       ]);
+
+//       if (insertError) {
+//         console.error("Insert error: " + insertError.message);
+//         return encodedRedirect( "error", "/sign-up", "Failed to save user data.");
+//       }
+//     } 
+//     else {
+//       // Insert the user data into the dun table
+//       const { error: insertError } = await supabase.from("dun").insert([
+//         {
+//           user_id: user_id, name, email, phone, address, id_register: registerID.id,
+//         },
+//       ]);
+
+//       if (insertError) {
+//         console.error("Insert error: " + insertError.message);
+//         return encodedRedirect( "error", "/sign-up", "Failed to save user data.");
+//       }
+//     }
+//     // Success response
+//       return encodedRedirect(
+//         "success",
+//         "/sign-up",
+//         "Thanks for signing up! Please check your email for a verification link.",
+//       );
+//   };
+
+
+  // export const signUpAction = async (formData) => {
+  //   const email = formData.get("email")?.toString();
+  //   const password = formData.get("password")?.toString();
+  //   const name = formData.get("name")?.toString();
+  //   const address = formData.get("address")?.toString();
+  //   const phone = formData.get("phone")?.toString();
+  //   const register_code = formData.get("register_code")?.toString();
+  
+  //   const supabase = createClient();
+  //   const origin = headers().get("origin");
+  
+  //   if (!email || !password || !name || !address || !phone || !register_code) {
+  //     return encodedRedirect(
+  //       "error",
+  //       "/sign-up",
+  //       "All fields are required"
+  //     );
+  //   }
+  
+  //   // Handle role code for Manager or Supervisor (Admin roles)
+  //   if (register_code === "25048082" || register_code === "80845621") {
+  //     // Admin roles (Manager or Supervisor)
+  //     const { data: registerID, error: dbError } = await supabase
+  //       .from("registration")
+  //       .select("id")
+  //       .eq("role_code", register_code)
+  //       .single();
+  
+  //     if (dbError) {
+  //       console.error(`Database error: ${dbError.message}`);
+  //       return encodedRedirect("error", "/sign-up", "Error validating role code.");
+  //     }
+  
+  //     if (!registerID) {
+  //       return encodedRedirect("error", "/sign-up", "Registration code invalid");
+  //     }
+  
+  //     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+  //       email,
+  //       password,
+  //       options: {
+  //         emailRedirectTo: `${origin}/auth/callback`,
+  //       },
+  //     });
+  
+  //     if (signUpError) {
+  //       console.error(`Sign-up error: ${signUpError.message}`);
+  //       return encodedRedirect("error", "/sign-up", signUpError.message);
+  //     }
+  
+  //     const user_id = signUpData.user?.id;
+  //     if (!user_id) {
+  //       console.error("Sign-up failed: user ID is missing.");
+  //       return encodedRedirect("error", "/sign-up", "Failed to complete sign-up.");
+  //     }
+  
+  //     // Insert the user data for the admin role into the admin table
+  //     const { error: insertError } = await supabase.from("admin").insert([{
+  //       user_id: user_id, name, email, phone, address, id_register: registerID.id,
+  //     }]);
+  
+  //     if (insertError) {
+  //       console.error("Admin insert error:", insertError.message);
+  //       return encodedRedirect(
+  //         "error",
+  //         "/sign-up",
+  //         "Failed to save user data in Admin."
+  //       );
+  //     }
+  
+  //     // Success response for admin role
+  //     return encodedRedirect(
+  //       "success",
+  //       "/sign-up",
+  //       "Thanks for signing up! Please check your email for a verification link."
+  //     );
+  //   } else {
+  //     // For other role codes (non-admin roles, DUNs)
+  //     const { data: registerID, error: dbError } = await supabase
+  //       .from("registration")
+  //       .select("id")
+  //       .eq("role_code", register_code)
+  //       .single();
+  
+  //     if (dbError) {
+  //       console.error(`Database error: ${dbError.message}`);
+  //       return encodedRedirect("error", "/sign-up", "Error validating role code.");
+  //     }
+  
+  //     if (!registerID) {
+  //       return encodedRedirect("error", "/sign-up", "Registration code invalid");
+  //     }
+  
+  //     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+  //       email,
+  //       password,
+  //       options: {
+  //         emailRedirectTo: `${origin}/auth/callback`,
+  //       },
+  //     });
+  
+  //     if (signUpError) {
+  //       console.error(`Sign-up error: ${signUpError.message}`);
+  //       return encodedRedirect("error", "/sign-up", signUpError.message);
+  //     }
+  
+  //     const user_id = signUpData.user?.id;
+  //     if (!user_id) {
+  //       console.error("Sign-up failed: user ID is missing.");
+  //       return encodedRedirect("error", "/sign-up", "Failed to complete sign-up.");
+  //     }
+  
+  //     // Insert the user data for non-admin roles into the DUN table (or similar)
+  //     const { error: insertError } = await supabase.from("dun").insert([{
+  //       user_id: user_id, name, email, phone, address, id_register: registerID.id,
+  //     }]);
+  
+  //     if (insertError) {
+  //       console.error("DUN insert error:", insertError.message);
+  //       return encodedRedirect("error", "/sign-up", "Failed to save user data in DUN.");
+  //     }
+  
+  //     // Success response for non-admin roles (DUN)
+  //     return encodedRedirect(
+  //       "success",
+  //       "/sign-up",
+  //       "Thanks for signing up! Please check your email for a verification link."
+  //     );
+  //   }
+  // };
+
+
+
+
+  // import { createClient } from "@/utils/supabase/server";
+// const supabase = createClient();
+// const { data, error } = supabase.auth.getUser()
+// if (error || !data?.user) {
+//   redirect('/(auth-pages)/sign-in')
+// }
+
+
+
+
+
+
+// Perfect Actions.js
+// app/actions.js
+"use server";
+import { encodedRedirect } from "@/utils/utils";
+import { createClient } from "@/utils/supabase/server";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+export const signUpAction = async (formData) => {
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+  const name = formData.get("name")?.toString();
+  const address = formData.get("address")?.toString();
+  const phone = formData.get("phone")?.toString();
+  const register_code = formData.get("register_code")?.toString();
+
+  const supabase = createClient();
+  const origin = headers().get("origin");
+
+  // Check for missing fields
+  if (!email || !password || !name || !address || !phone || !register_code) {
+    return encodedRedirect("error", "/sign-up", "All fields are required");
+  }
+
+  // Validate the registration code
+  const { data: registerID, error: dbError } = await supabase
+    .from("registration")
+    .select("id")
+    .eq("role_code", register_code)
+    .single();
+  
+  if (dbError) {
+    console.error(`Database error: ${dbError.message}`);
+    return encodedRedirect("error", "/sign-up", "Error validating role code.");
+  }
+
+  if (!registerID) {
+    return encodedRedirect("error", "/sign-up", "Registration code invalid");
+  }
+
+  // Sign up the user with Supabase Auth
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (signUpError) {
+    console.error(`Sign-up error: ${signUpError.message}`);
+    return encodedRedirect("error", "/sign-up", signUpError.message);
+  }
+
+  const user_id = signUpData.user?.id;
+  if (!user_id) {
+    console.error("Sign-up failed: user ID is missing.");
+    return encodedRedirect("error", "/sign-up", "Failed to complete sign-up.");
+  }
+
+// Verify Admin or Dun
+if (registerID.id === '25048082' || registerID.id === '80845621') {
+  // Insert user data into the admin table after authentication
+  const { error: insertError } = await supabase.from("admin").insert([
+    {
+      user_id: user_id,
+      name,
+      email,
+      phone,
+      address,
+      id_register: registerID.id,
+    },
+  ]);
+    
+  if (insertError) {
+    console.error("Insert error: " + insertError.message);
+    return encodedRedirect("error", "/sign-up", "Failed to save user data.");
+  }
+} else {
+  // Assign the registration code for managers
+  const managerRegisterCode = '25048082';
+
+  // Validate the registration code for the manager
+  const { data: registerCodeData, error: dbError } = await supabase
+    .from("registration")
+    .select("id")
+    .eq("role_code", managerRegisterCode)
+    .single();
+
+  if (dbError) {
+    console.error("Database error: " + dbError.message);
+    return encodedRedirect("error", "/sign-up", "Error validating registration code for manager.");
+  }
+
+  // Insert user data into the dun table after authentication
+  const { error: dunInsertError } = await supabase.from("dun").insert([
+    {
+      user_id: user_id,
+      name,
+      email,
+      phone,
+      address,
+      id_admin: registerCodeData.id,
+      id_register: registerID.id,
+    },
+  ]);
+    
+  if (dunInsertError) {
+    console.error("Insert error: " + dunInsertError.message);
+    return encodedRedirect("error", "/sign-up", "Failed to save user data.");
+  }
+}
+  // Success response
+  return encodedRedirect(
+    "success",
+    "/sign-up",
+    "Thanks for signing up! Please check your email for a verification link."
+  );
+};
+
+
+
+
+
+So I have delete all the database and re-run all the database back. After that, I try to sign up to test the program but the terminal says this, Database error: JSON object requested, multiple (or no) rows returned
+ POST /sign-up 303 in 377ms
+
+
+
+
+
+
+
+
+
+
+
+
+ //// MMODAL
+ Modal
+        <section>
+          <Modal open={open} onClose={() => setOpen(false)}>
+            <div className="flex flex-col w-full justify-center items-center">
+              <article id="form-title" className="text-center text-3xl font-semibold text-indigo-600 py-4 mb-4">
+                <h1>Borang Serahan Bantuan</h1>
+              </article>
+              <article className="flex w-full">
+                <div className="flex flex-col gap-4 w-full">
+                  {/* Section 1 */}
+                  <section className="flex flex-col px-2 gap-2">
+                    <label className="text-indigo-700">Barang Bantuan</label>
+                    <input
+                    type="text"
+                    name="barang_bantuan"
+                    className="h-8 rounded border border-gray-400"
+                    placeholder=" Contoh: Kerusi Roda, Katil Hospital"
+                    value={formData.barang_bantuan}
+                    onChange={handleChange}
+                  />
+                  </section>
+                  {/* Section 2 */}
+                  <section className="grid grid-flow-col grid-rows-1 gap-x-2 px-2 h-[60px]">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-indigo-700">Kategori Bantuan</label>
+                      <select
+                      name="kategori_bantuan"
+                      className="h-8 rounded border border-gray-400"
+                      value={formData.kategori_bantuan}
+                      onChange={handleChange}>
+                        <option value="1">Program Kebajikan</option>
+                        <option value="2">Program Mesra Rakyat</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-indigo-700">Kategori Penerima</label>
+                      <select 
+                      name="kategori_penerima"
+                      className="h-8 rounded border border-gray-400"
+                      value={formData.kategori_penerima}
+                      onChange={handleChange}>
+                        <option value="1">Kesejahteraan Rakyat</option>
+                        <option value="2">Pendidikan</option>
+                        <option value="3">NGO/Pertubuhan</option>
+                        <option value="4">Bencana</option>
+                        <option value="5">Keagamaan</option>
+                        <option value="6">Pusat Khidmat</option>
+                      </select>
+                    </div>
+                  </section>
+                  {/* Section 3 */}
+                  <section className="grid grid-flow-col grid-rows-1 gap-x-2 px-2 h-[60px]">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-indigo-700">No Telefon</label>
+                      <input
+                        type="text"
+                        name="no_tel"
+                        className="h-8 rounded border border-gray-400"
+                        placeholder=" 0109992938"
+                        value={formData.no_tel}
+                        onChange={handleChange}/>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-indigo-700">Jenis Bantuan</label>
+                      <select
+                      name="jenis_bantuan"
+                      className="h-8 rounded border border-gray-400"
+                      value={formData.jenis_bantuan}
+                      onChange={handleChange}>
+                        <option value="1">Tunai</option>
+                        <option value="2">Bantuan Peralatan</option>
+                        <option value="3">Tunai dan Peralatan</option>
+                      </select>
+                    </div>
+                  </section>
+                  {/* Section 4 */}
+                  <section className="flex flex-col px-2 gap-2">
+                    <label className="text-indigo-700">Alamat</label>
+                    <input
+                      type="text"
+                      name="alamat"
+                      className="h-8 rounded border border-gray-400"
+                      placeholder=" No Rumah Jalan Daerah"
+                      value={formData.alamat}
+                      onChange={handleChange}/>
+                  </section>
+                  {/* Section 5 */}
+                  <section className="grid grid-flow-col grid-rows-1 gap-x-2 px-2 h-[60px]">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-indigo-700">Kuantiti</label>
+                      <select
+                      name="kuantiti"
+                      className="h-8 rounded border border-gray-400"
+                      value={formData.kuantiti}
+                      onChange={handleChange}>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-indigo-700">Harga</label>
+                      <input
+                        type="text"
+                        name="harga"
+                        className="h-8 rounded border border-gray-400"
+                        placeholder=" Contoh 890.00"
+                        value={formData.harga}
+                        onChange={handleChange}/>
+                    </div>
+                  </section>
+                </div>
+
+                <div className="flex flex-col gap-4 w-full">
+                  <section className="flex flex-col gap-2 px-2">
+                    <label className="text-indigo-700">Catatan</label>
+                    <textarea
+                      name="catatan"
+                      className="h-[100px] rounded border border-gray-400"
+                      value={formData.catatan}
+                      onChange={handleChange}>
+                    </textarea>
+
+                    {/* Total Section */}
+                    <div className="bg-slate-500 h-auto">
+                      <div className="flex py-4">
+                        <h1 className="text-xl font-semibold px-2 py-2">Total Cost = RM<span>0</span></h1>
+                        <SubmitButton pendingText="Processing..." className="bg-indigo-600 hover:bg-indigo-500 ml-[180px]" onClick={handleAddItem}>
+                          Add Item
+                        </SubmitButton>
+                      </div>
+                      <table className="table-auto w-full border-collapse">
+                        <thead>
+                          <tr className="bg-slate-300">
+                            <th className="text-left px-4 py-2 text-gray-900">Item Name</th>
+                            <th className="text-left px-4 py-2 text-gray-900">Quantity</th>
+                            <th className="text-left px-4 py-2 text-gray-900">Price</th>
+                            <th className="text-left px-4 py-2 text-gray-900">Edit</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {items.map((item, index) => (
+                          <tr key={index}>
+                            <td className="border px-4 py-2">{item.itemName}</td>
+                            <td className="border px-4 py-2">{item.quantity}</td>
+                            <td className="border px-4 py-2">{item.price}</td>
+                            <td className="border px-4 py-2">
+                              <button onClick={() => handleDeleteItem(index)} className="bg-red-500 text-white px-2 py-1 rounded">
+                                Delete
+                              </button>
+                            </td>
+                         </tr>
+                        ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                      <SubmitButton pendingText="Processing..." className="bg-indigo-600 hover:bg-indigo-500">
+                        Submit
+                      </SubmitButton>
+                      <Link href={"/rekod"} className="bg-neutral-700 text-slate-50 justify-center text-center p-2 rounded-sm hover:bg-neutral-800">
+                        Cancel
+                      </Link>
+                    </section>
+                  </div>
+                </article>
+                <article>
+                  <button onClick={() => setOpen(false)} className="bg-indigo-600 text-white text-base w-36 p-2 rounded mt-4">
+                    Close
+                  </button>
+                </article>
+              </div>
+            </Modal>
+          </section>

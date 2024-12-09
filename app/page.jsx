@@ -1,3 +1,5 @@
+
+// C:\Users\User\parlimen\app\page.jsx
 // import ConnectSupabaseSteps from "@/components/tutorial/connect-supabase-steps";
 // import SignUpUserSteps from "@/components/tutorial/sign-up-user-steps";
 // import { hasEnvVars } from "@/utils/supabase/check-env-vars";
@@ -5,13 +7,15 @@ import HeaderAuth from "@/components/header-auth";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 
+import Navbar from "@/components/Navbar";
+
 export default async function Index() {
   return (
     <>
       <main className="flex flex-col min-h-screen bg-slate-200">
         <section className="relative w-full h-screen">
         {/* Header Navigator */}
-        <ThemeProvider>
+        {/* <ThemeProvider>
           <nav className="absolute w-full flex justify-center border-b border-b-foreground/10 h-16  opacity-100 z-10">
             <div className="w-full max-w-7xl flex justify-between items-center p-3 px-5 text-sm">
               <div className="flex gap-5 items-center font-semibold">
@@ -24,10 +28,12 @@ export default async function Index() {
                 <div><p><a href="#">Contact Us</a></p></div>
               </div>
               <HeaderAuth /> 
-              {/* {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />} */}
+              {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />} // Comment
             </div>
           </nav>
-          </ThemeProvider>
+          </ThemeProvider> */}
+          
+          <Navbar /> {/* Use the Navbar component */}
 
           <video
           src="/parliamentVid.mp4"

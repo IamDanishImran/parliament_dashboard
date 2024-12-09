@@ -1,18 +1,25 @@
+// C:\Users\User\parlimen\tailwind.config.js
 import { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
   content: [
-    // "./pages/**/*.{ts,tsx}",
-    // "./components/**/*.{ts,tsx}",
-    // "./app/**/*.{ts,tsx}",
-    // "./src/**/*.{ts,tsx}",
+    "./pages/**/*.{ts,tsx,js,jsx}",
+    "./components/**/*.{ts,tsx,js,jsx}",
+    "./app/**/*.{ts,tsx,js,jsx}",
+    "./src/**/*.{ts,tsx,js,jsx}",
+  ],  
+  // content: [
+  //   "./pages/**/*.{ts,tsx}",
+  //   "./components/**/*.{ts,tsx}",
+  //   "./app/**/*.{ts,tsx}",
+  //   "./src/**/*.{ts,tsx}",
 
-    "./pages/**/*.{js,jsx}",
-    "./components/**/*.{js,jsx}",
-    "./app/**/*.{js,jsx}",
-    "./src/**/*.{js,jsx}",
-  ],
+  //   "./pages/**/*.{js,jsx}",
+  //   "./components/**/*.{js,jsx}",
+  //   "./app/**/*.{js,jsx}",
+  //   "./src/**/*.{js,jsx}",
+  // ],
   prefix: "",
   theme: {
     container: {
@@ -62,6 +69,9 @@ const config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        'custom-md': '6px 6px',
       },
       keyframes: {
         "accordion-down": {

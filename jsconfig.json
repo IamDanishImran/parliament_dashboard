@@ -22,7 +22,7 @@
       "utils/**/*",
       "lib/**/*",
       "components/**/*",
-      "middleware.js",
+      "middleware.ts",
       "tailwind.config.js"
     ],
     "exclude": ["node_modules"]
