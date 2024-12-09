@@ -2,7 +2,6 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
-import { Chart } from "chart.js";
 
 import ChartPMR from "@/components/piePMR-dashboard";
 import ChartKebajikan from "@/components/pieKebajikan-dashboard";
