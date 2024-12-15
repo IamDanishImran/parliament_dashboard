@@ -11,108 +11,236 @@ export const signUpAction = async (formData) => {
   const name = formData.get("name")?.toString();
   const ic = formData.get("identification_number")?.toString();
   const register_code = formData.get("register_code")?.toString();
-
   const supabase = await createClient();
   const origin = headers().get("origin");
 
-  // Check for missing fields
   if (!email || !password || !name || !ic || !register_code) {
-    return encodedRedirect("error", "/sign-up", "All fields are required");
+    return encodedRedirect("error", "/sign-up", "All fields are required.");
   }
 
-  // Validate the registration code
   const { data: registerID, error: dbError } = await supabase
     .from("registration")
-    .select("id")
+    .select("*")
     .eq("role_code", register_code)
     .single();
-  
-  if (dbError) {
-    console.error(`Database error: ${dbError.message}`);
-    return encodedRedirect("error", "/sign-up", "Error validating role code.");
+
+  if (dbError || !registerID) {
+    return encodedRedirect("error", "/sign-up", "Invalid or missing registration code.");
   }
 
-  if (!registerID) {
-    return encodedRedirect("error", "/sign-up", "Registration code invalid");
-  }
-
-  // Sign up the user with Supabase Auth
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
+    options: { emailRedirectTo: `${origin}/auth/callback` },
   });
 
-  if (signUpError) {
-    console.error(`Sign-up error: ${signUpError.message}`);
-    return encodedRedirect("error", "/sign-up", signUpError.message);
+  const user_id = signUpData?.user?.id;
+  if (signUpError || !user_id) {
+    return encodedRedirect("error", "/sign-up", "Failed to sign up. Please try again.");
   }
 
-  const user_id = signUpData.user?.id;
-  if (!user_id) {
-    console.error("Sign-up failed: user ID is missing.");
-    return encodedRedirect("error", "/sign-up", "Failed to complete sign-up.");
+  const isAdminRole = registerID.role_code === "25048082" || registerID.role_code === "80845621";
+
+  try {
+    if (isAdminRole) {
+      // Insert into admin table
+      const { data: insertAdmin, error: adminError } = await supabase
+        .from("admin")
+        .insert([{ user_id: user_id, name, email, ic, id_register: registerID.id }]);
+
+      if (adminError) {
+        console.error("Insert error (admin): " + adminError.message);
+        return encodedRedirect("error", "/sign-up", "Failed to save user data.");
+      }
+    } else {
+      // Insert into dun table and get its ID
+      const { data: insertDun, error: dunError } = await supabase
+        .from("dun")
+        .insert([{ user_id: user_id, name, email, ic, id_register: registerID.id }])
+        .select('id');
+
+      if (dunError || !insertDun) {
+        console.error("Insert error (dun): " + dunError?.message);
+        return encodedRedirect("error", "/sign-up", "Failed to save user data.");
+      }
+
+      const dunId = insertDun[0]?.id;
+      if (!dunId) {
+        console.error("Failed to retrieve the inserted dun id.");
+        return encodedRedirect("error", "/sign-up", "Failed to retrieve user ID.");
+      }
+
+      // Determine if the id_register is odd or even and fetch corresponding admin
+      const isOdd = registerID.id % 2 !== 0;
+      const { data: adminData, error: adminFetchError } = await supabase
+        .from("admin")
+        .select("id")
+        .eq("id_register", isOdd ? 1 : 2);
+
+      if (adminFetchError) {
+        console.error("Error fetching admin ID: " + adminFetchError?.message);
+        return encodedRedirect("error", "/sign-up", "Failed to fetch admin data.");
+      }
+
+      // Handle cases where no admin is found or multiple admins are returned
+      if (adminData.length === 0) {
+        console.error("No admin found for the given register code.");
+        return encodedRedirect("error", "/sign-up", "No admin found for this registration.");
+      } else if (adminData.length > 1) {
+        console.error("Multiple admins found for the given register code.");
+        return encodedRedirect("error", "/sign-up", "Multiple admins found, please contact support.");
+      }
+
+      const adminId = adminData[0]?.id;
+
+      // Insert into admin_dun junction table
+      const { error: junctionError } = await supabase
+        .from('admin_dun')
+        .insert([{ id_admin: adminId, id_dun: dunId }]);
+
+      if (junctionError) {
+        console.error("Insert error (admin_dun): " + junctionError.message);
+        return encodedRedirect("error", "/sign-up", "Failed to assign admin to dun.");
+      }
+    }
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return encodedRedirect("error", "/sign-up", "Something went wrong!");
   }
 
-// Verify Admin or Dun
-if (registerID.id === '25048082' || registerID.id === '80845621') {
-  // Insert user data into the admin table after authentication
-  const { error: insertError } = await supabase.from("admin").insert([
-    {
-      user_id: user_id,
-      name,
-      email,
-      ic,
-      id_register: registerID.id,
-    },
-  ]);
-    
-  if (insertError) {
-    console.error("Insert error: " + insertError.message);
-    return encodedRedirect("error", "/sign-up", "Failed to save user data.");
-  }
-} else {
-  // Assign the registration code for managers
-  const managerRegisterCode = '25048082';
-
-  // Validate the registration code for the manager
-  const { data: registerCodeData, error: dbError } = await supabase
-    .from("registration")
-    .select("id")
-    .eq("role_code", managerRegisterCode)
-    .single();
-
-  if (dbError) {
-    console.error("Database error: " + dbError.message);
-    return encodedRedirect("error", "/sign-up", "Error validating registration code for manager.");
-  }
-
-  // Insert user data into the dun table after authentication
-  const { error: dunInsertError } = await supabase.from("dun").insert([
-    {
-      user_id: user_id,
-      name,
-      email,
-      ic,
-      id_admin: registerCodeData.id,
-      id_register: registerID.id,
-    },
-  ]);
-    
-  if (dunInsertError) {
-    console.error("Insert error: " + dunInsertError.message);
-    return encodedRedirect("error", "/sign-up", "Failed to save user data.");
-  }
-}
-  // Success response
   return encodedRedirect(
     "success",
     "/sign-up",
-    "Thanks for signing up! Please check your email for a verification link."
+    "Thanks for signing up! Check your email for a verification link."
   );
 };
+
+
+
+
+
+
+
+
+
+
+// "use server";
+// import { encodedRedirect } from "@/utils/utils";
+// import { createClient } from "@/utils/supabase/server";
+// import { headers } from "next/headers";
+// import { redirect } from "next/navigation";
+
+// export const signUpAction = async (formData) => {
+//   const email = formData.get("email")?.toString();
+//   const password = formData.get("password")?.toString();
+//   const name = formData.get("name")?.toString();
+//   const ic = formData.get("identification_number")?.toString();
+//   const register_code = formData.get("register_code")?.toString();
+
+//   const supabase = await createClient();
+//   const origin = headers().get("origin");
+
+//   // Check for missing fields
+//   if (!email || !password || !name || !ic || !register_code) {
+//     return encodedRedirect("error", "/sign-up", "All fields are required");
+//   }
+
+//   // Validate the registration code
+//   const { data: registerID, error: dbError } = await supabase
+//     .from("registration")
+//     .select("id")
+//     .eq("role_code", register_code)
+//     .single();
+  
+//   if (dbError) {
+//     console.error(`Database error: ${dbError.message}`);
+//     return encodedRedirect("error", "/sign-up", "Error validating role code.");
+//   }
+
+//   if (!registerID) {
+//     return encodedRedirect("error", "/sign-up", "Registration code invalid");
+//   }
+
+//   // Sign up the user with Supabase Auth
+//   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+//     email,
+//     password,
+//     options: {
+//       emailRedirectTo: `${origin}/auth/callback`,
+//     },
+//   });
+
+//   if (signUpError) {
+//     console.error(`Sign-up error: ${signUpError.message}`);
+//     console.error("Detailed sign-up error: ", signUpError);
+//     return encodedRedirect("error", "/sign-up", `Error: ${signUpError.message}`);
+//   }
+
+//   const user_id = signUpData.user?.id;
+//   if (!user_id) {
+//     console.error("Sign-up failed: user ID is missing.");
+//     return encodedRedirect("error", "/sign-up", "Failed to complete sign-up.");
+//   }
+
+// // Verify Admin or Dun
+// if (registerID.id === '25048082' || registerID.id === '80845621') {
+//   // Insert user data into the admin table after authentication
+//   const { error: insertError } = await supabase.from("admin").insert([
+//     {
+//       user_id: user_id,
+//       name,
+//       email,
+//       ic,
+//       id_register: registerID.id,
+//     },
+//   ]);
+//   if (insertError) {
+//     console.error("Insert error: " + insertError.message);
+//     return encodedRedirect("error", "/sign-up", "Failed to save user data.");
+//   }
+// } else {
+//   // Assign the registration code for managers
+//   const managerRegisterCode = '25048082';
+
+//   // Validate the registration code for the manager
+//   const { data: registerCodeData, error: dbError } = await supabase
+//     .from("registration")
+//     .select("id")
+//     .eq("role_code", managerRegisterCode)
+//     .single();
+
+//   if (dbError) {
+//     console.error("Database error: " + dbError.message);
+//     return encodedRedirect("error", "/sign-up", "Error validating registration code for manager.");
+//   }
+
+//   // Insert user data into the dun table after authentication
+//   const { error: dunInsertError } = await supabase.from("dun").insert([
+//     {
+//       user_id: user_id,
+//       name,
+//       email,
+//       ic,
+//       id_register: registerID.id,
+//     },
+//   ]);
+    
+//   if (dunInsertError) {
+//     console.error("Insert error: " + dunInsertError.message);
+//     return encodedRedirect("error", "/sign-up", "Failed to save user data.");
+//   }
+// }
+//   // Success response
+//   return encodedRedirect(
+//     "success",
+//     "/sign-up",
+//     "Thanks for signing up! Please check your email for a verification link."
+//   );
+// };
+
+
+
+
 
 
 
@@ -128,7 +256,11 @@ export const signInAction = async (formData) => {
   if (error) {
     return encodedRedirect("error", "/sign-in", error.message);
   } 
-  return redirect("/protected/dashboard/");
+  return encodedRedirect(
+    "success",
+    "/protected/dashboard",
+    "Thanks for signing up! Please check your email for a verification link."
+  );
 };
 
 
@@ -210,115 +342,7 @@ export const resetPasswordAction = async (formData) => {
 };
 
 export const signOutAction = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
-  return redirect("/");
+  return redirect("/sign-in");
 };
-
-
-
-
-
-// "use server";
-// import { encodedRedirect } from "@/utils/utils";
-// import { createClient } from "@/utils/supabase/server";
-// import { headers } from "next/headers";
-// import { redirect } from "next/navigation";
-
-// export const signUpAction = async (formData) => {
-//   const email         = formData.get("email")?.toString();
-//   const password      = formData.get("password")?.toString();
-//   const name          = formData.get("name")?.toString();
-//   const address       = formData.get("address")?.toString();
-//   const phone         = formData.get("phone")?.toString();
-//   const register_code = formData.get("register_code")?.toString();
-
-//   const supabase = createClient();
-//   const origin = headers().get("origin");
-
-//   if (!email || !password || !name || !address || !phone || !register_code) {
-//     return encodedRedirect(
-//       "error",
-//       "/sign-up",
-//       "All fields are required",
-//     );
-//   }
-
-//   // Validate the registration code
-//   const { data: registerID, error: dbError } = await supabase
-//     .from("registration")
-//     .select("id")
-//     .eq("role_code", register_code)
-//     .single();
-//     if (dbError) {
-//       console.error(`Database error: ${dbError.message}`);
-//       return encodedRedirect("error", "/sign-up", "Error validating role code.");
-//     }
-//     if (!registerID) {
-//       return encodedRedirect("error", "/sign-up", "Registration code invalid");
-//     }
-    
-//     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-//       email,
-//       password,
-//       options: {
-//         emailRedirectTo: `${origin}/auth/callback`,
-//       },
-//     });
-//     if (signUpError) {
-//       console.error(`Sign-up error: ${signUpError.message}`);
-//       return encodedRedirect("error", "/sign-up", signUpError.message);
-//     }
-//     const user_id = signUpData.user?.id;
-//     if (!user_id) {
-//       console.error("Sign-up failed: user ID is missing.");
-//       return encodedRedirect("error", "/sign-up", "Failed to complete sign-up.");
-//     }
-
-//     if (registerID.id === '25048082' || registerID.id === '80845621') {
-//       const { error } = await supabase.from("admin").insert([
-//         {
-//           user_id: user_id,
-//           name,
-//           email,
-//           phone,
-//           address,
-//           id_register: registerID.id,
-//         },
-//       ]);
-
-//       if ( error ) {
-//         console.error("Insert error: " + insertError.message);
-//         return encodedRedirect( "error", "/sign-up", "Failed to save user data.");
-//       }
-//     }
-//     else {
-//       const { error } = await supabase.from("dun").insert([
-//         {
-//           user_id: user_id,
-//           name,
-//           email,
-//           phone,
-//           address,
-//           id_register: registerID.id,
-//           id_admin: registerID.id === 1,
-//         },
-//       ]);
-
-//       if ( error ) {
-//         console.error("Insert error: " + error.message);
-//         return encodedRedirect( "error", "/sign-up", "Failed to save user data.");
-//       }
-//     }
-    
-//     if (insertError) {
-//       console.error("Insert error: " + insertError.message);
-//       return encodedRedirect( "error", "/sign-up", "Failed to save user data.");
-//     }
-//     // Success response
-//       return encodedRedirect(
-//         "success",
-//         "/sign-up",
-//         "Thanks for signing up! Please check your email for a verification link.",
-//       );
-//   };
