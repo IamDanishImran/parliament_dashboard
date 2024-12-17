@@ -1,14 +1,14 @@
 // app/protected/rekod/page.jsx
 "use client";
 import Link from "next/link";
-import Footer from "@/components/footer-dashboard";
+import Footer from "@/components/footer";
 import { useState, useEffect } from "react";
 
 import Header from "@/components/header";
 import moment from 'moment';
 import { createClient } from "@/utils/supabase/client";
-import Modal from "@/components/modal";
-import EditModal from "@/components/editModal";
+import Modal from "@/components/rekod/modal";
+import EditModal from "@/components/rekod/editModal";
 
 export default function Rekod() {
   // First Modal Section (for adding items)
@@ -35,17 +35,14 @@ export default function Rekod() {
       [name]: value,
     });
   };
-
   const handleAddItem = () => {
     // Handle item addition logic
   };
   const handleDeleteItem = (index) => {
     // Handle item deletion logic
   };
-
   const total = 100; // Example total value
   const items = []; // Example items array
-
   // Edit Modal Section
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for the edit modal
   const [editingForm, setEditingForm] = useState(null); // Declare editingForm here, once, for use in the edit modal
@@ -54,66 +51,7 @@ export default function Rekod() {
     setEditingForm(item); // Set the form data to be edited
     setIsEditModalOpen(true); // Open the edit modal
   };
-
   const closeEditModal = () => setIsEditModalOpen(false); // Close the edit modal
-
-
-
-  // Form List Section
-  const [statusSearch, setStatus] = useState('');
-  const [bulanSearch, setBulanBantuan] = useState('');
-  const [jenisBantuanSearch, setJenisBantuan] = useState('');
-  const [dunSearch, setDunSearch] = useState('');
-  const [kategoriSearch, setKategoriSearch] = useState('');
-  const [bantuanSearch, setBantuanSearch] = useState('');
-  const [form, setForm] = useState([]);
-  const [filteredForm, setFilteredForm] = useState([]); // Fixed initialization
-  const supabase = createClient();
-
-// Fetch data when the component mounts
-useEffect(() => {
-  const fetchData = async () => {
-    const { data, error } = await supabase
-      .from('form')
-      .select('*, dun(id_register(*))');
-    if (error) {
-      console.error("Error fetching data:", error);
-    } else {
-      setForm(data);
-      setFilteredForm(data); // Initialize with full data
-    }
-  };
-  fetchData();
-}, []);
-
-const handleSearch = () => {
-  const filteredResults = form.filter((item) => {
-    // Extract the short month from the inserted_at timestamp string
-    const itemMonth = new Date(item.inserted_at).toLocaleString('en-GB', { month: 'short' });
-
-    return (
-      (statusSearch === '*' || item.form_status.toLowerCase() === statusSearch.toLowerCase()) &&
-      (jenisBantuanSearch === '*' || item.help_type.toUpperCase() === jenisBantuanSearch.toUpperCase()) &&
-      (!bulanSearch || itemMonth.toLowerCase() === bulanSearch.toLowerCase()) &&
-      (!dunSearch || item.dun.id_register?.description.toLowerCase().includes(dunSearch.toLowerCase())) &&
-      (!kategoriSearch || item.category?.title.toLowerCase().includes(kategoriSearch.toLowerCase())) &&
-      (!bantuanSearch || item.help_type.toLowerCase().includes(bantuanSearch.toLowerCase()))
-    );
-  });
-
-  setFilteredForm(filteredResults); // Update filtered results
-};
-
-const resetSearch = () => {
-  setStatus('');
-  setBulanBantuan('');
-  setJenisBantuan('');
-  setDunSearch('');
-  setKategoriSearch('');
-  setBantuanSearch('');
-  setFilteredForm(form); // Reset to original data
-};
-
 
 
   // CSV Download function
@@ -141,6 +79,60 @@ const resetSearch = () => {
       link.click();
     };
 
+
+
+
+
+     // Form List Section
+const [statusSearch, setStatus] = useState('*');
+const [categorySearch, setCategory] = useState('*');
+const [dunSearch, setDun] = useState('*');
+
+const [form, setForm] = useState([]);
+const [filteredForm, setFilteredForm] = useState([]);
+const supabase = createClient();
+
+// Fetch data when the component mounts
+useEffect(() => {
+  const fetchData = async () => {
+    const { data, error } = await supabase
+      .from('form')
+      .select('*, dun(id_register(*))');
+
+    if (error) {
+      console.error("Error fetching data:", error);
+    } else {
+      setForm(data); // Store the fetched data
+      setFilteredForm(data); // Initially, display all data
+    }
+  };
+  fetchData();
+}, []);
+
+// Handle Search
+const handleSearch = () => {
+  const filteredResults = form.filter((item) => {
+    const matchesStatus = statusSearch === '*' || item.form_status.toLowerCase() === statusSearch.toLowerCase();
+    const matchesCategory = categorySearch === '*' || item.category.toLowerCase() === categorySearch.toLowerCase();
+    const matchesDun = dunSearch === '*' || item.dun.id_register?.description.toLowerCase() === dunSearch.toLowerCase()
+    
+    // Return true if both conditions are satisfied
+    return matchesStatus && matchesCategory && matchesDun;
+  });
+
+  setFilteredForm(filteredResults); // Update filtered data based on the status and category search
+};
+
+// Reset Search
+const resetSearch = () => {
+  setStatus('*'); // Reset to "All" status
+  setCategory('*');
+  setDun('*');
+
+  setFilteredForm(form); // Show all data when reset
+};
+    
+
   return (
     <main className="p-2 pl-10 pr-20">
       <Header title="Rekod" />
@@ -155,7 +147,7 @@ const resetSearch = () => {
           <div className="w-2/4 m-2">
             <label htmlFor="statusForm">Status</label>
             <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500 w-[540px]">
-              <select className="w-full h-full bg-sky-50" id="statusForm" value={statusSearch} onChange={(e) => setStatus(e.target.value)}>
+            <select className="w-full h-full bg-sky-50" id="statusForm" value={statusSearch} onChange={(e) => setStatus(e.target.value)}>
                 <option value="*">All</option>
                 <option value="MOHON">MOHON</option>
                 <option value="LULUS">LULUS</option>
@@ -164,68 +156,34 @@ const resetSearch = () => {
               </select>
             </div>
           </div>
+
+          <div className="w-2/4 m-2">
+            <label htmlFor="Kategori Bantuan">Kategori Bantuan</label>
+            <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
+              <select className="w-full h-full bg-sky-50" id="categoryForm" value={categorySearch} onChange={(e) => setCategory(e.target.value)}>
+                <option value="*">All</option>
+                <option value="Program Mesra Rakyat">Program Mesra Rakyat</option>
+                <option value="Bantuan Kebajikan">Bantuan Kebajikan</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="w-2/4 m-2">
+            <label htmlFor="Dun">Dun</label>
+            <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
+              <select className="w-full h-full bg-sky-50" id="dun" value={dunSearch} onChange={(e) => setDun(e.target.value)}>
+                <option value="*">All</option>
+                <option value="Rembia">Rembia</option>
+                <option value="Machap Jaya">Machap Jaya</option>
+                <option value="Durian Tunggal">Durian Tunggal</option>
+                <option value="Asahan">Asahan</option>
+                <option value="Gadek">Gadek</option>
+                <option value="Luar Alor Gajah">Luar Alor Gajah</option>
+                <option value="Luar Melaka">Luar Melaka</option>
+              </select>
+            </div>
+          </div>
         </article>
-
-        <article className="flex justify-around px-2">
-        <div className="w-2/4 m-2">
-          <label htmlFor="Kategori Bantuan">Jenis Bantuan</label>
-          <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
-            <select className="w-full h-full bg-sky-50" id="kategori_bantuan" value={jenisBantuanSearch} onChange={(e) => setJenisBantuan(e.target.value)}>
-              <option value="*">All</option>
-              <option value="TUNAI">Tunai</option>
-              <option value="BANTUAN PERALATAN">Bantuan Peralatan</option>
-              <option value="PERALATAN DAN TUNAI">Peralatan dan Tunai</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="w-2/4 m-2">
-          <label htmlFor="Dun">Dun</label>
-          <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
-            <select className="w-full h-full bg-sky-50" id="dun" value={dunSearch} onChange={(e) => setDunSearch(e.target.value)}>
-              <option value="*">All</option>
-              <option value="Rembia">Rembia</option>
-              <option value="Machap Jaya">Machap Jaya</option>
-              <option value="Durian Tunggal">Durian Tunggal</option>
-              <option value="Asahan">Asahan</option>
-              <option value="Gadek">Gadek</option>
-              <option value="Luar Alor Gajah">Luar Alor Gajah</option>
-              <option value="Luar Melaka">Luar Melaka</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="w-2/4 m-2">
-          <label htmlFor="Kategori Bantuan">Kategori Bantuan</label>
-          <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
-            <select className="w-full h-full bg-sky-50" id="kategori_bantuan" value={kategoriSearch} onChange={(e) => setKategoriSearch(e.target.value)}>
-              <option value="*">All</option>
-              <option value="Program Mesra Rakyat">Program Mesra Rakyat</option>
-              <option value="Bantuan Kebajikan">Bantuan Kebajikan</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="w-2/4 m-2">
-          <label htmlFor="Bantuan Bulanan">Bulan Bantuan Diberi</label>
-          <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
-            <select className="w-full h-full bg-sky-50" id="bulan_bantuan" value={bulanSearch} onChange={(e) => setBulanBantuan(e.target.value)}>
-              <option value="January">Jan</option>
-              <option value="February">Feb</option>
-              <option value="March">Mar</option>
-              <option value="April">Apr</option>
-              <option value="May">May</option>
-              <option value="June">Jun</option>
-              <option value="July">Jul</option>
-              <option value="August">Aug</option>
-              <option value="September">Sep</option>
-              <option value="October">Oct</option>
-              <option value="November">Nov</option>
-              <option value="December">Dec</option>
-            </select>
-          </div>
-        </div>
-      </article>
       <article className="flex mt-2 px-4 py-4 gap-4">
         <button
           className="w-32 h-8 flex justify-center items-center rounded bg-indigo-600 hover:bg-violet-500 text-slate-50 ease-in duration-200"
@@ -256,19 +214,6 @@ const resetSearch = () => {
         </article>
 
 
-        {/* Modal for adding records */}
-        <Modal
-          open={isAddModalOpen}   // Correct state to control Add Modal visibility
-          onClose={closeAddModal}
-          formData={formData}
-          handleChange={handleChange}
-          handleAddItem={handleAddItem}
-          total={total}
-          items={items}
-          handleDeleteItem={handleDeleteItem}
-        />
-
-
         {/* Scrollable Table Section */}
         <article className="h-[500px] overflow-y-auto">
         <table className="table-auto w-full text-left border-collapse">
@@ -278,8 +223,8 @@ const resetSearch = () => {
                 <th className="border border-black px-4 py-1">Penerima</th>
                 <th className="border border-black px-4 py-1">Tarikh Permohonan</th>
                 <th className="border border-black px-4 py-1">Kategori Bantuan</th>
-                <th className="border border-black px-4 py-1">Catatan Bantuan</th>
-                <th className="border border-black px-4 py-1">Dun</th>
+                <th className="border border-black px-4 py-1 max-w-[180px] truncate">Catatan Bantuan</th>
+                <th className="border border-black px-4 py-1 max-w-[100px] truncate">Dun</th>
                 <th className="border border-black px-4 py-1">Jenis Bantuan</th>
                 <th className="border border-black px-4 py-1">Status</th>
                 <th className="border border-black px-4 py-1">Info</th>
@@ -292,19 +237,20 @@ const resetSearch = () => {
     </tr>
   ) : (
     filteredForm.map((item, index) => (
-      <tr key={index} className="border border-black hover:bg-slate-200 ease-out transition-200">
+      <tr 
+        key={index} className={index % 2 === 0 ? "bg-slate-50 border border-black hover:bg-slate-200 ease-out transition-200" : "bg-slate-100 border border-black hover:bg-slate-200 ease-out transition-200"}>
         <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{index + 1}</td>
         <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{item.category_type}</td>
         <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{moment(item.inserted_at).format('DD MMMM YYYY')}</td>
         <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{item.category}</td>
-        <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{item.notes}</td>
-        <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{item.dun.id_register?.description}</td>
+        <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px] truncate">{item.notes}</td>
+        <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap max-w-[100px] truncate">{item.dun.id_register?.description}</td>
         <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{item.help_type}</td>
         <td className={`border px-4 py-4 text-center 
           ${item.form_status === 'MOHON' ? 'bg-yellow-200' : ''}
-          ${item.form_status === 'LULUS' ? 'bg-emerald-300' : ''}
-          ${item.form_status === 'KIV' ? 'bg-cyan-300' : ''}
-          ${item.form_status === 'DITOLAK' ? 'bg-red-300' : ''}`}>
+          ${item.form_status === 'LULUS' ? 'bg-green-400' : ''}
+          ${item.form_status === 'KIV' ? 'bg-cyan-400' : ''}
+          ${item.form_status === 'DITOLAK' ? 'bg-red-500' : ''}`}>
           {item.form_status}
         </td>
         <td className="border px-4 py-2 text-center">
@@ -320,6 +266,22 @@ const resetSearch = () => {
           </table>
         </article>
       </section>
+
+
+
+      {/* Modal for adding records */}
+      <Modal
+          open={isAddModalOpen}
+          onClose={closeAddModal}
+          formData={formData}
+          handleChange={handleChange}
+          handleAddItem={handleAddItem}
+          total={total}
+          items={items}
+          handleDeleteItem={handleDeleteItem}
+        />
+
+
       {/* Edit Modal */}
       {editingForm && isEditModalOpen && (
           <EditModal

@@ -1,4 +1,3 @@
-// app/protected/layout.js
 "use client";
 import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/sidebar";
@@ -11,61 +10,63 @@ export default function ProtectedLayout({ children }) {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        // Get authenticated user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) throw new Error("User not authenticated");
 
-        if (!user) {
-          setUserRole(null); // Default role if no user is logged in
-          return;
-        }
+        const email = user.email;
 
-        const userId = user.id;
-
-        // Check if the user is an admin
-        const { data: adminData } = await supabase
-          .from("admin")
-          .select("id_register")
-          .eq("user_id", userId)
-          .single();
-
-        if (adminData) {
-          const { data: registrationData } = await supabase
-            .from("registration")
-            .select("role_code")
-            .eq("id", adminData.id_register)
-            .single();
-
-          if (registrationData) {
-            setUserRole(registrationData.role_code); // Set the role code
-            return;
-          }
-        }
-
-        // Check if the user is a DUN
-        const { data: dunData } = await supabase
+        // Check `dun` table
+        const { data: userDun, error: dunError } = await supabase
           .from("dun")
           .select("id_register")
-          .eq("user_id", userId)
-          .single();
+          .eq("email", email);
 
-        if (dunData) {
-          const { data: registrationData } = await supabase
+        if (dunError) throw dunError;
+
+        if (userDun && userDun.length > 0) {
+          const idRegister = userDun[0].id_register;
+          const { data: register, error: registerError } = await supabase
             .from("registration")
             .select("role_code")
-            .eq("id", dunData.id_register)
-            .single();
+            .eq("id", idRegister);
 
-          if (registrationData) {
-            setUserRole(registrationData.role_code); // Set the role code
+          if (registerError) throw registerError;
+
+          if (register && register.length > 0) {
+            setUserRole(register[0].role_code);
             return;
           }
         }
 
-        setUserRole(null); // Default if neither admin nor DUN
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setUserRole(null);
+        // Check `admin` table
+        const { data: userAdmin, error: adminError } = await supabase
+          .from("admin")
+          .select("id_register")
+          .eq("email", email);
+
+        if (adminError) throw adminError;
+
+        if (userAdmin && userAdmin.length > 0) {
+          const idRegister = userAdmin[0].id_register;
+          const { data: register, error: registerError } = await supabase
+            .from("registration")
+            .select("role_code")
+            .eq("id", idRegister);
+
+          if (registerError) throw registerError;
+
+          if (register && register.length > 0) {
+            setUserRole(register[0].role_code);
+            return;
+          }
+        }
+
+        // Default if no role is found
+        setUserRole("No Role");
+      } catch (err) {
+        console.error("Error fetching user role:", err.message);
+        setUserRole("Error");
       }
     };
 
@@ -75,7 +76,7 @@ export default function ProtectedLayout({ children }) {
   return (
     <div className="flex bg-slate-700 min-h-screen font-sans subpixel-antialiased">
       <Sidebar userRole={userRole} />
-      {/* Page content - will change depending on the page */}
+      {/* Page content */}
       <div className="flex-1 bg-slate-100 px-4 overflow-y-auto h-screen">
         {children}
       </div>

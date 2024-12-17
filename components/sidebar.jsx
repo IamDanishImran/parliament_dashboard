@@ -1,5 +1,6 @@
 // components/Sidebar.jsx
 "use client";
+import { createClient } from "@/utils/supabase/client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -9,14 +10,21 @@ import { signOutAction } from "@/app/actions";
 export default function Sidebar({ userRole }) {
   const pathname = usePathname();
   const [isAdminWithAccess, setIsAdminWithAccess] = useState(false);
+  const [isAccessAllAdmin, setAccessAllAdmin] = useState(false);
+
+  const supabase = createClient();
 
   useEffect(() => {
     // Check if the user role is allowed to access Help Center
-    if (userRole !== "80845621") {
-      setIsAdminWithAccess(true);
-    } else {
-      setIsAdminWithAccess(false);
-    }
+    if (userRole === "25048082") { setIsAdminWithAccess(true); }
+    if(userRole === "80845621") { setIsAdminWithAccess(false); }
+    else { setIsAdminWithAccess(true); }
+  }, [userRole]);
+
+  // Check if the user is admin to allowed to access User Management
+  useEffect(() => {
+    if (userRole === "80845621" || userRole === "25048082") { setAccessAllAdmin(true) }
+    else { setAccessAllAdmin(false) }
   }, [userRole]);
 
   return (
@@ -47,9 +55,11 @@ export default function Sidebar({ userRole }) {
         </div>
       )}
 
-        <div className={`text-sm rounded px-4 py-2 m-1 mt-4 ${pathname === "/protected/user-manage" ? "bg-indigo-600 text-slate-50 pointer-events-none" : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"} duration-200`}>
-          <Link href="/protected/user-manage">User Management</Link>
-        </div>
+      {isAccessAllAdmin && (
+        <div className={`text-sm rounded px-4 py-2 m-1 mt-4 ${pathname === "/protected/user_management" ? "bg-indigo-600 text-slate-50 pointer-events-none" : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"} duration-200`}>
+          <Link href="/protected/user_management">User Management</Link>
+      </div>
+      )}
         <div className={`text-sm rounded px-4 py-2 m-1 mt-4 ${pathname === "/protected/sign-out" ? "bg-indigo-600 text-slate-50 pointer-events-none" : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"} duration-200`}>
           <form action={signOutAction} method="post">
             <button type="submit">Sign out</button>

@@ -1,59 +1,56 @@
-// app/protected/help/page.jsx
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Header from "@/components/header";
+import EditModal from "@/components/help/editEmail";
+
+import Footer from "@/components/footer";
 
 export default function Help() {
   const supabase = createClient();
+
+  // User Role and Email State
   const [userRole, setUserRole] = useState(null);
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Editing Email Section Hooks
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingForm, setEditingForm] = useState(null);
+
+  const handleEditClick = (item) => {
+    setEditingForm(item);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => setIsEditModalOpen(false);
+
   useEffect(() => {
-    const fetchUserRole = async () => {
+    // Fetch user role logic here
+    const fetchData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("User not logged in");
 
-        const userId = user.id;
-
-        // Check if the user is an admin or Dun
-        const { data: adminData } = await supabase
-          .from("admin")
-          .select("id_register")
-          .eq("user_id", userId)
-          .single();
-
-        if (adminData) {
-          const { data: registrationData } = await supabase
-            .from("registration")
-            .select("role_code")
-            .eq("id", adminData.id_register)
+        const roles = ["admin", "dun"];
+        for (const role of roles) {
+          const { data } = await supabase
+            .from(role)
+            .select("id_register")
+            .eq("user_id", user.id)
             .single();
 
-          setUserRole(registrationData?.role_code);
-          return;
+          if (data) {
+            const { data: registrationData } = await supabase
+              .from("registration")
+              .select("role_code")
+              .eq("id", data.id_register)
+              .single();
+            setUserRole(registrationData?.role_code);
+            return;
+          }
         }
-
-        const { data: dunData } = await supabase
-          .from("dun")
-          .select("id_register")
-          .eq("user_id", userId)
-          .single();
-
-        if (dunData) {
-          const { data: registrationData } = await supabase
-            .from("registration")
-            .select("role_code")
-            .eq("id", dunData.id_register)
-            .single();
-
-          setUserRole(registrationData?.role_code);
-          return;
-        }
-
         throw new Error("Role not found");
       } catch (error) {
         console.error("Error fetching user role:", error);
@@ -62,69 +59,125 @@ export default function Help() {
         setLoading(false);
       }
     };
-
-    fetchUserRole();
+    fetchData();
   }, [supabase]);
 
+
+
   useEffect(() => {
-    if (userRole === "25048082") { // Assuming this is the admin role_code
-      const fetchEmails = async () => {
-        try {
-          const { data, error } = await supabase.from("email").select("*");
-          if (error) throw error;
-
-          setEmails(data || []);
-        } catch (error) {
-          console.error("Error fetching emails:", error);
-          setError("Failed to load email data. Please try again later.");
-        }
-      };
-
-      fetchEmails();
+    if (userRole === "25048082") {
+    // Fetch emails logic here
+    const fetchEmails = async () => {
+      try {
+        const { data, error } = await supabase.from("email").select("*");
+        if (error) throw error;
+        setEmails(data || []);
+      } catch (error) {
+        console.error("Error fetching emails:", error.message);
+        setError("Failed to load email data. Please try again.");
+      }
+    };
+    fetchEmails();
     }
   }, [supabase, userRole]);
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Handle form submission logic here
+    setLoading(true);
+    setError(null); // Clear any previous error
+
+    const formData = new FormData(e.target);
+    const { title, complaint } = Object.fromEntries(formData.entries());
+
+    if (!title.trim() || !complaint.trim()) {
+      alert("Please fill in all fields before submitting.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        console.error("Authentication error:", userError);
+        alert("Please log in to submit a complaint.");
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await supabase.from("email").insert([
+        { title, complaint, id_dun: user.email, status: "Pending" },
+      ]);
+
+      if (error) {
+        console.error("Error inserting email:", error);
+        alert("Failed to submit complaint. Please try again.");
+        return; // Return early after an error
+      }
+
+      alert("Complaint submitted successfully!");
+      e.target.reset(); // Reset the form
+    } catch (error) {
+      console.error("Error submitting complaint:", error);
+      alert("Failed to submit complaint. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
 
   return (
     <main className="p-4">
       <Header title="Help Center" />
 
       {userRole === "25048082" ? (
-        // Admin Interface: Show Email Table
-        <div className="mt-4 overflow-x-auto">
-          <table className="table-auto w-full border-collapse border border-slate-400">
-            <thead className="bg-slate-200">
+        <div className="mt-4 table-container max-h-[300px] overflow-y-auto border-1 shadow rounded">
+          <table className="table-auto h-[100px] w-full border-collapse border border-slate-400">
+            <thead className="bg-gray-200">
               <tr>
-                <th className="border border-slate-400 px-4 py-2">ID</th>
+                <th className="border border-slate-400 px-4 py-2">Bil</th>
                 <th className="border border-slate-400 px-4 py-2">Title</th>
                 <th className="border border-slate-400 px-4 py-2">Complaint</th>
-                <th className="border border-slate-400 px-4 py-2">Status</th>
                 <th className="border border-slate-400 px-4 py-2">Email</th>
                 <th className="border border-slate-400 px-4 py-2">Send Date</th>
+                <th className="border border-slate-400 px-4 py-2">Status</th>
+                <th className="border border-slate-400 px-4 py-2">Info</th>
               </tr>
             </thead>
             <tbody>
               {emails.map((email, index) => (
                 <tr
                   key={email.id || index}
-                  className={index % 2 === 0 ? "bg-slate-50" : "bg-slate-100"}
+                  className={index % 2 === 0 ? "bg-slate-50 hover:bg-slate-200 ease-out transition-200" : "bg-slate-100 hover:bg-slate-200 ease-out transition-200"}
                 >
-                  <td className="border border-slate-400 px-4 py-2">{email.id}</td>
-                  <td className="border border-slate-400 px-4 py-2">{email.title || "N/A"}</td>
-                  <td className="border border-slate-400 px-4 py-2">{email.complaint || "N/A"}</td>
-                  <td className="border border-slate-400 px-4 py-2">{email.status || "Pending"}</td>
-                  <td className="border border-slate-400 px-4 py-2">{email.email || "N/A"}</td>
-                  <td className="border border-slate-400 px-4 py-2">
+                  <td className="border border-slate-400 px-4 py-2 overflow-hidden">{index + 1}</td>
+                  <td className="border border-slate-400 px-4 py-2 overflow-hidden">{email.title || "N/A"}</td>
+                  <td className="border border-slate-400 px-4 py-2 overflow-hidden">{email.complaint || "N/A"}</td>
+                  <td className="border border-slate-400 px-4 py-2">{email.id_dun || "N/A"}</td>
+                  <td className="border border-slate-400 px-4 py-2 overflow-hidden">
                     {email.inserted_at
                       ? new Date(email.inserted_at).toLocaleString()
                       : "N/A"}
+                  </td>
+                  <td
+                    className={`border border-slate-400 px-4 py-2 overflow-hidden
+                    ${email.status === "Pending" ? "bg-yellow-200" : ""}
+                    ${email.status === "Complete" ? "bg-green-400" : ""}`}
+                  >
+                    {email.status || "Pending"}
+                  </td>
+                  <td className="border border-slate-400 px-4 py-2 text-center">
+                    <button
+                      onClick={() => handleEditClick(email)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -132,26 +185,13 @@ export default function Help() {
           </table>
         </div>
       ) : (
-        // Dun Interface: Form to Send Email
         <form
-          className="max-w-md mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const emailData = Object.fromEntries(formData.entries());
-
-            try {
-              const { error } = await supabase.from("email").insert([emailData]);
-              if (error) throw error;
-
-              alert("Email sent successfully!");
-            } catch (error) {
-              console.error("Error sending email:", error);
-              alert("Failed to send email.");
-            }
-          }}
+          onSubmit={handleSubmit}
+          className="max-w-md mx-auto mt-10 bg-white shadow-md rounded px-8 pt-6 pb-8"
         >
-          <h2 className="text-lg font-bold mb-4">Send Email</h2>
+          <h2 className="text-lg font-bold mb-4">
+            Get in touch with our team support
+          </h2>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">
               Title
@@ -173,25 +213,29 @@ export default function Help() {
               required
             ></textarea>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Email
-            </label>
-            <input
-              name="email"
-              type="email"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-              required
-            />
+          <div className="flex items-center justify-between">
+            <button
+              type="submit"
+              className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Submit"}
+            </button>
           </div>
-          <button
-            type="submit"
-            className="bg-indigo-600 text-white px-4 py-2 rounded"
-          >
-            Submit
-          </button>
         </form>
       )}
+      {/* Edit Modal */}
+      {editingForm && isEditModalOpen && (
+        <EditModal
+          isOpen={isEditModalOpen}
+          onClose={closeEditModal}
+          formData={editingForm}
+          supabase={supabase}
+        />
+      )}
+      <Footer />
     </main>
   );
 }
