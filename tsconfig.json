@@ -34,7 +34,7 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.jsx"  // Add this line to include .jsx files
-, "utils/supabase/server.ts"  ],
+, "utils/supabase/server.ts", "components/user_management/admin_dun.js"  ],
   "exclude": [
     "node_modules"
   ]

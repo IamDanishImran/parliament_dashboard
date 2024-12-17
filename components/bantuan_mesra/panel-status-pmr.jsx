@@ -1,4 +1,3 @@
-// components/panel-status.jsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
@@ -18,9 +17,9 @@ const PanelStatus = () => {
       try {
         // Fetch all form data including status
         const { data, error } = await supabase
-          .from('form')
+          .from('form') // 'form' is the table name
           .select('form_status')
-          .eq('category_type', "Program Mesra Rakyat");
+          .eq('category', 'Program Mesra Rakyat')
   
         if (error) {
           throw new Error(error.message);
@@ -58,30 +57,35 @@ const PanelStatus = () => {
     };
   
     fetchStatusCounts();
-  }, []); // Runs only once when the component mounts
+  }, []); // Runs only once when the component mounts  
 
     return (
-        <section id="status" className="bg-blue-200 w-full h-32 mt-4 p-4 grid grid-cols-5 gap-4">
-          <div className="h-full rounded bg-blue-700 text-center hover:shadow-md ease-out">
+        <section id="status" className="bg-blue-200 w-full h-32 mt-4 p-4 grid grid-cols-5 gap-4 rounded">
+          {/* Status Permohonan */}
+          <article className="h-full rounded bg-blue-700 text-center">
             <h1 className="items-center text-center mt-2 text-lg font-semi text-slate-50">PERMOHONAN</h1>
             <p className="text-2xl mt-2 font-medium text-slate-50">{statusCounts.TOTAL}</p>
-          </div>
-          <div className="h-full rounded bg-amber-200 text-center">
+          </article>
+          {/* Status Sedang Diproses */}
+          <article className="h-full rounded bg-yellow-200 text-center">
             <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">SEDANG DIPROSES</h1>
             <p className="text-2xl mt-2 font-medium">{statusCounts.MOHON}</p>
-          </div>
-          <div className="h-full rounded bg-green-400 text-center">
+          </article>
+          {/* Status Diluluskan */}
+          <article className="h-full rounded bg-green-400 text-center">
             <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">DILULUSKAN</h1>
             <p className="text-2xl mt-2 font-medium">{statusCounts.LULUS}</p>
-          </div>
-          <div className="h-full rounded bg-red-500 text-center">
+          </article>
+          {/* Status Ditolak */}
+          <article className="h-full rounded bg-red-500 text-center">
             <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">DITOLAK</h1>
             <p className="text-2xl mt-2 font-medium">{statusCounts.DITOLAK}</p>
-          </div>
-          <div className="h-full rounded bg-cyan-400 text-center">
+          </article>
+          {/* Status KIV */}
+          <article className="h-full rounded bg-cyan-400 text-center">
             <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">KIV</h1>
             <p className="text-2xl mt-2 font-medium">{statusCounts.KIV}</p>
-          </div>
+          </article>
         </section>
     );
 }

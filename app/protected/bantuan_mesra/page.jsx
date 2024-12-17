@@ -5,11 +5,11 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 import Header from "@/components/header";
-import BarGraph from "@/components/bar-pmr";
-import PanelStatus from "@/components/panel-status-pmr";
-import LegendStatus from "@/components/legend-status";
-import LegendCategory from "@/components/legend-category";
-import Footer from "@/components/footer-dashboard";
+import PanelStatus from "@/components/bantuan_mesra/panel-status-pmr";
+import PieDun from "@/components/bantuan_mesra/pieDun";
+import PieCategory from "@/components/bantuan_mesra/pieCategory";
+import BarGraph from "@/components/bantuan_mesra/bar-pmr";
+import Footer from "@/components/footer";
 
 export default function Program_Mesra() {
   // Form List Section
@@ -142,27 +142,12 @@ const resetSearch = () => {
 
         <PanelStatus />
 
-        {/* <PanelAnalysis /> */}
-
         <section id="chart-pie" className="flex w-full h-full mt-4 gap-4">
-        {/* Pie Chart 1 */}
-        <article className="flex flex-col bg-sky-50 gap-y-4 p-4 justify-center items-center w-1/2 h-auto rounded shadow-md">
-          <h1 className="text-xl">Program Mesra Rakyat</h1>
-          <div className="chart-container w-[300px] h-[300px]">
-            <canvas id="myChart" className=""></canvas>
-          </div>
-          <LegendStatus />
-        </article>
-
-        {/* Pie Chart 2 */}
-        <article className="flex flex-col bg-sky-50 gap-y-4 p-4 justify-center items-center w-1/2 h-auto rounded shadow-md">
-          <h1 className="text-xl">Bantuan Kebajikan</h1>
-          <div className="chart-container w-[300px] h-[300px]">
-            <canvas id="myChart2" className=""></canvas>
-          </div>
-          < LegendCategory />
-        </article>
-      </section>
+          {/* Pie Chart Dun */}
+          <PieDun />
+          {/* Pie Chart Category */}
+          <PieCategory />
+        </section>
 
       <BarGraph />
 
@@ -171,16 +156,3 @@ const resetSearch = () => {
     );
   }
   
-  // export default function Dashboard() {
-  //   return (
-  //     <ProtectedLayout>
-  //       {/* Dashboard content goes here */}
-  //       <main className="p-2">
-  //         <section id="header" className="bg-emerald-400 w-full h-28"></section>
-  //         <section id="status" className="bg-indigo-600 w-full h-28 mt-4"></section>
-  //         <section id="chart-pie" className="bg-rose-500 w-full h-96 mt-4"></section>
-  //         <section id="chart-bar" className="bg-yellow-400 w-full h-96 mt-4"></section>
-  //       </main>
-  //     </ProtectedLayout>
-  //   );
-  // }

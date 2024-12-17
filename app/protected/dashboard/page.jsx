@@ -3,13 +3,13 @@
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 
-import ChartPMR from "@/components/piePMR-dashboard";
-import ChartKebajikan from "@/components/pieKebajikan-dashboard";
+import ChartPMR from "@/components/dashboard/piePMR-dashboard";
+import ChartKebajikan from "@/components/dashboard/pieKebajikan-dashboard";
 import Header from "@/components/header";
-import BarGraph from "@/components/bar-dashboard";
-import PanelStatus from "@/components/panel-status";
-import PanelAnalysis from "@/components/panel-analysis";
-import Footer from "@/components/footer-dashboard";
+import BarGraph from "@/components/dashboard/bar-dashboard";
+import PanelStatus from "@/components/dashboard/panel-status";
+import PanelAnalysis from "@/components/dashboard/panel-analysis";
+import Footer from "@/components/footer";
 
 export default function Dashboard() {
   const supabase = createClient();
@@ -23,11 +23,10 @@ export default function Dashboard() {
       <PanelAnalysis />
 
       <section id="chart-pie" className="flex w-full h-full mt-4 gap-4">
-        {/* Pie Chart */}
-        <ChartPMR categoryId={"2"} />
-
+        {/* Chart Program Mesra Rakyat */}
+        <ChartPMR />
         {/* Pie Chart 2 */}
-        <ChartKebajikan categoryId={"1"} />
+        <ChartKebajikan />
       </section>
 
       {/* Bar Graph Section */}
