@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Header from "@/components/header";
 import EditModal from "@/components/help/editEmail";
-
 import Footer from "@/components/footer";
 
 export default function Help() {

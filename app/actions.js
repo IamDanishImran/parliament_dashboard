@@ -40,9 +40,20 @@ export const signUpAction = async (formData) => {
   }
 
   const isAdminRole = registerID.role_code === "25048082" || registerID.role_code === "80845621";
-
   try {
     if (isAdminRole) {
+      // Check if an admin already exists before proceeding
+      const { data: existingAdmin, error: adminCheckError } = await supabase
+        .from("admin")
+        .select("*")
+        .eq("role_code", register_code)
+        .single();  // Only looking for one admin
+
+      if (adminCheckError || existingAdmin) {
+        // If an admin exists, don't create the dun user, and show an error
+        return encodedRedirect("error", "/sign-up", "An admin has already signed up. You cannot create a region user (Dun) until an admin is added.");
+      }
+      
       // Insert into admin table
       const { data: insertAdmin, error: adminError } = await supabase
         .from("admin")

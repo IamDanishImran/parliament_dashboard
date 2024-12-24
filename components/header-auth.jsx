@@ -77,9 +77,8 @@ import { Button } from "./ui/button";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function AuthButton() {
-  const {
-    data: { user },
-  } = await createClient().auth.getUser();
+  const supabase = createClient();
+  const { data: { user } } = await (await supabase).auth.getUser();
 
   if (!hasEnvVars) {
     return (

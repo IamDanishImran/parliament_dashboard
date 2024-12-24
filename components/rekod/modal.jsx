@@ -254,9 +254,8 @@ const Modal = ({ open, onClose }) => {
               </button>
               <button
                 type="submit"
-                onSubmit={handleSubmit}
                 disabled={loading}
-                className="bg-indigo-600 text-white px-4 py-2 rounded disabled:bg-indigo-300">
+                className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-500">
                 {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>

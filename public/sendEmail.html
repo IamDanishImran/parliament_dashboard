@@ -1,0 +1,65 @@
+<!-- public/templates/sendEmail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .email-footer {
+      font-size: 0.9rem;
+      color: #7a7a7a;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #3273dc; /* Bulma primary color */
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container has-background-dark">
+    <section class="content">
+      <p class="has-text-grey-dark">
+        Dear <span class="highlight">User</span>,
+      </p>
+      <p class="has-text-grey-dark">
+        Your complaint titled "<strong class="highlight">{{title}}</strong>" has been updated.
+        The status is now: <span class="tag is-info">{{status}}</span>.
+      </p>
+      <p class="has-text-grey-dark">
+        Complaint:
+        <blockquote class="has-background-light p-3 has-text-grey-darker">
+          <em>{{complaint}}</em>
+        </blockquote>
+      </p>
+      <p class="has-text-grey-dark">
+        Best regards,
+      </p>
+      <p class="has-text-grey-dark">
+        <strong>Parliament Help Support Team</strong>
+      </p>
+    </section>
+  </div>
+  <div class="email-footer">
+    <p>
+      This is an automated message. Please do not reply to this email.
+    </p>
+  </div>
+</body>
+</html>

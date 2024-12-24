@@ -11,12 +11,10 @@ const ChartPMR = () => {
   const supabase = createClient();
 
   const [statusCounts, setStatusCounts] = useState({
-    Kesejahteraan_Rakyat: 0,
-    Pendidikan: 0,
-    Keagamaan: 0,
-    NGO_Pertubuhan: 0,
-    Bencana: 0,
-    Pusat_Khidmat: 0,
+    Mohon: 0,
+    Lulus: 0,
+    Ditolak: 0,
+    KIV: 0,
   });
 
   useEffect(() => {
@@ -34,17 +32,17 @@ const ChartPMR = () => {
 
         // Initialize the status counts
         const form_status_counts = {
-          MOHON: 0,
-          LULUS: 0,
-          DITOLAK: 0,
+          Mohon: 0,
+          Lulus: 0,
+          Ditolak: 0,
           KIV: 0,
         };
 
         // Loop through the form data and count each form_status
         data.forEach((form) => {
-          if (form.form_status === "MOHON") form_status_counts.MOHON++;
-          if (form.form_status === "LULUS") form_status_counts.LULUS++;
-          if (form.form_status === "DITOLAK") form_status_counts.DITOLAK++;
+          if (form.form_status === "MOHON") form_status_counts.Mohon++;
+          if (form.form_status === "LULUS") form_status_counts.Lulus++;
+          if (form.form_status === "DITOLAK") form_status_counts.Ditolak++;
           if (form.form_status === "KIV") form_status_counts.KIV++;
         });
 
@@ -58,10 +56,10 @@ const ChartPMR = () => {
     fetchStatusCounts();
   }, []);
 
+
   useEffect(() => {
     const ctx = document.getElementById("pmrChart").getContext("2d");
     const dataValues = Object.values(statusCounts);
-
     // Initialize Chart.js
     const chart = new Chart(ctx, {
       type: "doughnut",
@@ -73,7 +71,7 @@ const ChartPMR = () => {
               "#fef08a", // MOHON
               "#4ade80", // LULUS
               "#ef4444", // DITOLAK
-              "#22d3ee", // KIV 
+              "#22d3ee", // KIV
             ],
             hoverOffset: 4,
           },
@@ -83,11 +81,21 @@ const ChartPMR = () => {
         responsive: true,
         plugins: {
           legend: {
-            position: "top",
+            display: false,
           },
           tooltip: {
             callbacks: {
-              label: (context) => `${context.label}: ${context.raw} forms`,
+              title: (context) => {
+                const index = context[0].dataIndex;
+                return Object.keys(statusCounts)[index];
+              },
+              label: (context) => {
+                // const status = Object.keys(statusCounts)[context.dataIndex];
+                const value = context.raw || 0;
+                const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(2);
+                return `${value} (${percentage}%)`;
+              },
             },
           },
         },
