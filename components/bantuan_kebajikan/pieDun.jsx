@@ -1,5 +1,4 @@
 "use client";
-import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 import { Chart, registerables } from "chart.js";
 import LegendDun from "@/components/legend-dun";
@@ -7,9 +6,7 @@ import LegendDun from "@/components/legend-dun";
 // Register all necessary components for Chart.js
 Chart.register(...registerables);
 
-const ChartKebajikan = () => {
-  const supabase = createClient();
-
+const PieDun = ({ filteredForm }) => {
   const [dunCounts, setDunCounts] = useState({
     "Rembia": 0,
     "Gadek": 0,
@@ -20,63 +17,43 @@ const ChartKebajikan = () => {
     "Luar Melaka": 0,
   });
 
-  // Fetch form counts grouped by descriptions
   useEffect(() => {
-    const fetchFormCountsByDescription = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("form")
-          .select("id_dun(id_register(description))")
-          .eq("category", "Bantuan Kebajikan");
-  
-        if (error) {
-          throw new Error(error.message);
-        }
-  
-        const dun_counts = {
-          "Rembia": 0,
-          "Gadek": 0,
-          "Machap Jaya": 0,
-          "Asahan": 0,
-          "Durian Tunggal": 0,
-          "Luar Alor_Gajah": 0,
-          "Luar Melaka": 0,
-        };
-  
-        // Loop through the fetched data
-        data.forEach((form) => {
-          if(form?.id_dun?.id_register?.description === "Rembia") dun_counts["Rembia"]++;
-          if(form?.id_dun?.id_register?.description === "Gadek") dun_counts["Gadek"]++;
-          if(form?.id_dun?.id_register?.description === "Machap Jaya") dun_counts["Machap Jaya"]++;
-          if(form?.id_dun?.id_register?.description === "Asahan") dun_counts["Asahan"]++;
-          if(form?.id_dun?.id_register?.description === "Durian Tunggal") dun_counts["Durian Tunggal"]++;
-          if(form?.id_dun?.id_register?.description === "Luar Alor Gajah") dun_counts["Luar Alor_Gajah"]++;
-          if(form?.id_dun?.id_register?.description === "Luar Melaka") dun_counts["Luar Melaka"]++;
-        });
-
-        // Update the dun count
-        setDunCounts(dun_counts); 
-      } catch (error) {
-        console.error("Error fetching form counts by description:", error);
-        return null;
-      }
+    const dun_counts = {
+      "Rembia": 0,
+      "Gadek": 0,
+      "Machap Jaya": 0,
+      "Asahan": 0,
+      "Durian Tunggal": 0,
+      "Luar Alor_Gajah": 0,
+      "Luar Melaka": 0,
     };
 
-    fetchFormCountsByDescription();
-  }, []);
+    // Loop through the filteredForm data
+    filteredForm.forEach((form) => {
+      if (form?.dun?.id_register?.description === "Rembia") dun_counts["Rembia"]++;
+      if (form?.dun?.id_register?.description === "Gadek") dun_counts["Gadek"]++;
+      if (form?.dun?.id_register?.description === "Machap Jaya") dun_counts["Machap Jaya"]++;
+      if (form?.dun?.id_register?.description === "Asahan") dun_counts["Asahan"]++;
+      if (form?.dun?.id_register?.description === "Durian Tunggal") dun_counts["Durian Tunggal"]++;
+      if (form?.dun?.id_register?.description === "Luar Alor Gajah") dun_counts["Luar Alor_Gajah"]++;
+      if (form?.dun?.id_register?.description === "Luar Melaka") dun_counts["Luar Melaka"]++;
+    });
+
+    // Update the dun count
+    setDunCounts(dun_counts);
+  }, [filteredForm]);
 
   useEffect(() => {
-    const ctx = document.getElementById("pmrChart").getContext("2d");
+    const ctx = document.getElementById("pmrChart");
     const dataValues = Object.values(dunCounts);
-
-    // Destroy existing chart if it exists
+    // Initialize Chart.js
     const dunChart = new Chart(ctx, {
       type: "doughnut",
       data: {
-         datasets: [
+        datasets: [
           {
             data: dataValues,
-             backgroundColor: [
+            backgroundColor: [
               "#581c87",  // Rembia
               "#701a75",   // Gadek
               "#9d174d", // Machap Jaya
@@ -104,7 +81,7 @@ const ChartKebajikan = () => {
               label: (context) => {
                 const index = context.dataIndex;
                 const total = Object.values(dunCounts).reduce((a, b) => a + b, 0);
-                const percentage = ((dataValues[index] / total) * 100).toFixed(2); 
+                const percentage = ((dataValues[index] / total) * 100).toFixed(2);
                 return `${dataValues[index]} (${percentage}%)`;
               },
             },
@@ -112,23 +89,29 @@ const ChartKebajikan = () => {
         },
       },
     });
+
     return () => {
       dunChart.destroy();
     };
   }, [dunCounts]);
 
-  // Display Current Year
-  const currentYear = new Date().getFullYear();
+  const hasData = Object.values(dunCounts).some(count => count > 0);
 
   return (
     <article className="flex flex-col bg-slate-50 gap-y-4 p-4 justify-center items-center w-1/2 h-auto rounded border shadow shadow-gray-400">
-      <h1 className="text-xl text-center">{`Bantuan Program Kebajikan Mengikut DUN ${currentYear}`}</h1>
+      <h1 className="text-xl text-center">Program Mesra Rakyat</h1>
       <div className="chart-container w-[300px] h-[300px]">
-        <canvas id="pmrChart" className="w-full h-full"></canvas>
+        {hasData ? (
+          <canvas id="pmrChart" className="w-full h-full"></canvas>
+        ) : (
+          <div className="flex justify-center items-center w-full h-full text-gray-500">
+            <p className="text-center text-black">No Data</p>
+          </div>
+        )}
       </div>
       <LegendDun />
     </article>
   );
 };
 
-export default ChartKebajikan;
+export default PieDun;

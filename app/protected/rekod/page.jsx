@@ -125,11 +125,10 @@ const handleSearch = () => {
 
 // Reset Search
 const resetSearch = () => {
-  setStatus('*'); // Reset to "All" status
+  setStatus('*');
   setCategory('*');
   setDun('*');
-
-  setFilteredForm(form); // Show all data when reset
+  setFilteredForm(form);
 };
     
 

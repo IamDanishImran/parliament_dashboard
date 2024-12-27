@@ -1,73 +1,61 @@
 "use client";
-import { createClient } from "@/utils/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Chart, registerables } from "chart.js";
 import LegendCategory from "@/components/legend-category";
 
 // Register all necessary components for Chart.js
 Chart.register(...registerables);
 
-const ChartKebajikan = () => {
-  const supabase = createClient();
-
-  const [statusCounts, setStatusCounts] = useState({
-    Kesejahteraan_Rakyat: 0,
-    Pendidikan: 0,
-    Keagamaan: 0,
-    NGO_Pertubuhan: 0,
-    Bencana: 0,
-    Pusat_Khidmat: 0,
+const PieCategory = ({ filteredForm }) => {
+  const [categoryCounts, setCategoryCounts] = useState({
+    "Kesejahteraan Rakyat": 0,
+    "Pendidikan": 0,
+    "Keagamaan": 0,
+    "NGO/Pertubuhan": 0,
+    "Bencana": 0,
+    "Pusat Khidmat": 0,
   });
 
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
   useEffect(() => {
-    const fetchStatusCounts = async () => {
-      try {
-        // Fetch all form data including category_type
-        const { data, error } = await supabase
-          .from("form")
-          .select("category_type")
-          .eq("category", "Bantuan Kebajikan");
+    if (!Array.isArray(filteredForm)) return;
 
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        // Initialize the status counts
-        const category_type_counts = {
-          Kesejahteraan_Rakyat: 0,
-          Pendidikan: 0,
-          Keagamaan: 0,
-          NGO_Pertubuhan: 0,
-          Bencana: 0,
-          Pusat_Khidmat: 0,
-        };
-
-        // Loop through the form data and count each category_type
-        data.forEach((form) => {
-          if (form.category_type === "Kesejahteraan Rakyat") category_type_counts.Kesejahteraan_Rakyat++;
-          if (form.category_type === "Pendidikan") category_type_counts.Pendidikan++;
-          if (form.category_type === "Bencana") category_type_counts.Bencana++;
-          if (form.category_type === "NGO/Pertubuhan") category_type_counts.NGO_Pertubuhan++;
-          if (form.category_type === "Keagamaan") category_type_counts.Keagamaan++;
-          if (form.category_type === "Pusat Khidmat") category_type_counts.Pusat_Khidmat++;
-        });
-
-        // Update the state with the new status counts
-        setStatusCounts(category_type_counts);
-      } catch (error) {
-        console.error("Error fetching category type counts:", error);
-      }
+    const category_counts = {
+      "Kesejahteraan Rakyat": 0,
+      "Pendidikan": 0,
+      "Keagamaan": 0,
+      "NGO/Pertubuhan": 0,
+      "Bencana": 0,
+      "Pusat Khidmat": 0,
     };
 
-    fetchStatusCounts();
-  }, []);
+    // Loop through the filteredForm data
+    filteredForm.forEach((form) => {
+      if (form?.category_type === "Kesejahteraan Rakyat") category_counts["Kesejahteraan Rakyat"]++;
+      if (form?.category_type === "Pendidikan") category_counts["Pendidikan"]++;
+      if (form?.category_type === "Keagamaan") category_counts["Keagamaan"]++;
+      if (form?.category_type === "NGO/Pertubuhan") category_counts["NGO/Pertubuhan"]++;
+      if (form?.category_type === "Bencana") category_counts["Bencana"]++;
+      if (form?.category_type === "Pusat Khidmat") category_counts["Pusat Khidmat"]++;
+    });
+    setCategoryCounts(category_counts);
+  }, [filteredForm]);
 
   useEffect(() => {
-    const ctx = document.getElementById("kebajikanChart").getContext("2d");
-    const dataValues = Object.values(statusCounts);
+    if (!canvasRef.current) return;
 
-    // Initialize Chart.js
-    const chart = new Chart(ctx, {
+    const ctx = canvasRef.current.getContext("2d");
+    const dataValues = Object.values(categoryCounts);
+
+    // Destroy existing chart if it exists
+    if (chartRef.current) {
+      chartRef.current.destroy();
+    }
+
+    // Create new chart instance
+    chartRef.current = new Chart(ctx, {
       type: "doughnut",
       data: {
         datasets: [
@@ -88,12 +76,19 @@ const ChartKebajikan = () => {
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: "top",
-          },
+          legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => `${context.label}: ${context.raw} forms`,
+              title: (context) => {
+                const index = context[0].dataIndex;
+                return Object.keys(categoryCounts)[index];
+              },
+              label: (context) => {
+                const index = context.dataIndex;
+                const total = Object.values(categoryCounts).reduce((a, b) => a + b, 0);
+                const percentage = ((Object.values(categoryCounts)[index] / total) * 100).toFixed(2);
+                return `${Object.values(categoryCounts)[index]} (${percentage}%)`;
+              },
             },
           },
         },
@@ -102,22 +97,31 @@ const ChartKebajikan = () => {
 
     // Cleanup to prevent chart duplication on re-renders
     return () => {
-      chart.destroy();
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
     };
-  }, [statusCounts]);
+  }, [categoryCounts]);
 
-  // Display Current Year
   const currentYear = new Date().getFullYear();
+  const hasData = Object.values(categoryCounts).some((count) => count > 0);
 
   return (
     <article className="flex flex-col bg-slate-50 gap-y-4 p-4 justify-center items-center w-1/2 h-auto rounded border shadow shadow-gray-400">
-      <h1 className="text-xl text-center">{`Bantuan Kebajikan Mengikut Kategori ${currentYear}`}</h1>
+      <h1 className="text-xl text-center">Bantuan Kebajikan Mengikut Kategori {currentYear}</h1>
       <div className="chart-container w-[300px] h-[300px]">
-        <canvas id="kebajikanChart" className="w-full h-full"></canvas>
+        {hasData ? (
+          <canvas ref={canvasRef} id="categoryChart" className="w-full h-full"></canvas>
+        ) : (
+          <div className="flex justify-center items-center w-full h-full text-gray-500">
+            <p className="text-center text-black">No Data</p>
+          </div>
+        )}
       </div>
       <LegendCategory />
     </article>
   );
 };
 
-export default ChartKebajikan;
+export default PieCategory;
