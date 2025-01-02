@@ -1,7 +1,4 @@
 import "./globals.css";
-import HeaderAuth from "@/components/header-auth";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import Navbar from "@/components/Navbar";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -22,11 +19,6 @@ export default function RootLayout({ children, params }) {
       <body className="bg-neutral-950 text-foreground min-h-screen">
         <main className="min-h-screen flex flex-col items-center">
           <div className="flex-1 w-full flex flex-col gap-0 items-center">
-            
-            {/* {!isAuthPage && <Navbar />} {/* Only show Navbar if not an auth page */}
-            {/* <HeaderAuth /> */}
-            {/* {hasEnvVars ? <HeaderAuth /> : <EnvVarWarning />} */}
-
             <div className="flex flex-col w-full h-full">{children}</div>
           </div>
         </main>

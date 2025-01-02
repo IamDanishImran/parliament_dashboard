@@ -47,7 +47,18 @@ export default function Signup({ searchParams }) {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="register_code">Registration Code</Label>
-            <Input name="register_code" placeholder="Your registration code" required />
+            <select name="register_code" id="userRole" className="h-10 rounded" required>
+              <option value="">Pilih</option>
+              <option value="Rembia">Rembia</option>
+              <option value="Machap Jaya">Machap Jaya</option>
+              <option value="Durian Tunggal">Durian Tunggal</option>
+              <option value="Asahan">Asahan</option>
+              <option value="Gadek">Gadek</option>
+              <option value="Luar Alor Gajah">Luar Alor Gajah</option>
+              <option value="Luar Melaka">Luar Melaka</option>
+              <option value="Supervisor">Admin</option>
+            </select>
+            {/* <Input name="register_code" placeholder="Your registration code" required /> */}
           </div>
         </div>
 

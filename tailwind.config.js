@@ -1,3 +1,4 @@
+const { nextui } = require("@nextui-org/theme");
 // C:\Users\User\parlimen\tailwind.config.js
 import { Config } from "tailwindcss";
 
@@ -8,7 +9,8 @@ const config = {
     "./components/**/*.{ts,tsx,js,jsx}",
     "./app/**/*.{ts,tsx,js,jsx}",
     "./src/**/*.{ts,tsx,js,jsx}",
-  ],  
+    "./node_modules/@nextui-org/theme/dist/components/skeleton.js",
+  ],
   // content: [
   //   "./pages/**/*.{ts,tsx}",
   //   "./components/**/*.{ts,tsx}",
@@ -71,7 +73,7 @@ const config = {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        'custom-md': '6px 6px',
+        "custom-md": "6px 6px",
       },
       keyframes: {
         "accordion-down": {
@@ -89,8 +91,8 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-}
+  plugins: [require("tailwindcss-animate"), nextui()],
+};
 // satisfies Config;
 
 export default config;

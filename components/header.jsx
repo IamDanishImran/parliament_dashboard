@@ -90,7 +90,7 @@ export default function Header({ title }) {
   }, [supabase]);
 
   return (
-    <header className="grid grid-rows-1 grid-flow-col w-full h-[120px] p-2 rounded border border-black">
+    <header className="grid grid-rows-1 grid-flow-col w-full h-[120px] p-2 rounded shadow border border-gray-900">
       <article className="px-2 justify-end items-center w-full">
         <p className="text-sm font-medium">
           <span className="text-slate-600">Home</span> / {title}

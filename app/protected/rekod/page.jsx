@@ -1,8 +1,8 @@
-// app/protected/rekod/page.jsx
 "use client";
 import Link from "next/link";
 import Footer from "@/components/footer";
 import { useState, useEffect } from "react";
+import { ToastContainer, toast } from 'react-toastify'; // Only import toast here
 
 import Header from "@/components/header";
 import moment from 'moment';
@@ -13,7 +13,31 @@ import EditModal from "@/components/rekod/editModal";
 export default function Rekod() {
   // First Modal Section (for adding items)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const openAddModal = () => setIsAddModalOpen(true);
+  const supabase = createClient();
+
+  const checkAdminAndOpenModal = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('You need to login first');
+        return;
+      }
+      const { data: getDun, error } = await supabase
+        .from('dun')
+        .select('id')
+        .eq('email', user.email)
+        .single();
+      if (error) {
+        toast.error(`Admin can't access add form`);
+        return;
+      }
+      setIsAddModalOpen(true);
+    } catch (error) {
+      toast.error('An unexpected error occurred.');
+      console.error(error);
+    }
+  };
+
   const closeAddModal = () => setIsAddModalOpen(false);
   
   const [formData, setFormData] = useState({
@@ -37,6 +61,7 @@ export default function Rekod() {
   };
   const handleAddItem = () => {
     // Handle item addition logic
+    toast.success("Form added successfully!");
   };
   const handleDeleteItem = (index) => {
     // Handle item deletion logic
@@ -79,10 +104,6 @@ export default function Rekod() {
       link.click();
     };
 
-
-
-
-
      // Form List Section
 const [statusSearch, setStatus] = useState('*');
 const [categorySearch, setCategory] = useState('*');
@@ -90,7 +111,6 @@ const [dunSearch, setDun] = useState('*');
 
 const [form, setForm] = useState([]);
 const [filteredForm, setFilteredForm] = useState([]);
-const supabase = createClient();
 
 // Fetch data when the component mounts
 useEffect(() => {
@@ -206,7 +226,7 @@ const resetSearch = () => {
             </button>
           </div>
           <div>
-          <button onClick={openAddModal} className="text-indigo-700 font-bold bg-slate-50 border border-black px-4 py-2 rounded hover:bg-slate-300 ease-in duration-200">
+          <button onClick={checkAdminAndOpenModal} className="text-indigo-700 font-bold bg-slate-50 border border-black px-4 py-2 rounded hover:bg-slate-300 ease-in duration-200">
               Tambah Rekod
             </button>
           </div>
@@ -279,6 +299,7 @@ const resetSearch = () => {
           items={items}
           handleDeleteItem={handleDeleteItem}
         />
+        <ToastContainer />
 
 
       {/* Edit Modal */}

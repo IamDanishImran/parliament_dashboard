@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import Header from "@/components/header";
 import EditModal from "@/components/help/editEmail";
 import Footer from "@/components/footer";
@@ -23,7 +25,21 @@ export default function Help() {
     setIsEditModalOpen(true);
   };
 
-  const closeEditModal = () => setIsEditModalOpen(false);
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    fetchEmails(); // Refresh emails after closing the modal
+  };
+
+  const fetchEmails = async () => {
+    try {
+      const { data, error } = await supabase.from("email").select("*");
+      if (error) throw error;
+      setEmails(data || []);
+    } catch (error) {
+      console.error("Error fetching emails:", error.message);
+      setError("Failed to load email data. Please try again.");
+    }
+  };
 
   useEffect(() => {
     // Fetch user role logic here
@@ -61,26 +77,11 @@ export default function Help() {
     fetchData();
   }, [supabase]);
 
-
-
   useEffect(() => {
     if (userRole === "25048082") {
-    // Fetch emails logic here
-    const fetchEmails = async () => {
-      try {
-        const { data, error } = await supabase.from("email").select("*");
-        if (error) throw error;
-        setEmails(data || []);
-      } catch (error) {
-        console.error("Error fetching emails:", error.message);
-        setError("Failed to load email data. Please try again.");
-      }
-    };
-    fetchEmails();
+      fetchEmails();
     }
   }, [supabase, userRole]);
-
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +93,7 @@ export default function Help() {
     const { title, complaint } = Object.fromEntries(formData.entries());
 
     if (!title.trim() || !complaint.trim()) {
-      alert("Please fill in all fields before submitting.");
+      toast.error("Please fill in all fields before submitting.");
       setLoading(false);
       return;
     }
@@ -101,7 +102,7 @@ export default function Help() {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
         console.error("Authentication error:", userError);
-        alert("Please log in to submit a complaint.");
+        toast.error("Please log in to submit a complaint.");
         setLoading(false);
         return;
       }
@@ -112,15 +113,16 @@ export default function Help() {
 
       if (error) {
         console.error("Error inserting email:", error);
-        alert("Failed to submit complaint. Please try again.");
+        toast.error("Failed to submit complaint. Please try again.");
         return; // Return early after an error
       }
 
-      alert("Complaint submitted successfully!");
+      toast.success("Complaint submitted successfully!");
       e.target.reset(); // Reset the form
+      fetchEmails(); // Refresh emails after submitting a complaint
     } catch (error) {
       console.error("Error submitting complaint:", error);
-      alert("Failed to submit complaint. Please try again.");
+      toast.error("Failed to submit complaint. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -129,9 +131,9 @@ export default function Help() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-
   return (
     <main className="p-4">
+      <ToastContainer />
       <Header title="Help Center" />
 
       {userRole === "25048082" ? (
@@ -184,10 +186,7 @@ export default function Help() {
           </table>
         </div>
       ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="max-w-md mx-auto mt-10 bg-white shadow-md rounded px-8 pt-6 pb-8"
-        >
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-10 bg-white shadow-md rounded px-8 pt-6 pb-8">
           <h2 className="text-lg font-bold mb-4">
             Get in touch with our team support
           </h2>

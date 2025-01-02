@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   const [formStatus, setFormStatus] = useState("");
@@ -27,23 +29,19 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const { data: user, error: userError } = await supabase.auth.getUser();
       if (userError || !user?.email) {
         throw new Error("User not authenticated or email not available");
       }
-
       const { data, error } = await supabase
         .from("email")
         .select("status, title, complaint, inserted_at, id_dun")
         .eq("id_dun", user.email)
         .maybeSingle();
-
       if (error || !data) {
         throw new Error("No email data found or an error occurred");
       }
-
       setEmailData(data);
     } catch (err) {
       setError(err.message || "Failed to fetch email data.");
@@ -54,7 +52,7 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
 
   const handleSave = async () => {
     if (!formStatus || !complaint || !title) {
-      alert("Please fill in all fields");
+      toast.error("Please fill in all fields");
       return;
     }
 
@@ -85,7 +83,7 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipient: dunEmail, subject, body: emailTemplate, contentType: "text/html", }),
+        body: JSON.stringify({ recipient: dunEmail, subject, body: emailTemplate, contentType: "text/html" }),
       });
 
       if (!response.ok) {
@@ -93,11 +91,11 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
         throw new Error(result.message || "Failed to send email");
       }
 
-      alert("Email sent successfully!");
+      toast.success("Email sent successfully!");
       onClose();
     } catch (err) {
       console.error("Error:", err);
-      alert("An error occurred while processing your request.");
+      toast.error("An error occurred while processing your request.");
     } finally {
       setIsLoading(false);
     }
@@ -114,11 +112,11 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
 
         if (error) throw error;
 
-        alert("Form deleted successfully");
+        toast.success("Email deleted successfully");
         onClose();
       } catch (err) {
         console.error("Error deleting form:", err);
-        alert("An error occurred while deleting the form.");
+        toast.error("An error occurred while deleting the email.");
       } finally {
         setIsLoading(false);
       }

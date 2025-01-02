@@ -44,7 +44,7 @@ const PanelStatus = ({ filteredForm }) => {
   }, [filteredForm]); // Recalculate when filteredForm changes
 
   return (
-    <section id="status" className="bg-blue-200 w-full h-32 mt-4 p-4 grid grid-cols-5 gap-4 rounded">
+    <section id="status" className="bg-blue-200 w-full h-32 mt-4 mb-6 p-4 grid grid-cols-5 gap-4 rounded shadow-md">
       {/* Status Permohonan */}
       <article className="h-full rounded bg-blue-700 text-center">
         <h1 className="items-center text-center mt-2 text-lg font-semi text-slate-50">PERMOHONAN</h1>
