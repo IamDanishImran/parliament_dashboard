@@ -1,6 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Skeleton } from '@nextui-org/react';
 
 import Header from "@/components/header";
 import PanelStatus from "@/components/bantuan_kebajikan/panel-status-kebajikan";
@@ -16,42 +19,38 @@ export default function Bantuan_Kebajikan() {
   const [form, setForm] = useState([]);
   const [filteredForm, setFilteredForm] = useState([]);
   const supabase = createClient();
+  const [loading, setLoading] = useState(true);
 
   // Fetch Form Data
   useEffect(() => {
     const fetchData = async () => {
-      const { data, error } = await supabase
-        .from('form')
-        .select('*, dun(id_register(*))')
-        .eq('category', 'Bantuan Kebajikan');
-      if (error) {
+      try {
+        const { data, error } = await supabase
+          .from('form')
+          .select('*, dun(id_register(*))')
+          .eq('category', 'Bantuan Kebajikan');
+        if (error) {
+          console.error("Error fetching data:", error);
+        } else {
+          console.log("Fetched Data:", data);
+          setForm(data);
+          setFilteredForm(data);
+        }
+      } catch (error) {
         console.error("Error fetching data:", error);
-      } else {
-        console.log("Fetched Data:", data); // Add this line
-        setForm(data);
-        setFilteredForm(data);
+        toast.error("Error fetching data");
+      } finally {
+        setLoading(false);
       }
-    };
-    fetchData();
+    }; fetchData();
   }, []);
 
   const handleSearch = () => {
-    console.log("Jenis Bantuan Search:", jenisBantuanSearch);
-    console.log("Dun Search:", dunSearch);
-
     const filteredResults = form.filter((item) => {
       const matchesBantuan = !jenisBantuanSearch || jenisBantuanSearch === '*' || item.help_type.toUpperCase() === jenisBantuanSearch.toUpperCase();
       const matchesDun = !dunSearch || dunSearch === '*' || item.dun.id_register?.description.toLowerCase() === dunSearch.toLowerCase();
-
-      console.log("Item Help Type:", item.help_type);
-      console.log("Item Dun Description:", item.dun.id_register?.description);
-      console.log("Matches Bantuan:", matchesBantuan);
-      console.log("Matches Dun:", matchesDun);
-
       return matchesBantuan && matchesDun;
     });
-
-    console.log("Filtered Results:", filteredResults);
     setFilteredForm(filteredResults); // Update filtered results
   };
 
@@ -64,9 +63,10 @@ export default function Bantuan_Kebajikan() {
   return (
     <main className="p-2 pl-10 pr-20">
       <Header title="Rumusan Program Kebajikan" />
-
+      <br />
       {/* Search Bar */}
-      <section id="search" className="flex flex-col w-full h-auto mt-4 rounded border shadow shadow-gray-400">
+      <Skeleton isLoaded={!loading}>
+      <section id="search" className="flex flex-col w-full h-auto rounded border shadow shadow-gray-400">
         <article>
           <h1 className="mx-4 mt-4 text-2xl font-semibold">Panel Carian</h1>
         </article>
@@ -99,31 +99,39 @@ export default function Bantuan_Kebajikan() {
             </div>
           </div>
         </article>
-        
         <article className="flex mt-2 px-4 py-4 gap-4">
-          <button
-            className="w-32 h-8 flex justify-center items-center rounded bg-indigo-600 hover:bg-violet-500 text-slate-50 ease-in duration-200"
+          <button className="w-32 h-8 flex justify-center items-center rounded bg-indigo-600 hover:bg-violet-500 text-slate-50 ease-in duration-200"
             onClick={handleSearch}>
-              Search
+            Search
           </button>
-          <button
-            className="w-32 h-8 flex justify-center items-center rounded border border-slate-900 bg-slate-50 hover:bg-violet-500 text-slate-900 ease-in duration-200"
+          <button className="w-32 h-8 flex justify-center items-center rounded border border-slate-900 bg-slate-50 hover:bg-violet-500 text-slate-900 ease-in duration-200"
             onClick={resetSearch}>
-              Reset Search
+            Reset Search
           </button>
         </article>
       </section>
+      </Skeleton>
 
-      {/* Status Panel */}
-      <PanelStatus filteredForm={filteredForm} />
-      <PanelAnalysis filteredForm={filteredForm} />
-      <section id="chart-pie" className="flex w-full h-full mt-4 gap-4">
-        {/* Chart Dun */}
-        <PieDun filteredForm={filteredForm} />
-        {/* Chart Category */}
-        <PieCategory filteredForm={filteredForm} />
-      </section>
-      <BarGraph filteredForm={filteredForm} />
+      <br />
+      <Skeleton isLoaded={!loading}>
+        <PanelStatus filteredForm={filteredForm} />
+      </Skeleton>
+      <br />
+      <Skeleton isLoaded={!loading}>
+        <PanelAnalysis filteredForm={filteredForm} />
+      </Skeleton>
+
+      <Skeleton isLoaded={!loading}>
+        <section id="chart-pie" className="flex w-full h-full mt-4 gap-4">
+          <PieDun filteredForm={filteredForm} /> {/* Pie Chart Dun */}
+          <PieCategory filteredForm={filteredForm} /> {/* Pie Chart Category */}
+        </section>
+      </Skeleton>
+      
+      <br /><br />
+      <Skeleton isLoaded={!loading}>
+        <BarGraph filteredForm={filteredForm} />
+      </Skeleton>
       <Footer />
     </main>
   );

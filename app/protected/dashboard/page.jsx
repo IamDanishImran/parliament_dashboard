@@ -1,7 +1,7 @@
 "use client";
-import { createClient } from "@/utils/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Skeleton } from "@nextui-org/skeleton";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -14,7 +14,7 @@ import PanelAnalysis from "@/components/dashboard/panel-analysis";
 import Footer from "@/components/footer";
 
 export default function Dashboard() {
-  const supabase = createClient();
+  const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -22,11 +22,14 @@ export default function Dashboard() {
     console.log("Login status:", loginStatus);
     if (loginStatus && loginStatus.startsWith("success")) {
       toast.success("Welcome back!");
+      setLoading(true);
+    } else {
+      setLoading(false);
     }
   }, [searchParams]);
 
   return (
-    <main className="p-2 pl-10 pr-20">
+    <main className="pt-4 p-2 pl-10 pr-20">
       <ToastContainer />
       <Header title="Dashboard" />
       <br />
@@ -34,16 +37,14 @@ export default function Dashboard() {
       <br />
       <PanelAnalysis />
       <br />
-      <section id="chart-pie" className="flex w-full h-full gap-4">
-        {/* Chart Program Mesra Rakyat */}
-        <ChartPMR />
-        {/* Chart Bantuan Kebajikan */}
-        <ChartKebajikan />
-      </section>
-
-      {/* Bar Graph Section */}
-      <BarGraph />
-
+      <Skeleton isLoaded={!loading}>
+        <section id="chart-pie" className="flex w-full h-full gap-4">
+          <ChartPMR /> {/* Chart Program Mesra Rakyat */}
+          <ChartKebajikan /> {/* Chart Bantuan Kebajikan */}
+        </section>
+      </Skeleton>
+      <br />
+      <BarGraph /> {/* Bar Graph Section */}
       <Footer />
     </main>
   );

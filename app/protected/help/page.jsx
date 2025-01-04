@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { Skeleton } from "@nextui-org/skeleton";
+
 import Header from "@/components/header";
 import EditModal from "@/components/help/editEmail";
 import Footer from "@/components/footer";
@@ -128,16 +130,22 @@ export default function Help() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <main className="p-4">
       <ToastContainer />
-      <Header title="Help Center" />
+      
+      <Skeleton isLoaded={!loading}>
+        <Header title="Help Center" />
+      </Skeleton>
+
+      <br />
 
       {userRole === "25048082" ? (
-        <div className="mt-4 table-container max-h-[300px] overflow-y-auto border-1 shadow rounded">
+        <>
+       <Skeleton isLoaded={!loading}>
+        <div className="table-container max-h-[300px] overflow-y-auto border-1 shadow rounded">
           <table className="table-auto h-[100px] w-full border-collapse border border-slate-400">
             <thead className="bg-gray-200">
               <tr>
@@ -185,8 +193,12 @@ export default function Help() {
             </tbody>
           </table>
         </div>
+      </Skeleton>
+      </>
       ) : (
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-10 bg-white shadow-md rounded px-8 pt-6 pb-8">
+        <>
+        <Skeleton isLoaded={!loading}>
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8 bg-white shadow-md rounded px-8 pt-6 pb-8">
           <h2 className="text-lg font-bold mb-4">
             Get in touch with our team support
           </h2>
@@ -223,6 +235,8 @@ export default function Help() {
             </button>
           </div>
         </form>
+        </Skeleton>
+        </>
       )}
       {/* Edit Modal */}
       {editingForm && isEditModalOpen && (

@@ -9,33 +9,24 @@ Chart.register(...registerables);
 
 const ChartPMR = () => {
   const supabase = createClient();
-
   const [statusCounts, setStatusCounts] = useState({
-    Mohon: 0,
-    Lulus: 0,
-    Ditolak: 0,
-    KIV: 0,
+    Mohon: 0, Lulus: 0, Ditolak: 0, KIV: 0,
   });
 
   useEffect(() => {
     const fetchStatusCounts = async () => {
       try {
-        // Fetch all form data including form_status
         const { data, error } = await supabase
           .from("form")
           .select("form_status")
           .eq("category", "Program Mesra Rakyat");
-
         if (error) {
           throw new Error(error.message);
         }
 
         // Initialize the status counts
         const form_status_counts = {
-          Mohon: 0,
-          Lulus: 0,
-          Ditolak: 0,
-          KIV: 0,
+          Mohon: 0, Lulus: 0, Ditolak: 0, KIV: 0,
         };
 
         // Loop through the form data and count each form_status
@@ -45,14 +36,11 @@ const ChartPMR = () => {
           if (form.form_status === "DITOLAK") form_status_counts.Ditolak++;
           if (form.form_status === "KIV") form_status_counts.KIV++;
         });
-
-        // Update the state with the new status counts
         setStatusCounts(form_status_counts);
       } catch (error) {
         console.error("Error fetching form status counts:", error);
       }
     };
-
     fetchStatusCounts();
   }, []);
 
@@ -60,7 +48,6 @@ const ChartPMR = () => {
   useEffect(() => {
     const ctx = document.getElementById("pmrChart").getContext("2d");
     const dataValues = Object.values(statusCounts);
-    // Initialize Chart.js
     const chart = new Chart(ctx, {
       type: "doughnut",
       data: {
@@ -90,7 +77,6 @@ const ChartPMR = () => {
                 return Object.keys(statusCounts)[index];
               },
               label: (context) => {
-                // const status = Object.keys(statusCounts)[context.dataIndex];
                 const value = context.raw || 0;
                 const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
                 const percentage = ((value / total) * 100).toFixed(2);
@@ -101,8 +87,6 @@ const ChartPMR = () => {
         },
       },
     });
-
-    // Cleanup to prevent chart duplication on re-renders
     return () => {
       chart.destroy();
     };

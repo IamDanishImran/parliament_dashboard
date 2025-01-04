@@ -8,33 +8,21 @@ import 'react-toastify/dist/ReactToastify.css';
 const PanelStatus = () => {
   const supabase = createClient();
   const [statusCounts, setStatusCounts] = useState({
-    TOTAL: 0,
-    MOHON: 0,
-    LULUS: 0,
-    DITOLAK: 0,
-    KIV: 0,
+    TOTAL: 0, MOHON: 0, LULUS: 0, DITOLAK: 0, KIV: 0,
   });
   const [loading, setLoading] = useState(true);
 
   // Function to fetch the status counts from the Supabase database
   const fetchStatusCounts = async () => {
     try {
-      // Fetch all form data including status
       const { data, error } = await supabase
-        .from('form') // 'form' is the table name
-        .select('form_status'); // Select the 'form_status' column only
-
+        .from('form')
+        .select('form_status');
       if (error) {
         throw new Error(error.message);
       }
-
-      // Initialize the status counts
       const newStatusCounts = {
-        TOTAL: 0,
-        MOHON: 0,
-        LULUS: 0,
-        DITOLAK: 0,
-        KIV: 0,
+        TOTAL: 0, MOHON: 0, LULUS: 0, DITOLAK: 0, KIV: 0,
       };
 
       // Loop through the form data and count each status
@@ -45,13 +33,10 @@ const PanelStatus = () => {
         if (form.form_status === 'KIV') newStatusCounts.KIV++;
       });
 
-      // Calculate TOTAL: MOHON - (LULUS + DITOLAK + KIV)
       newStatusCounts.TOTAL = newStatusCounts.MOHON + newStatusCounts.LULUS + newStatusCounts.DITOLAK + newStatusCounts.KIV;
-
-      // Update the state with the new status counts
       setStatusCounts(newStatusCounts);
     } catch (error) {
-      toast.error('Failed to fetch status counts.');
+      console.error('Error fetching status counts:', error);
     } finally {
       setLoading(false);
     }
@@ -59,26 +44,23 @@ const PanelStatus = () => {
 
   // Subscribe to real-time changes in the 'form' table
   useEffect(() => {
-    // Fetch the initial status counts
     fetchStatusCounts();
-    // Subscribe to real-time changes on the 'form' table
     const subscription = supabase
-      .channel('form-updates') // Create a subscription channel
+      .channel('form-updates')
       .on(
-        'postgres_changes', // Event type for listening to changes in the database
-        { event: '*', schema: 'public', table: 'form' }, // Listen to all events (INSERT, UPDATE, DELETE) on the 'form' table
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'form' },
         (payload) => {
           console.log('Real-time data change detected:', payload);
           toast.info('Data has changed!'); 
-          fetchStatusCounts(); // Re-fetch the status counts when data changes
+          fetchStatusCounts();
         }
       )
-      .subscribe(); // Actually subscribe to the changes
-    // Cleanup the subscription when the component unmounts
+      .subscribe();
     return () => {
-      supabase.removeChannel(subscription); // Remove the subscription when no longer needed
+      supabase.removeChannel(subscription);
     };
-  }, []); // Empty dependency array to run this effect only once (on component mount)
+  }, []);
 
   return (
     <>

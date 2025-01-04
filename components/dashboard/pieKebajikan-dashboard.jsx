@@ -9,7 +9,6 @@ Chart.register(...registerables);
 
 const ChartKebajikan = () => {
   const supabase = createClient();
-
   const [statusCounts, setStatusCounts] = useState({
     "Kesejahteraan Rakyat": 0,
     "Pendidikan": 0,
@@ -22,12 +21,10 @@ const ChartKebajikan = () => {
   useEffect(() => {
     const fetchStatusCounts = async () => {
       try {
-        // Fetch all form data including category_type
         const { data, error } = await supabase
           .from("form")
           .select("category_type")
           .eq("category", "Bantuan Kebajikan");
-
         if (error) {
           throw new Error(error.message);
         }
@@ -56,17 +53,15 @@ const ChartKebajikan = () => {
         setStatusCounts(category_type_counts);
       } catch (error) {
         console.error("Error fetching category type counts:", error);
+        toast.error('Failed to fetch category type counts.');
       }
     };
-
     fetchStatusCounts();
   }, []);
 
   useEffect(() => {
     const ctx = document.getElementById("kebajikanChart").getContext("2d");
     const dataValues = Object.values(statusCounts);
-
-    // Initialize Chart.js
     const chart = new Chart(ctx, {
       type: "doughnut",
       data: {
@@ -89,7 +84,7 @@ const ChartKebajikan = () => {
         responsive: true,
         plugins: {
           legend: {
-            display: false, // Disable the legend
+            display: false,
           },
           tooltip: {
             callbacks: {
@@ -98,7 +93,6 @@ const ChartKebajikan = () => {
                 return Object.keys(statusCounts)[index];
               },
               label: (context) => {
-                // const status = Object.keys(statusCounts)[context.dataIndex];
                 const value = context.raw || 0;
                 const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
                 const percentage = ((value / total) * 100).toFixed(2);
@@ -109,8 +103,6 @@ const ChartKebajikan = () => {
         },
       },
     });
-
-    // Cleanup to prevent chart duplication on re-renders
     return () => {
       chart.destroy();
     };

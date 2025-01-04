@@ -1,7 +1,7 @@
-// components/header.jsx
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { Skeleton } from "@nextui-org/skeleton";
 
 export default function Header({ title }) {
   const supabase = createClient();
@@ -10,6 +10,7 @@ export default function Header({ title }) {
     name: "Loading...",
     description: "Loading...",
   });
+  const [loading, setLoading] = useState(true); // Track loading state
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -24,6 +25,7 @@ export default function Header({ title }) {
             name: "Guest",
             description: "No description available",
           });
+          setLoading(false);
           return;
         }
 
@@ -47,6 +49,7 @@ export default function Header({ title }) {
             name: adminData.name,
             description: registrationData?.description || "No description found",
           });
+          setLoading(false);
           return;
         }
 
@@ -68,6 +71,7 @@ export default function Header({ title }) {
             name: dunData.name,
             description: registrationData?.description || "No description found",
           });
+          setLoading(false);
           return;
         }
 
@@ -76,6 +80,7 @@ export default function Header({ title }) {
           name: "Name not found",
           description: "No description available",
         });
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching user details:", error.message);
         setUserDetails({
@@ -83,6 +88,7 @@ export default function Header({ title }) {
           name: "Error retrieving name",
           description: "Error retrieving description",
         });
+        setLoading(false);
       }
     };
 
@@ -90,26 +96,29 @@ export default function Header({ title }) {
   }, [supabase]);
 
   return (
-    <header className="grid grid-rows-1 grid-flow-col w-full h-[120px] p-2 rounded shadow border border-gray-900">
-      <article className="px-2 justify-end items-center w-full">
-        <p className="text-sm font-medium">
-          <span className="text-slate-600">Home</span> / {title}
-        </p>
-        <h1 className="text-3xl font-semibold mt-4">{title}</h1>
-        <p className="font-semibold text-gray-700">Dashboard Parlimen Alor Gajah</p>
-      </article>
-      <article className="flex flex-col items-end justify-start w-full">
-        <div className="bg-slate-50 border border-black rounded px-2 py-1 font-semibold">
-          <p>{userDetails.name}</p>
-          {/* {userDetails.email} */}
-        </div>
-        <div className="bg-amber-300 text-amber-900 border border-black rounded px-2 py-1 mt-1 font-medium">
-          <p>
-            {userDetails.description}
-          </p>
-        </div>
-      </article>
-    </header>
+    <>
+      {loading ? (
+        // Skeleton loader wrapping the whole header
+        <Skeleton animated height="100%" width="100%" />
+      ) : (
+        <header className="bg-neutral-50 grid grid-rows-1 grid-flow-col w-full h-[120px] p-2 rounded shadow border border-gray-900">
+          <article className="px-2 justify-end items-center w-full">
+            <p className="text-sm font-medium">
+              <span className="text-slate-600">Home</span> / {title}
+            </p>
+            <h1 className="text-3xl font-semibold mt-4">{title}</h1>
+            <p className="font-semibold text-gray-700">Dashboard Parlimen Alor Gajah</p>
+          </article>
+          <article className="flex flex-col items-end justify-start w-full">
+            <div className="bg-slate-50 border border-black rounded px-2 py-1 font-semibold">
+              <p>{userDetails.name}</p>
+            </div>
+            <div className="bg-amber-300 text-amber-900 border border-black rounded px-2 py-1 mt-1 font-medium">
+              <p>{userDetails.description}</p>
+            </div>
+          </article>
+          </header>
+      )}
+    </>
   );
 }
-

@@ -38,7 +38,7 @@ const PanelAnalysis = ({ filteredForm }) => {
   }, [filteredForm]);
 
   return (
-    <section id="analysis" className="w-full h-56 mt-4 py-4 grid grid-cols-4 gap-4">
+    <section id="analysis" className="w-full h-56 py-4 grid grid-cols-4 gap-4">
       {/* Total Expenses PMR */}
       <article className="bg-slate-50 h-full rounded px-4 border-2 border-slate-300 shadow">
         <div className="inline-flex items-center justify-center p-2 mt-4 mb-8">

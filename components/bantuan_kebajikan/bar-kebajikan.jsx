@@ -84,7 +84,7 @@ const BarGraph = ({ filteredForm }) => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="bg-slate-50 w-full h-auto mt-8 px-14 py-6 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
+    <div className="bg-slate-50 w-full h-auto px-14 py-6 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
       <h1 className="text-xl mb-4">{`Total Perbelanjaan Mengikut Bulanan (${currentYear})`}</h1>
       <canvas id="barChart" className="bg-slate-50" height="300" width="600"></canvas>
     </div>
