@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Chart, registerables } from "chart.js";
+import { Skeleton } from "@nextui-org/skeleton";
 
 // Register all necessary components for Chart.js
 Chart.register(...registerables);
@@ -9,15 +10,14 @@ Chart.register(...registerables);
 const BarGraph = () => {
   const supabase = createClient();
   const [monthlyData, setMonthlyData] = useState({ months: [], totals: [] });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch submission forms with their submission date and price
         const { data, error } = await supabase
           .from("form")
           .select("inserted_at, price");
-
         if (error) {
           throw new Error(error.message);
         }
@@ -49,6 +49,8 @@ const BarGraph = () => {
         setMonthlyData({ months, totals });
       } catch (error) {
         console.error("Error fetching form data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -98,10 +100,14 @@ const BarGraph = () => {
   }, [monthlyData]);
 
   return (
-    <div className="bg-slate-50 w-full h-auto mt-8 px-14 py-6 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
-      <h1 className="text-xl mb-4">Total Perbelanjaan Mengikut Bulanan</h1>
-      <canvas id="barChart" className="bg-slate-50" height="300" width="600"></canvas>
-    </div>
+    <>
+      <Skeleton isLoaded={!loading}>
+        <div className="bg-slate-50 w-full h-auto px-14 py-6 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
+          <h1 className="text-xl mb-4">Total Perbelanjaan Mengikut Bulanan</h1>
+          <canvas id="barChart" className="bg-slate-50" height="300" width="600"></canvas>
+        </div>
+      </Skeleton>
+    </>
   );
 };
 

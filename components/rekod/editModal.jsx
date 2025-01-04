@@ -1,5 +1,5 @@
-// components/editModal.jsx
 import { useState, useEffect } from "react";
+import { toast } from 'react-toastify';
 
 const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   const [formStatus, setFormStatus] = useState(formData.form_status || "");
@@ -13,6 +13,37 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
     }
   }, [formData]);
 
+  useEffect(() => {
+    const checkDunUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          onClose();
+          toast.error('You need to login first');
+          return;
+        }
+        const { data: getDun, error } = await supabase
+          .from('dun')
+          .select('id')
+          .eq('email', user.email)
+          .single();
+        if (!error) {
+          onClose();
+          toast.error(`DUN users can't access edit form`);
+          return;
+        }
+      } catch (error) {
+        onClose();
+        toast.error('An unexpected error occurred.');
+        console.error(error);
+      }
+    };
+
+    if (isOpen) {
+      checkDunUser();
+    }
+  }, [isOpen, onClose, supabase]);
+
   const handleSave = async () => {
     if (!formStatus || !notes) {
       alert("Please fill in all fields");
@@ -25,10 +56,9 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
         .from("form")
         .update({ form_status: formStatus, notes: notes })
         .eq("id", formData.id);
-
       if (error) throw error;
 
-    //   alert("Form updated successfully");
+      toast.success("Form updated successfully");
       onClose();
     } catch (error) {
       console.error("Error updating form:", error);
@@ -49,7 +79,7 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
 
         if (error) throw error;
 
-        alert("Form deleted successfully");
+        toast.success("Form deleted successfully");
         onClose();
       } catch (error) {
         console.error("Error deleting form:", error);

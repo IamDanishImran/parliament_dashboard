@@ -1,3 +1,4 @@
+// app\api\send-email\route.js
 import nodemailer from 'nodemailer';
 
 export async function POST(request) {
@@ -10,16 +11,16 @@ export async function POST(request) {
       service: 'gmail',
       auth: {
         user: 'imran24022004@gmail.com', // Your Gmail email
-        pass: 'xtcn wsqt wvan eczg' // The 16-character app password you generated
-      }
+        pass: 'xtcn wsqt wvan eczg', // The 16-character app password you generated
+      },
     });
 
     // Email options
     const mailOptions = {
-      from: 'imran24022004@gmail.com',  // Sender's email
-      to: recipient,  // Recipient's email
-      subject: subject,  // Email subject
-      text: body  // Email body
+      from: 'imran24022004@gmail.com', // Sender's email
+      to: recipient, // Recipient's email
+      subject: subject, // Email subject
+      html: body, // HTML body (used for rich content)
     };
 
     // Send the email
@@ -27,13 +28,13 @@ export async function POST(request) {
 
     // Return success response
     return new Response(JSON.stringify({ message: 'Email sent successfully', info }), {
-      status: 200
+      status: 200,
     });
   } catch (error) {
     // Handle any errors that occur
     console.error('Error sending email:', error);
     return new Response(JSON.stringify({ message: 'Error sending email', error }), {
-      status: 500
+      status: 500,
     });
   }
 }

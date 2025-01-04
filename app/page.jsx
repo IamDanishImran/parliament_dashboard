@@ -33,15 +33,16 @@ export default async function Index() {
           </nav>
           </ThemeProvider> */}
           
-          <Navbar /> {/* Use the Navbar component */}
+          <Navbar /> {/* Use the Navbar component */}z
 
           <video
-          src="/parliamentVid.mp4"
+          src="/parliament.mp4"
           autoPlay
           muted
           loop
           className="absolute inset-0 w-full h-full object-cover transform"
           />
+          {/* <img src="/parliament1.png" alt="" className="absolute inset-0 w-full h-full object-cover transform"/> */}
           <div className="absolute top-28 left-20">
             <h1 className="text-white text-5xl font-bold">Parliament Alor Gajah <br />Dashboard</h1>
             <p className="text-white">Administration Dashboard provider for Melacca Goverment </p>

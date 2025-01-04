@@ -12,102 +12,65 @@ export const signUpAction = async (formData) => {
   const ic = formData.get("identification_number")?.toString();
   const register_code = formData.get("register_code")?.toString();
   const supabase = await createClient();
-  const origin = headers().get("origin");
+
+  console.log("Received form data:", { email, password, name, ic, register_code });
 
   if (!email || !password || !name || !ic || !register_code) {
+    console.log("Missing required fields.");
     return encodedRedirect("error", "/sign-up", "All fields are required.");
   }
 
-  const { data: registerID, error: dbError } = await supabase
+  const { data: registerRole, error: registerRoleError } = await supabase
     .from("registration")
-    .select("*")
-    .eq("role_code", register_code)
+    .select("id")
+    .eq("description", register_code)
     .single();
 
-  if (dbError || !registerID) {
+  console.log("Role lookup result:", { registerRole, registerRoleError });
+
+  if (registerRoleError || !registerRole) {
+    console.log("Invalid registration code.");
     return encodedRedirect("error", "/sign-up", "Invalid or missing registration code.");
   }
 
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: `${origin}/auth/callback` },
   });
+
+  console.log("Sign-up result:", { signUpData, signUpError });
 
   const user_id = signUpData?.user?.id;
   if (signUpError || !user_id) {
-    return encodedRedirect("error", "/sign-up", "Failed to sign up. Please try again.");
+    console.log("Sign-up failed:", signUpError.message);
+    return encodedRedirect("error", "/sign-up", signUpError.message);
   }
 
-  const isAdminRole = registerID.role_code === "25048082" || registerID.role_code === "80845621";
+  const userRole = registerRole.id; // Assuming `id` is numeric
+  console.log("Determined user role:", userRole);
+
+  const insertUserData = async (tableName, data) => {
+    console.log(`Inserting into table ${tableName}:`, data);
+    const { error } = await supabase.from(tableName).insert(data);
+    if (error) throw new Error(`Error inserting into ${tableName}: ${error.message}`);
+  };
 
   try {
-    if (isAdminRole) {
-      // Insert into admin table
-      const { data: insertAdmin, error: adminError } = await supabase
-        .from("admin")
-        .insert([{ user_id: user_id, name, email, ic, id_register: registerID.id }]);
-
-      if (adminError) {
-        console.error("Insert error (admin): " + adminError.message);
-        return encodedRedirect("error", "/sign-up", "Failed to save user data.");
-      }
-    } else {
-      // Insert into dun table and get its ID
-      const { data: insertDun, error: dunError } = await supabase
-        .from("dun")
-        .insert([{ user_id: user_id, name, email, ic, id_register: registerID.id }])
-        .select('id');
-
-      if (dunError || !insertDun) {
-        console.error("Insert error (dun): " + dunError?.message);
-        return encodedRedirect("error", "/sign-up", "Failed to save user data.");
-      }
-
-      const dunId = insertDun[0]?.id;
-      if (!dunId) {
-        console.error("Failed to retrieve the inserted dun id.");
-        return encodedRedirect("error", "/sign-up", "Failed to retrieve user ID.");
-      }
-
-      // Determine if the id_register is odd or even and fetch corresponding admin
-      const isOdd = registerID.id % 2 !== 0;
-      const { data: adminData, error: adminFetchError } = await supabase
-        .from("admin")
-        .select("id")
-        .eq("id_register", isOdd ? 1 : 2);
-
-      if (adminFetchError) {
-        console.error("Error fetching admin ID: " + adminFetchError?.message);
-        return encodedRedirect("error", "/sign-up", "Failed to fetch admin data.");
-      }
-
-      // Handle cases where no admin is found or multiple admins are returned
-      if (adminData.length === 0) {
-        console.error("No admin found for the given register code.");
-        return encodedRedirect("error", "/sign-up", "No admin found for this registration.");
-      } else if (adminData.length > 1) {
-        console.error("Multiple admins found for the given register code.");
-        return encodedRedirect("error", "/sign-up", "Multiple admins found, please contact support.");
-      }
-
-      const adminId = adminData[0]?.id;
-
-      // Insert into admin_dun junction table
-      const { error: junctionError } = await supabase
-        .from('admin_dun')
-        .insert([{ id_admin: adminId, id_dun: dunId }]);
-
-      if (junctionError) {
-        console.error("Insert error (admin_dun): " + junctionError.message);
-        return encodedRedirect("error", "/sign-up", "Failed to assign admin to dun.");
-      }
+    if (userRole === "Supervisor") { // Admin Role
+      await insertUserData("admin", {
+        user_id, name, email, ic, id_register: userRole, status: "Pending",
+      });
+    } else { // DUN Role
+      await insertUserData("dun", {
+        user_id, name, email, ic, id_register: userRole, status: "Pending",
+      });
     }
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    return encodedRedirect("error", "/sign-up", "Something went wrong!");
+  } catch (error) {
+    console.error("Error inserting user data:", error.message);
+    return encodedRedirect("error", "/sign-up", "Error inserting user data.");
   }
 
+  console.log("User successfully signed up and data inserted.");
   return encodedRedirect(
     "success",
     "/sign-up",
@@ -118,31 +81,55 @@ export const signUpAction = async (formData) => {
 
 
 
-
 // Sign In Action
 export const signInAction = async (formData) => {
+  const supabase = await createClient();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const register_code = formData.get("register_code")?.toString();
+  
+  // Check all fields are filled
+  if (!email || !password || !register_code) {
+    return encodedRedirect("error", "/sign-in", "All fields are required.");
+  }
 
-  const supabase = await createClient();
+  // Check if the user has been approved by the manager
+  let user;
+  let userError;
+  if (register_code === '25048082' || register_code === '80845621') {
+    ({ data: user, error: userError } = await supabase
+      .from("admin")
+      .select("status")
+      .eq("email", email)
+      .single());
+  } else {
+    ({ data: user, error: userError } = await supabase
+      .from("dun")
+      .select("status")
+      .eq("email", email)
+      .single());
+  }
+
+  if (userError) {
+    return encodedRedirect("error", "/sign-in", "User not found.");
+  }
+  if (user.status !== "Approved") {
+    return encodedRedirect("error", "/sign-in", "User not approved.");
+  }
+
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
-  })
+  });
   if (error) {
     return encodedRedirect("error", "/sign-in", error.message);
   } 
   return encodedRedirect(
     "success",
-    "/protected/dashboard",
-    "Thanks for signing up! Please check your email for a verification link."
+    "/protected/dashboard?login=success",
+    "Welcome back! You have successfully signed in."
   );
 };
-
-
-
-
-
 
 
 // Forgot Password Action
@@ -226,5 +213,5 @@ export const resetPasswordAction = async (formData) => {
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return redirect("/sign-in");
+  return redirect("/");
 };

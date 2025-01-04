@@ -9,64 +9,59 @@ Chart.register(...registerables);
 
 const ChartKebajikan = () => {
   const supabase = createClient();
-
   const [statusCounts, setStatusCounts] = useState({
-    Kesejahteraan_Rakyat: 0,
-    Pendidikan: 0,
-    Keagamaan: 0,
-    NGO_Pertubuhan: 0,
-    Bencana: 0,
-    Pusat_Khidmat: 0,
+    "Kesejahteraan Rakyat": 0,
+    "Pendidikan": 0,
+    "Keagamaan": 0,
+    "NGO Pertubuhan": 0,
+    "Bencana": 0,
+    "Pusat Khidmat": 0,
   });
 
   useEffect(() => {
     const fetchStatusCounts = async () => {
       try {
-        // Fetch all form data including category_type
         const { data, error } = await supabase
           .from("form")
           .select("category_type")
           .eq("category", "Bantuan Kebajikan");
-
         if (error) {
           throw new Error(error.message);
         }
 
         // Initialize the status counts
         const category_type_counts = {
-          Kesejahteraan_Rakyat: 0,
-          Pendidikan: 0,
-          Keagamaan: 0,
-          NGO_Pertubuhan: 0,
-          Bencana: 0,
-          Pusat_Khidmat: 0,
+          "Kesejahteraan Rakyat": 0,
+          "Pendidikan": 0,
+          "Keagamaan": 0,
+          "NGO/Pertubuhan": 0,
+          "Bencana": 0,
+          "Pusat Khidmat": 0,
         };
 
         // Loop through the form data and count each category_type
         data.forEach((form) => {
-          if (form.category_type === "Kesejahteraan Rakyat") category_type_counts.Kesejahteraan_Rakyat++;
-          if (form.category_type === "Pendidikan") category_type_counts.Pendidikan++;
-          if (form.category_type === "Bencana") category_type_counts.Bencana++;
-          if (form.category_type === "NGO/Pertubuhan") category_type_counts.NGO_Pertubuhan++;
-          if (form.category_type === "Keagamaan") category_type_counts.Keagamaan++;
-          if (form.category_type === "Pusat Khidmat") category_type_counts.Pusat_Khidmat++;
+          if (form.category_type === "Kesejahteraan Rakyat") category_type_counts["Kesejahteraan Rakyat"]++;
+          if (form.category_type === "Pendidikan") category_type_counts["Pendidikan"]++;
+          if (form.category_type === "Bencana") category_type_counts["Bencana"]++;
+          if (form.category_type === "NGO/Pertubuhan") category_type_counts["NGO/Pertubuhan"]++;
+          if (form.category_type === "Keagamaan") category_type_counts["Keagamaan"]++;
+          if (form.category_type === "Pusat Khidmat") category_type_counts["Pusat Khidmat"]++;
         });
 
         // Update the state with the new status counts
         setStatusCounts(category_type_counts);
       } catch (error) {
         console.error("Error fetching category type counts:", error);
+        toast.error('Failed to fetch category type counts.');
       }
     };
-
     fetchStatusCounts();
   }, []);
 
   useEffect(() => {
     const ctx = document.getElementById("kebajikanChart").getContext("2d");
     const dataValues = Object.values(statusCounts);
-
-    // Initialize Chart.js
     const chart = new Chart(ctx, {
       type: "doughnut",
       data: {
@@ -89,18 +84,25 @@ const ChartKebajikan = () => {
         responsive: true,
         plugins: {
           legend: {
-            position: "top",
+            display: false,
           },
           tooltip: {
             callbacks: {
-              label: (context) => `${context.label}: ${context.raw} forms`,
+              title: (context) => {
+                const index = context[0].dataIndex;
+                return Object.keys(statusCounts)[index];
+              },
+              label: (context) => {
+                const value = context.raw || 0;
+                const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(2);
+                return `${value} (${percentage}%)`;
+              },
             },
           },
         },
       },
     });
-
-    // Cleanup to prevent chart duplication on re-renders
     return () => {
       chart.destroy();
     };

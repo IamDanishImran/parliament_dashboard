@@ -1,96 +1,91 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
-
+'use client';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import Header from "@/components/header";
-import userModal from "@/components/user_management/infoDun";
+import DunModal from "@/components/user_management/DunModal";
+import AdminModal from "@/components/user_management/AdminModal";
 import Footer from "@/components/footer";
-import UserModal from "@/components/user_management/infoDun";
 
-export default function Bantuan_Kebajikan() {
+const UserManagement = () => {
   const supabase = createClient();
-  const [dunData, setDunData] = useState([]);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDun, setSelectedDun] = useState(null);
-  const openModal = (dun) => {
-    setSelectedDun(dun);
-    setIsModalOpen(true);
-  };
-  
-  const closeModal = () => {
-    setSelectedDun(null);
-    setIsModalOpen(false);
-  };
+  const [dunData, setDunData] = useState([]);
+  const [adminData, setAdminData] = useState([]);
 
-  // Delete function
-  const handleDelete = async (userId) => {
-    if (!userId) return;
+  // To ensure which interface need to be display according to the admin role
+  const [adminRole, setAdminRole] = useState(null);
 
-    const { error } = await supabase
-      .from("admin_dun") // Replace with your actual table
-      .delete()
-      .eq("id_dun.id", userId); // Match the user's ID
-
-    if (error) {
-      console.error("Error deleting user:", error.message);
-      alert("Failed to delete user");
-    } else {
-      alert("User deleted successfully");
-      setDunData((prevData) => prevData.filter((item) => item.id_dun.id !== userId));
-      setModalOpen(false);
-    }
-  };
-  
-
+  // Modal State
+  const [isDunModalOpen, setDunModalOpen] = useState(false);
+  const [dunModalData, setDunModalData] = useState(null);
+  const [isAdminModalOpen, setAdminModalOpen] = useState(false);
+  const [adminModalData, setAdminModalData] = useState(null);
 
   useEffect(() => {
-    const fetchAdminAndData = async () => {
+    const fetchAdminData = async () => {
       try {
-        // Fetch authenticated user and admin data in parallel
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        if (userError) throw new Error(userError.message);
-
-        const userEmail = userData?.user?.email;
-
-        const { data: adminData, error: adminError } = await supabase
-          .from("admin")
-          .select("id")
-          .eq("email", userEmail)
+        const { data: session, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw new Error("Failed to fetch session info.");
+  
+        const adminEmail = session?.session?.user?.email;
+        if (!adminEmail) throw new Error("User email not found.");
+  
+        const { data: adminRoleData, error: adminRoleError } = await supabase
+          .from('admin')
+          .select(`id, id_register, status, registration:registration(description)`)
+          .eq('email', adminEmail)
+          .limit(1)
           .single();
-        if (adminError) throw new Error(adminError.message);
-
-        const { data: dunData, error: dunError } = await supabase
-          .from("admin_dun")
-          .select(`
-            id_admin,
-            id_dun (
-              id,
-              name,
-              email,
-              ic,
-              id_register (
-                description
-              )
-            )
-          `)
-          .eq("id_admin", adminData.id);
-
-        if (dunError) throw new Error(dunError.message);
-
-        setDunData(dunData || []);
+        if (adminRoleError) throw new Error("Failed to fetch admin data.");
+        if (!adminRoleData) throw new Error("No admin data found.");
+  
+        setAdminRole(adminRoleData.registration.description);
+  
+        const { data: fetchDunData, error: dunError } = await supabase
+          .from('dun')
+          .select(`id, name, email, ic, status, id_register, registration:registration(description)`);
+        if (dunError) throw new Error("Failed to fetch dun data.");
+        setDunData(fetchDunData);
+  
+        const { data: fetchAdminData, error: adminError } = await supabase
+          .from('admin')
+          .select(`id, name, email, ic, status, id_register, registration:registration(description)`);
+        if (adminError) throw new Error("Failed to fetch admin data.");
+        setAdminData(fetchAdminData);
+  
       } catch (err) {
+        console.error(err.message);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+  
+    fetchAdminData();
+  }, []);
+  
+  
 
-    fetchAdminAndData();
-  }, [supabase]);
+  // Modal Handlers
+  const handleDunModal = (item) => {
+    console.log("Dun Modal Data:", item);
+    if (item) {
+      setDunModalData(item);
+      setDunModalOpen(true);
+    } else {
+      console.error("No data found for Dun Modal");
+    }
+  };
+  const closeDunModal = () => setDunModalOpen(false);
+
+  const handleAdminModal = (item) => {
+    console.log("Admin Modal Data:", item);
+    setAdminModalData(item);
+    setAdminModalOpen(true);
+  };
+  const closeAdminModal = () => setAdminModalOpen(false);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
@@ -99,55 +94,128 @@ export default function Bantuan_Kebajikan() {
     <main className="p-2 pl-10 pr-20">
       <Header title="User Management" />
 
-      <section className="border mt-4 rounded shadow">
-        <article className="h-[500px] overflow-y-auto">
-          <table className="table-auto w-full text-left border-collapse">
-            <thead className="text-gray-700 bg-gray-200">
-              <tr className="border border-black">
-                <th className="border border-black px-4 py-1">Bil</th>
-                <th className="border border-black px-4 py-1">Name</th>
-                {/* <th className="border border-black px-4 py-1">Email</th>
-                <th className="border border-black px-4 py-1">IC</th>
-                <th className="border border-black px-4 py-1">Dun</th> */}
-                <th className="border border-black px-4 py-1">Info</th>
-              </tr>
-            </thead>
-            <tbody className="bg-slate-50">
-              {dunData.map((item, index) => (
-                <tr
-                  key={item.id_dun.id}
-                  className={
-                    index % 2 === 0
-                      ? "bg-slate-50 border border-black hover:bg-slate-200 ease-out transition-200"
-                      : "bg-slate-100 border border-black hover:bg-slate-200 ease-out transition-200"
-                  }
-                >
-                  <td className="border px-4 py-4">{index + 1}</td>
-                  <td className="border px-4 py-4">{item.id_dun.name}</td>
-                  {/* <td className="border px-4 py-4">{item.id_dun.email}</td>
-                  <td className="border px-4 py-4">{item.id_dun.ic}</td>
-                  <td className="border px-4 py-4">
-                    {item.id_dun.id_register?.description || "N/A"}
-                  </td> */}
-                  <td className="border px-4 py-2 text-center">
-                    <button onClick={() => openModal(item.id_dun)} className="text-blue-600 hover:text-blue-800">
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </article>
-      </section>
+      {adminRole === "Manager" && (
+        <div className="flex flex-col">
+          {/* Manage Admins */}
+          <section className="border mt-4 rounded shadow">
+            <article className="h-[300px] overflow-y-auto">
+              <table className="table-auto w-full text-left border-collapse">
+                <thead className="text-gray-700 bg-gray-200">
+                  <tr className="border border-black">
+                    <th className="border border-black px-4 py-1">Bil</th>
+                    <th className="border border-black px-4 py-1">Name</th>
+                    <th className="border border-black px-4 py-1">Email</th>
+                    <th className="border border-black px-4 py-1">IC</th>
+                    <th className="border border-black px-4 py-1">Status</th>
+                    <th className="border border-black px-4 py-1">Info</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-slate-50">
+                  {adminData.map((item, index) => (
+                    <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+                      <td className="border border-black px-4 py-1">{index + 1}</td>
+                      <td className="border border-black px-4 py-1">{item.name}</td>
+                      <td className="border border-black px-4 py-1">{item.email}</td>
+                      <td className="border border-black px-4 py-1">{item.ic}</td>
+                      <td className="border border-black px-4 py-1">{item.status}</td>
+                      <td className="border border-black px-4 py-1">
+                        <button onClick={() => handleAdminModal(item)} className="text-blue-600 hover:text-blue-800">Edit</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </article>
+          </section>
+          
+          {/* Manage Duns */}
+          <section className="border mt-4 rounded shadow">
+            <article className="h-[300px] overflow-y-auto">
+              <table className="table-auto w-full text-left border-collapse">
+                <thead className="text-gray-700 bg-gray-200">
+                  <tr className="border border-black">
+                    <th className="border border-black px-4 py-1">Bil</th>
+                    <th className="border border-black px-4 py-1">Name</th>
+                    <th className="border border-black px-4 py-1">Email</th>
+                    <th className="border border-black px-4 py-1">IC</th>
+                    <th className="border border-black px-4 py-1">Status</th>
+                    <th className="border border-black px-4 py-1">Dun</th>
+                    <th className="border border-black px-4 py-1">Info</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-slate-50">
+                  {dunData.map((item, index) => (
+                    <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+                      <td className="border border-black px-4 py-1">{index + 1}</td>
+                      <td className="border border-black px-4 py-1">{item.name}</td>
+                      <td className="border border-black px-4 py-1">{item.email}</td>
+                      <td className="border border-black px-4 py-1">{item.ic}</td>
+                      <td className="border border-black px-4 py-1">{item.status}</td>
+                      <td className="border border-black px-4 py-1">{item.registration.description}</td>
+                      <td className="border border-black px-4 py-1">
+                        <button onClick={() => handleDunModal(item)} className="text-blue-600 hover:text-blue-800">Edit</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </article>
+          </section>
+        </div>
+      )}
 
-      {/* Edit Modal */}
-      {isModalOpen && (
-        <UserModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          onDelete={handleDelete}
-          data={selectedDun}
+      {adminRole === "Supervisor" && (
+        <div>
+          {/* Manage Duns */}
+          <section className="border mt-4 rounded shadow">
+            <article className="h-[500px] overflow-y-auto">
+              <table className="table-auto w-full text-left border-collapse">
+                <thead className="text-gray-700 bg-gray-200">
+                  <tr className="border border-black">
+                    <th className="border border-black px-4 py-1">Bil Dun</th>
+                    <th className="border border-black px-4 py-1">Name</th>
+                    <th className="border border-black px-4 py-1">Email</th>
+                    <th className="border border-black px-4 py-1">IC</th>
+                    <th className="border border-black px-4 py-1">Dun</th>
+                    <th className="border border-black px-4 py-1">Info</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-slate-50">
+                  {dunData.map((item, index) => (
+                    <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+                      <td className="border border-black px-4 py-1">{index + 1}</td>
+                      <td className="border border-black px-4 py-1">{item.name}</td>
+                      <td className="border border-black px-4 py-1">{item.email}</td>
+                      <td className="border border-black px-4 py-1">{item.ic}</td>
+                      <td className="border border-black px-4 py-1">{item.registration.description}</td>
+                      <td className="border border-black px-4 py-1">
+                        <button onClick={() => handleDunModal(item)} className="text-blue-600 hover:text-blue-800">Edit</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </article>
+          </section>
+        </div>
+      )}
+
+      {/* Dun Modal */}
+      {dunModalData && isDunModalOpen && (
+        <DunModal
+          isOpen={isDunModalOpen}
+          onClose={closeDunModal}
+          formData={dunModalData}
+          supabase={supabase}
+        />
+      )}
+
+      {/* Admin Modal */}
+      {adminModalData && isAdminModalOpen && (
+        <AdminModal
+          isOpen={isAdminModalOpen}
+          onClose={closeAdminModal}
+          formData={adminModalData}
           supabase={supabase}
         />
       )}
@@ -155,4 +223,6 @@ export default function Bantuan_Kebajikan() {
       <Footer />
     </main>
   );
-}
+};
+
+export default UserManagement;
