@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Skeleton } from "@nextui-org/skeleton";
+import Breadcrumbs from "@mui/material/Breadcrumbs"; // Assuming you're using Material UI's Breadcrumbs component
+import Link from "next/link"; // For navigation links in breadcrumbs
 
 export default function Header({ title }) {
   const supabase = createClient();
@@ -103,9 +105,12 @@ export default function Header({ title }) {
       ) : (
         <header className="bg-neutral-50 grid grid-rows-1 grid-flow-col w-full h-[120px] p-2 rounded shadow border border-gray-900">
           <article className="px-2 justify-end items-center w-full">
-            <p className="text-sm font-medium">
-              <span className="text-slate-600">Home</span> / {title}
-            </p>
+            <Breadcrumbs aria-label="breadcrumb" separator="›">
+              <Link href="/" className="text-slate-600">
+                Home
+              </Link>
+              <p className="text-sm font-medium text-neutral-900">{title}</p>
+            </Breadcrumbs>
             <h1 className="text-3xl font-semibold mt-4">{title}</h1>
             <p className="font-semibold text-gray-700">Dashboard Parlimen Alor Gajah</p>
           </article>
@@ -117,7 +122,7 @@ export default function Header({ title }) {
               <p>{userDetails.description}</p>
             </div>
           </article>
-          </header>
+        </header>
       )}
     </>
   );

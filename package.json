@@ -6,7 +6,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@geist-ui/react": "^2.2.5",
+    "@mui/material": "^6.3.1",
     "@nextui-org/react": "^2.6.10",
     "@nextui-org/skeleton": "^2.2.4",
     "@nextui-org/system": "^2.4.5",

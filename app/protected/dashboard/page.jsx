@@ -37,13 +37,11 @@ export default function Dashboard() {
       <br />
       <PanelAnalysis />
       <br />
-      <Skeleton isLoaded={!loading}>
-        <section id="chart-pie" className="flex w-full h-full gap-4">
-          <ChartPMR /> {/* Chart Program Mesra Rakyat */}
-          <ChartKebajikan /> {/* Chart Bantuan Kebajikan */}
-        </section>
-      </Skeleton>
-      <br />
+      <section id="chart-pie" className="flex w-full h-full gap-4">
+        <ChartPMR /> {/* Chart Program Mesra Rakyat */}
+        <ChartKebajikan /> {/* Chart Bantuan Kebajikan */}
+      </section>
+      <br /><br />
       <BarGraph /> {/* Bar Graph Section */}
       <Footer />
     </main>

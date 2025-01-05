@@ -112,26 +112,16 @@ export default function Bantuan_Kebajikan() {
       </section>
       </Skeleton>
 
-      <br />
-      <Skeleton isLoaded={!loading}>
-        <PanelStatus filteredForm={filteredForm} />
-      </Skeleton>
-      <br />
-      <Skeleton isLoaded={!loading}>
-        <PanelAnalysis filteredForm={filteredForm} />
-      </Skeleton>
-
-      <Skeleton isLoaded={!loading}>
-        <section id="chart-pie" className="flex w-full h-full mt-4 gap-4">
-          <PieDun filteredForm={filteredForm} /> {/* Pie Chart Dun */}
-          <PieCategory filteredForm={filteredForm} /> {/* Pie Chart Category */}
-        </section>
-      </Skeleton>
-      
-      <br /><br />
-      <Skeleton isLoaded={!loading}>
-        <BarGraph filteredForm={filteredForm} />
-      </Skeleton>
+        <br />
+      <PanelStatus filteredForm={filteredForm} /> {/* Panel Status */}
+        <br />
+      <PanelAnalysis filteredForm={filteredForm} /> {/* Panel Analysis */}
+      <section id="chart-pie" className="flex w-full h-full mt-4 gap-4">
+        <PieDun filteredForm={filteredForm} /> {/* Pie Chart Dun */}
+        <PieCategory filteredForm={filteredForm} /> {/* Pie Chart Category */}
+      </section>     
+        <br /><br /> 
+      <BarGraph filteredForm={filteredForm} /> {/* Bar Graph */}
       <Footer />
     </main>
   );

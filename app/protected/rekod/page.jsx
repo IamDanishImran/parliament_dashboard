@@ -167,6 +167,7 @@ export default function Rekod() {
 
         <br />
 
+        <Skeleton isLoaded={!loading}>
         {/* Search Bar */}
         <section id="search" className="flex flex-col w-full h-auto rounded border shadow shadow-gray-400">
           <article>
@@ -226,6 +227,7 @@ export default function Rekod() {
           </button>
         </article>
       </section>
+      </Skeleton>
 
       <br />
 

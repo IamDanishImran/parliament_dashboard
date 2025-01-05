@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { Skeleton } from "@nextui-org/skeleton";
+
 import Header from "@/components/header";
 import DunModal from "@/components/user_management/DunModal";
 import AdminModal from "@/components/user_management/AdminModal";
@@ -87,13 +89,13 @@ const UserManagement = () => {
   };
   const closeAdminModal = () => setAdminModalOpen(false);
 
-  if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
   return (
     <main className="p-2 pl-10 pr-20">
       <Header title="User Management" />
 
+      <Skeleton isLoaded={!loading}>
       {adminRole === "Manager" && (
         <div className="flex flex-col">
           {/* Manage Admins */}
@@ -163,7 +165,9 @@ const UserManagement = () => {
           </section>
         </div>
       )}
+      </Skeleton>
 
+      <Skeleton isLoaded={!loading}>
       {adminRole === "Supervisor" && (
         <div>
           {/* Manage Duns */}
@@ -199,6 +203,7 @@ const UserManagement = () => {
           </section>
         </div>
       )}
+      </Skeleton>
 
       {/* Dun Modal */}
       {dunModalData && isDunModalOpen && (

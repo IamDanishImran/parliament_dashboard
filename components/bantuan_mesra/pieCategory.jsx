@@ -1,12 +1,14 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { Chart, registerables } from "chart.js";
+import { Skeleton } from "@nextui-org/skeleton";
 import LegendCategory from "@/components/legend-category";
 
 // Register all necessary components for Chart.js
 Chart.register(...registerables);
 
 const PieCategory = ({ filteredForm }) => {
+  const [loading, setLoading] = useState(true);
   const [categoryCounts, setCategoryCounts] = useState({
     "Kesejahteraan Rakyat": 0,
     "Pendidikan": 0,
@@ -20,7 +22,8 @@ const PieCategory = ({ filteredForm }) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
-    if (!Array.isArray(filteredForm)) return;
+    try {
+      if (!Array.isArray(filteredForm)) return;
 
     const category_counts = {
       "Kesejahteraan Rakyat": 0,
@@ -41,10 +44,16 @@ const PieCategory = ({ filteredForm }) => {
       if (form?.category_type === "Pusat Khidmat") category_counts["Pusat Khidmat"]++;
     });
     setCategoryCounts(category_counts);
+    } catch(error) {
+      console.error("Error calculating category counts:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [filteredForm]);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    try {
+      if (!canvasRef.current) return;
 
     const ctx = canvasRef.current.getContext("2d");
     const dataValues = Object.values(categoryCounts);
@@ -94,21 +103,29 @@ const PieCategory = ({ filteredForm }) => {
         },
       },
     });
-
     // Cleanup to prevent chart duplication on re-renders
     return () => {
-      if (chartRef.current) {
-        chartRef.current.destroy();
-        chartRef.current = null;
+      try {
+        if (chartRef.current) {
+          chartRef.current.destroy();
+          chartRef.current = null;
+        }
+      } catch (error) {
+        console.error("Error initializing chart:", error);
       }
     };
+    } catch (error) {
+      console.error("Error initializing chart:", error);
+    }
   }, [categoryCounts]);
 
   const currentYear = new Date().getFullYear();
   const hasData = Object.values(categoryCounts).some((count) => count > 0);
 
   return (
-    <article className="flex flex-col bg-slate-50 gap-y-4 p-4 justify-center items-center w-1/2 h-auto rounded border shadow shadow-gray-400">
+    <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
+      <Skeleton isLoaded={!loading}>
+      <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
       <h1 className="text-xl text-center">Bantuan Kebajikan Mengikut Kategori {currentYear}</h1>
       <div className="chart-container w-[300px] h-[300px]">
         {hasData ? (
@@ -121,6 +138,8 @@ const PieCategory = ({ filteredForm }) => {
       </div>
       <LegendCategory />
     </article>
+      </Skeleton>
+    </main>
   );
 };
 

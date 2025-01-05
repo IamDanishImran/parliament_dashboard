@@ -1,15 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Chart, registerables } from "chart.js";
+import { Skeleton } from "@nextui-org/react";
 
 // Register all necessary components for Chart.js
 Chart.register(...registerables);
 
 const BarGraph = ({ filteredForm }) => {
   const [monthlyData, setMonthlyData] = useState({ months: [], totals: [] });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!Array.isArray(filteredForm)) return;
+    try {
+      if (!Array.isArray(filteredForm)) return;
 
     // Process the data to sum the prices per month
     const monthTotals = {};
@@ -36,10 +39,16 @@ const BarGraph = ({ filteredForm }) => {
     const totals = months.map((month) => monthTotals[month]);
 
     setMonthlyData({ months, totals });
+    } catch (error) {
+      console.error("Error processing data:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [filteredForm]);
 
   useEffect(() => {
-    if (monthlyData.months.length === 0) return; // Ensure data is available
+    try {
+      if (monthlyData.months.length === 0) return; // Ensure data is available
 
     // Get the canvas context
     const ctx = document.getElementById("barChart").getContext("2d");
@@ -78,16 +87,23 @@ const BarGraph = ({ filteredForm }) => {
         },
       },
     });
+    } catch {
+      console.log("Error rendering chart");
+    } finally {
+      setLoading(false);
+    }
   }, [monthlyData]);
 
   // Display Current Year
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="bg-slate-50 w-full h-auto px-14 py-6 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
+    <Skeleton isLoaded={!loading}>
+      <section className="bg-slate-50 w-full h-auto px-14 py-12 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
       <h1 className="text-xl mb-4">{`Total Perbelanjaan Mengikut Bulanan (${currentYear})`}</h1>
       <canvas id="barChart" className="bg-slate-50" height="300" width="600"></canvas>
-    </div>
+    </section>
+    </Skeleton>
   );
 };
 
