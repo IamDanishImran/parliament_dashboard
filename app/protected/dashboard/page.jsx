@@ -1,5 +1,6 @@
+// Dashboard
 "use client";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -32,12 +33,10 @@ export default function Dashboard() {
       <br />
       <PanelAnalysis />
       <br />
-      <Suspense fallback={<div>Loading charts...</div>}>
-        <section id="chart-pie" className="flex w-full h-full gap-4">
-          <ChartPMR /> {/* Chart Program Mesra Rakyat */}
-          <ChartKebajikan /> {/* Chart Bantuan Kebajikan */}
-        </section>
-      </Suspense>
+      <section id="chart-pie" className="flex w-full h-full gap-4">
+        <ChartPMR /> {/* Chart Program Mesra Rakyat */}
+        <ChartKebajikan /> {/* Chart Bantuan Kebajikan */}
+      </section>
       <br /><br />
       <BarGraph /> {/* Bar Graph Section */}
       <Footer />
