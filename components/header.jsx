@@ -99,10 +99,7 @@ export default function Header({ title }) {
 
   return (
     <>
-      {loading ? (
-        // Skeleton loader wrapping the whole header
-        <Skeleton animated height="100%" width="100%" />
-      ) : (
+        <Skeleton isLoaded={!loading}>
         <header className="grid grid-rows-1 grid-flow-col w-full h-[120px] p-2 rounded shadow border border-gray-900">
           <article className="px-2 justify-end items-center w-full">
             <Breadcrumbs aria-label="breadcrumb" separator="›">
@@ -123,7 +120,7 @@ export default function Header({ title }) {
             </div>
           </article>
         </header>
-      )}
+        </Skeleton>
     </>
   );
 }

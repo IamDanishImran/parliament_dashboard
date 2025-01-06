@@ -58,7 +58,7 @@ const UserManagement = () => {
         setAdminData(fetchAdminData);
   
       } catch (err) {
-        console.error(err.message);
+        console.log(err.message);
         setError(err.message);
       } finally {
         setLoading(false);

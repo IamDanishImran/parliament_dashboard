@@ -138,7 +138,7 @@ export default function Sidebar({ userRole }) {
                 : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"
             } duration-200`}
           >
-            <form action={signOutAction} method="post">
+            <form onSubmit={signOutAction} method="POST">
               <button type="submit">Sign out</button>
             </form>
           </div>

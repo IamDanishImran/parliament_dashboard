@@ -104,7 +104,10 @@ const PieCategory = ({ filteredForm }) => {
     };
   }, [categoryCounts]);
 
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(null);
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
   const hasData = Object.values(categoryCounts).some((count) => count > 0);
 
   return (

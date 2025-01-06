@@ -1,6 +1,11 @@
 import {Divider} from "@nextui-org/divider";
+import { useEffect, useState } from "react";
+
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(null);
+    useEffect(() => {
+      setCurrentYear(new Date().getFullYear());
+    }, []);
   return (
   <>
     <footer className="h-48 w-full py-5 flex flex-col gap-4 items-center justify-center">

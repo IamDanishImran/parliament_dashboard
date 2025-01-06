@@ -44,7 +44,7 @@ const DunModal = ({ isOpen, onClose, dunData, supabase }) => {
 
   // Handle Delete action
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this dun?")) {
+    if (typeof window !== "undefined" && window.confirm("Are you sure you want to delete this dun?")) {
       setIsLoading(true);
       try {
         const { error } = await supabase

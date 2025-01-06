@@ -54,7 +54,7 @@ const BarGraph = ({ filteredForm }) => {
     const ctx = document.getElementById("barChart").getContext("2d");
 
     // Destroy the previous chart if it exists
-    if (window.barChartInstance) {
+    if (typeof window !== "undefined" && window.barChartInstance) {
       window.barChartInstance.destroy();
     }
 
@@ -95,7 +95,10 @@ const BarGraph = ({ filteredForm }) => {
   }, [monthlyData]);
 
   // Display Current Year
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(null);
+    useEffect(() => {
+      setCurrentYear(new Date().getFullYear());
+    }, []);
 
   return (
     <Skeleton isLoaded={!loading}>

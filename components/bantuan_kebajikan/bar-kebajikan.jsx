@@ -9,100 +9,116 @@ Chart.register(...registerables);
 const BarGraph = ({ filteredForm }) => {
   const [monthlyData, setMonthlyData] = useState({ months: [], totals: [] });
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false); // Track client-side rendering
+  const [currentYear, setCurrentYear] = useState(null);
+
+  // Ensure client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+    setCurrentYear(new Date().getFullYear()); // Set the current year on the client side
+  }, []);
 
   useEffect(() => {
+    if (!isClient) return; // Skip if not on the client side
+
     try {
       if (!Array.isArray(filteredForm)) return;
 
-    // Process the data to sum the prices per month
-    const monthTotals = {};
-    const allMonths = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    ];
+      // Process the data to sum the prices per month
+      const monthTotals = {};
+      const allMonths = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
 
-    // Initialize month totals to zero for all months
-    allMonths.forEach((month) => {
-      monthTotals[month] = 0;
-    });
+      // Initialize month totals to zero for all months
+      allMonths.forEach((month) => {
+        monthTotals[month] = 0;
+      });
 
-    // Loop through the filteredForm data and sum prices per month
-    filteredForm.forEach((form) => {
-      const monthNumber = new Date(form.inserted_at).getMonth(); // Get numeric month (0-11)
-      const month = allMonths[monthNumber]; // Map numeric month to abbreviated name
-      const price = parseFloat(form.price) || 0; // Ensure price is a valid number
+      // Loop through the filteredForm data and sum prices per month
+      filteredForm.forEach((form) => {
+        const monthNumber = new Date(form.inserted_at).getMonth(); // Get numeric month (0-11)
+        const month = allMonths[monthNumber]; // Map numeric month to abbreviated name
+        const price = parseFloat(form.price) || 0; // Ensure price is a valid number
 
-      monthTotals[month] += price; // Sum up the price for each month
-    });
+        monthTotals[month] += price; // Sum up the price for each month
+      });
 
-    // Convert the data into an array of months and their respective total prices
-    const months = allMonths; // Ensure all months are represented
-    const totals = months.map((month) => monthTotals[month]);
+      // Convert the data into an array of months and their respective total prices
+      const months = allMonths; // Ensure all months are represented
+      const totals = months.map((month) => monthTotals[month]);
 
-    setMonthlyData({ months, totals });
+      setMonthlyData({ months, totals });
     } catch (error) {
       console.error("Error processing data:", error);
     } finally {
       setLoading(false);
     }
-  }, [filteredForm]);
+  }, [filteredForm, isClient]);
 
   useEffect(() => {
+    if (!isClient || monthlyData.months.length === 0) return; // Ensure it's client-side and data is available
+  
     try {
-      if (monthlyData.months.length === 0) return; // Ensure data is available
-
-    // Get the canvas context
-    const ctx = document.getElementById("barChart").getContext("2d");
-
-    // Destroy the previous chart if it exists
-    if (window.barChartInstance) {
-      window.barChartInstance.destroy();
-    }
-
-    // Initialize Chart.js for Bar Graph
-    window.barChartInstance = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: monthlyData.months,
-        datasets: [
-          {
-            label: "RM",
-            data: monthlyData.totals,
-            backgroundColor: "#36A2EB",
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            beginAtZero: true,
-          },
-          y: {
-            ticks: {
-              callback: function(value) {
-                return "RM " + value.toFixed(2); // Format the Y-axis as currency
+      // Get the canvas context
+      const ctx = document.getElementById("barChart").getContext("2d");
+  
+      // Destroy the previous chart if it exists
+      if (typeof window !== "undefined" && window.barChartInstance) {
+        window.barChartInstance.destroy();
+      }
+  
+      // Initialize Chart.js for Bar Graph
+      window.barChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: monthlyData.months,
+          datasets: [
+            {
+              label: "RM",
+              data: monthlyData.totals,
+              backgroundColor: "#36A2EB",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              beginAtZero: true,
+            },
+            y: {
+              ticks: {
+                callback: function (value) {
+                  return "RM " + value.toFixed(2); // Format the Y-axis as currency
+                },
               },
             },
           },
         },
-      },
-    });
-    } catch {
-      console.log("Error rendering chart");
+        });
+    } catch (error) {
+      console.log("Error rendering chart", error);
     } finally {
       setLoading(false);
     }
-  }, [monthlyData]);
-
-  // Display Current Year
-  const currentYear = new Date().getFullYear();
+  
+    // Cleanup chart instance on component unmount
+    return () => {
+      if (typeof window !== "undefined" && window.barChartInstance) {
+        window.barChartInstance.destroy();
+      }
+    };
+  
+  }, [monthlyData, isClient]);
+  
 
   return (
     <Skeleton isLoaded={!loading}>
       <section className="bg-slate-50 w-full h-auto px-14 py-12 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
-      <h1 className="text-xl mb-4">{`Total Perbelanjaan Mengikut Bulanan (${currentYear})`}</h1>
-      <canvas id="barChart" className="bg-slate-50" height="300" width="600"></canvas>
-    </section>
+        <h1 className="text-xl mb-4">{`Total Perbelanjaan Mengikut Bulanan (${currentYear})`}</h1>
+        <canvas id="barChart" className="bg-slate-50" height="300" width="600"></canvas>
+      </section>
     </Skeleton>
   );
 };

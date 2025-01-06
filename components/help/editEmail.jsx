@@ -102,7 +102,7 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this form?")) {
+    if (typeof window !== "undefined" && window.confirm("Are you sure you want to delete this form?")) {
       setIsLoading(true);
       try {
         const { error } = await supabase

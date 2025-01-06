@@ -64,7 +64,7 @@ const BarGraph = () => {
     const ctx = document.getElementById("barChart").getContext("2d");
 
     // Destroy the previous chart if it exists
-    if (window.barChartInstance) {
+    if (typeof window !== "undefined" && window.barChartInstance) {
       window.barChartInstance.destroy();
     }
 

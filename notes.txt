@@ -1,0 +1,23 @@
+1. env.local
+   NEXT_PUBLIC_SUPABASE_URL=https://pcusbdanqvvirksjyoau.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjdXNiZGFucXZ2aXJrc2p5b2F1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc3OTMyODAsImV4cCI6MjA0MzM2OTI4MH0.BYjAhhexkA92O6IWTQucHYxECzeYV2DgY9889xu0HpY
+
+2. npm install --save react-toastify
+3. npm install @mui/material @emotion/react @emotion/styled
+4. npm install nodemailer
+5. npm install chart.js
+6. npm install react-loading-skeleton
+
+7. npm install @types/react@latest
+8. npm install @types/react-dom@latest
+9. npm install autoprefixer@latest
+10. npm install lucide-react@latest
+11. npm install next-themes@latest
+12. npm install postcss@latest
+13. npm install react@latest
+14. npm install react-dom@latest
+15. npm install react-toastify@latest
+16. npm install tailwindcss@latest
+17. npm install typescript@latest
+npm update
+

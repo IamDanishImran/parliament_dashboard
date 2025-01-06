@@ -1,14 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Chart, registerables } from "chart.js";
-import { Skeleton } from "@nextui-org/skeleton"; // Import Skeleton component
+import { Skeleton } from "@nextui-org/skeleton";
 import LegendDun from "@/components/legend-dun";
 
 // Register all necessary components for Chart.js
 Chart.register(...registerables);
 
 const PieDun = ({ filteredForm }) => {
-  const [loading, setLoading] = useState(true); // Loading state for Skeleton
+  const [loading, setLoading] = useState(true);
   const [dunCounts, setDunCounts] = useState({
     "Rembia": 0,
     "Gadek": 0,
@@ -18,6 +18,9 @@ const PieDun = ({ filteredForm }) => {
     "Luar Alor_Gajah": 0,
     "Luar Melaka": 0,
   });
+
+  // Ref to hold the canvas element
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     const dun_counts = {
@@ -43,81 +46,86 @@ const PieDun = ({ filteredForm }) => {
 
     // Update the dun count
     setDunCounts(dun_counts);
-    setLoading(false); // Set loading to false once data is processed
+    setLoading(false);
   }, [filteredForm]);
 
   useEffect(() => {
-    const ctx = document.getElementById("pmrChart");
-    const dataValues = Object.values(dunCounts);
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      const dataValues = Object.values(dunCounts);
 
-    // Initialize Chart.js
-    const dunChart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        datasets: [
-          {
-            data: dataValues,
-            backgroundColor: [
-              "#581c87",  // Rembia
-              "#701a75",   // Gadek
-              "#9d174d", // Machap Jaya
-              "#bfdbfe", // Asahan
-              "#fb923c", // Durian Tunggal
-              "#fca5a5",   // Luar Alor Gajah
-              "#2e1065", // Luar Melaka
-            ],
-            hoverOffset: 4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            callbacks: {
-              title: (context) => {
-                const index = context[0].dataIndex;
-                return Object.keys(dunCounts)[index];
-              },
-              label: (context) => {
-                const index = context.dataIndex;
-                const total = Object.values(dunCounts).reduce((a, b) => a + b, 0);
-                const percentage = ((dataValues[index] / total) * 100).toFixed(2);
-                return `${dataValues[index]} (${percentage}%)`;
+      // Initialize Chart.js
+      const dunChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          datasets: [
+            {
+              data: dataValues,
+              backgroundColor: [
+                "#581c87",  // Rembia
+                "#701a75",   // Gadek
+                "#9d174d", // Machap Jaya
+                "#bfdbfe", // Asahan
+                "#fb923c", // Durian Tunggal
+                "#fca5a5",   // Luar Alor Gajah
+                "#2e1065", // Luar Melaka
+              ],
+              hoverOffset: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              callbacks: {
+                title: (context) => {
+                  const index = context[0].dataIndex;
+                  return Object.keys(dunCounts)[index];
+                },
+                label: (context) => {
+                  const index = context.dataIndex;
+                  const total = Object.values(dunCounts).reduce((a, b) => a + b, 0);
+                  const percentage = ((dataValues[index] / total) * 100).toFixed(2);
+                  return `${dataValues[index]} (${percentage}%)`;
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    return () => {
-      dunChart.destroy();
-    };
+      return () => {
+        dunChart.destroy();
+      };
+    }
   }, [dunCounts]);
 
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(null);
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
   const hasData = Object.values(dunCounts).some(count => count > 0);
 
   return (
     <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
       <Skeleton isLoaded={!loading}>
-      <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
-      <h1 className="text-xl text-center my-4">Bantuan Program Kebajikan Mengikut Dun {currentYear}</h1>
-      <div className="chart-container w-[300px] h-[300px]">
-          {hasData ? (
-            <canvas id="pmrChart" className="w-full h-full"></canvas>
-          ) : (
-            <div className="flex justify-center items-center w-full h-full text-gray-500">
-              <p className="text-center text-black">No Data</p>
-            </div>
-          )}
-      </div>
-      <LegendDun />
-    </article>
+        <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
+          <h1 className="text-xl text-center my-4">Bantuan Program Kebajikan Mengikut Dun {currentYear}</h1>
+          <div className="chart-container w-[300px] h-[300px]">
+            {hasData ? (
+              <canvas ref={canvasRef} className="w-full h-full"></canvas>
+            ) : (
+              <div className="flex justify-center items-center w-full h-full text-gray-500">
+                <p className="text-center text-black">No Data</p>
+              </div>
+            )}
+          </div>
+          <LegendDun />
+        </article>
       </Skeleton>
     </main>
   );

@@ -52,9 +52,12 @@ const PieDun = ({ filteredForm }) => {
   }, [filteredForm]);
 
   useEffect(() => {
+    if (loading) return;  // Ensure that the chart is only created when data is loaded
+  
     const ctx = document.getElementById("pmrChart");
+    if (!ctx) return;  // Check if the canvas element exists
+  
     const dataValues = Object.values(dunCounts);
-    // Initialize Chart.js
     const dunChart = new Chart(ctx, {
       type: "doughnut",
       data: {
@@ -97,13 +100,19 @@ const PieDun = ({ filteredForm }) => {
         },
       },
     });
-
+  
     return () => {
-      dunChart.destroy();
+      if (dunChart) {
+        dunChart.destroy();
+      }
     };
-  }, [dunCounts]);
+  }, [dunCounts, loading]); // Add loading as a dependency
+  
 
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(null);
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
   const hasData = Object.values(dunCounts).some(count => count > 0);
 
   return (
