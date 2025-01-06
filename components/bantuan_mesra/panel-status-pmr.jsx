@@ -1,49 +1,47 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { Skeleton } from '@nextui-org/skeleton';
 
 const PanelStatus = ({ filteredForm }) => {
   const [statusCounts, setStatusCounts] = useState({
-    TOTAL: 0,
-    MOHON: 0,
-    LULUS: 0,
-    DITOLAK: 0,
-    KIV: 0,
+    TOTAL: 0, MOHON: 0, LULUS: 0, DITOLAK: 0, KIV: 0,
   });
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const calculateStatusCounts = () => {
-      const newStatusCounts = {
-        TOTAL: 0,
-        MOHON: 0,
-        LULUS: 0,
-        DITOLAK: 0,
-        KIV: 0,
-      };
-
-      // Check if filteredForm is empty and directly set all counts to 0
-      if (!filteredForm || filteredForm.length === 0) {
+    try {
+      const calculateStatusCounts = () => {
+        const newStatusCounts = {
+          TOTAL: 0, MOHON: 0, LULUS: 0, DITOLAK: 0, KIV: 0,
+        };
+  
+        // Check if filteredForm is empty and directly set all counts to 0
+        if (!filteredForm || filteredForm.length === 0) {
+          setStatusCounts(newStatusCounts);
+          return;
+        }
+  
+        // Loop through filteredForm data and count each status
+        filteredForm.forEach((form) => {
+          if (form.form_status === 'MOHON') newStatusCounts.MOHON++;
+          if (form.form_status === 'LULUS') newStatusCounts.LULUS++;
+          if (form.form_status === 'DITOLAK') newStatusCounts.DITOLAK++;
+          if (form.form_status === 'KIV') newStatusCounts.KIV++;
+        });
+  
+        newStatusCounts.TOTAL = newStatusCounts.MOHON + newStatusCounts.LULUS + newStatusCounts.DITOLAK + newStatusCounts.KIV;
         setStatusCounts(newStatusCounts);
-        return;
-      }
-
-      // Loop through filteredForm data and count each status
-      filteredForm.forEach((form) => {
-        if (form.form_status === 'MOHON') newStatusCounts.MOHON++;
-        if (form.form_status === 'LULUS') newStatusCounts.LULUS++;
-        if (form.form_status === 'DITOLAK') newStatusCounts.DITOLAK++;
-        if (form.form_status === 'KIV') newStatusCounts.KIV++;
-      });
-
-      newStatusCounts.TOTAL = newStatusCounts.MOHON + newStatusCounts.LULUS + newStatusCounts.DITOLAK + newStatusCounts.KIV;
-
-      // Update the state with the new status counts
-      setStatusCounts(newStatusCounts);
-    };
-
-    calculateStatusCounts();
-  }, [filteredForm]); // Recalculate when filteredForm changes
+      };
+      calculateStatusCounts();
+    } catch {
+      console.error('Error fetching status counts:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [filteredForm]);
 
   return (
+    <Skeleton isLoaded={!loading}>
     <section id="status" className="bg-blue-200 w-full h-32 mt-4 mb-6 p-4 grid grid-cols-5 gap-4 rounded shadow-md">
       {/* Status Permohonan */}
       <article className="h-full rounded bg-blue-700 text-center">
@@ -71,6 +69,7 @@ const PanelStatus = ({ filteredForm }) => {
         <p className="text-2xl mt-2 font-medium">{statusCounts.KIV}</p>
       </article>
     </section>
+    </Skeleton>
   );
 };
 

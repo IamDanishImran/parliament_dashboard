@@ -112,21 +112,16 @@ export default function Program_Mesra() {
 
       <br />
 
-      <Skeleton isLoaded={!loading}>
-        <PanelStatus filteredForm={filteredForm} />
-      </Skeleton>
+      <PanelStatus filteredForm={filteredForm} />
 
-      <Skeleton isLoaded={!loading}>
-        <section id="chart-pie" className="flex w-full h-full mt-4 gap-4">
-          <PieDun filteredForm={filteredForm} /> {/* Pie Chart Dun */}
-          <PieCategory filteredForm={filteredForm} /> {/* Pie Chart Category */}
-        </section>
-      </Skeleton>
+      <br />
+      <section id="chart-pie" className="flex w-full h-full gap-4">
+        <PieDun filteredForm={filteredForm} /> {/* Pie Chart Dun */}
+        <PieCategory filteredForm={filteredForm} /> {/* Pie Chart Category */}
+      </section>
 
       <br /><br />
-      <Skeleton isLoaded={!loading}>
-        <BarGraph filteredForm={filteredForm} />
-      </Skeleton>
+      <BarGraph filteredForm={filteredForm} />
       <Footer />
     </main>
   );

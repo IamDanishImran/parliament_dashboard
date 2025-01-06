@@ -2,6 +2,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 import { Chart, registerables } from "chart.js";
+import { Skeleton } from "@nextui-org/skeleton";
 import LegendStatus from "@/components/legend-status";
 
 // Register all necessary components for Chart.js
@@ -9,6 +10,7 @@ Chart.register(...registerables);
 
 const ChartPMR = () => {
   const supabase = createClient();
+  const [loading, setLoading] = useState(true);
   const [statusCounts, setStatusCounts] = useState({
     Mohon: 0, Lulus: 0, Ditolak: 0, KIV: 0,
   });
@@ -20,46 +22,37 @@ const ChartPMR = () => {
           .from("form")
           .select("form_status")
           .eq("category", "Program Mesra Rakyat");
-        if (error) {
-          throw new Error(error.message);
-        }
+        if (error) throw new Error(error.message);
 
-        // Initialize the status counts
-        const form_status_counts = {
-          Mohon: 0, Lulus: 0, Ditolak: 0, KIV: 0,
-        };
-
-        // Loop through the form data and count each form_status
+        const counts = { Mohon: 0, Lulus: 0, Ditolak: 0, KIV: 0 };
         data.forEach((form) => {
-          if (form.form_status === "MOHON") form_status_counts.Mohon++;
-          if (form.form_status === "LULUS") form_status_counts.Lulus++;
-          if (form.form_status === "DITOLAK") form_status_counts.Ditolak++;
-          if (form.form_status === "KIV") form_status_counts.KIV++;
+          const status = form.form_status?.toUpperCase();
+          if (status === "MOHON") counts.Mohon++;
+          if (status === "LULUS") counts.Lulus++;
+          if (status === "DITOLAK") counts.Ditolak++;
+          if (status === "KIV") counts.KIV++;
         });
-        setStatusCounts(form_status_counts);
+        setStatusCounts(counts);
       } catch (error) {
         console.error("Error fetching form status counts:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchStatusCounts();
   }, []);
 
-
   useEffect(() => {
-    const ctx = document.getElementById("pmrChart").getContext("2d");
-    const dataValues = Object.values(statusCounts);
+    const ctx = document.getElementById("pmrChart")?.getContext("2d");
+    if (!ctx) return;
+
     const chart = new Chart(ctx, {
       type: "doughnut",
       data: {
         datasets: [
           {
-            data: dataValues,
-            backgroundColor: [
-              "#fef08a", // MOHON
-              "#4ade80", // LULUS
-              "#ef4444", // DITOLAK
-              "#22d3ee", // KIV
-            ],
+            data: Object.values(statusCounts),
+            backgroundColor: ["#fef08a", "#4ade80", "#ef4444", "#22d3ee"],
             hoverOffset: 4,
           },
         ],
@@ -67,15 +60,10 @@ const ChartPMR = () => {
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            display: false,
-          },
+          legend: { display: false },
           tooltip: {
             callbacks: {
-              title: (context) => {
-                const index = context[0].dataIndex;
-                return Object.keys(statusCounts)[index];
-              },
+              title: (context) => Object.keys(statusCounts)[context[0].dataIndex],
               label: (context) => {
                 const value = context.raw || 0;
                 const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
@@ -87,19 +75,22 @@ const ChartPMR = () => {
         },
       },
     });
-    return () => {
-      chart.destroy();
-    };
+
+    return () => chart?.destroy();
   }, [statusCounts]);
 
   return (
-    <article className="flex flex-col bg-slate-50 gap-y-4 p-4 justify-center items-center w-1/2 h-auto rounded border shadow shadow-gray-400">
-      <h1 className="text-xl">Program Mesra Rakyat</h1>
-      <div className="chart-container w-[300px] h-[300px]">
-        <canvas id="pmrChart" className="w-full h-full"></canvas>
-      </div>
-      <LegendStatus />
-    </article>
+    <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
+      <Skeleton isLoaded={!loading}>
+        <article className="flex flex-col gap-y-8 p-4 justify-center items-center w-full h-full">
+          <h1 className="text-xl">Program Mesra Rakyat</h1>
+          <div className="chart-container w-[300px] h-[300px]">
+            <canvas id="pmrChart" className="w-full h-full"></canvas>
+          </div>
+          <LegendStatus />
+        </article>
+      </Skeleton>
+    </main>
   );
 };
 

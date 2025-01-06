@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Skeleton } from '@nextui-org/react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const PanelStatus = () => {
   const supabase = createClient();
@@ -42,29 +40,12 @@ const PanelStatus = () => {
     }
   };
 
-  // Subscribe to real-time changes in the 'form' table
   useEffect(() => {
     fetchStatusCounts();
-    const subscription = supabase
-      .channel('form-updates')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'form' },
-        (payload) => {
-          console.log('Real-time data change detected:', payload);
-          toast.info('Data has changed!'); 
-          fetchStatusCounts();
-        }
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(subscription);
-    };
   }, []);
 
   return (
     <>
-      <ToastContainer />
       <Skeleton isLoaded={!loading}>
         <section id="status" className="bg-blue-200 w-full h-32 p-4 grid grid-cols-5 gap-4 rounded shadow-md">
           {/* Status Permohonan */}

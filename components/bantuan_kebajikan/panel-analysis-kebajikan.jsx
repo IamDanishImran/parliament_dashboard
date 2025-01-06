@@ -1,44 +1,53 @@
 // @/components/bantuan_kebajikan/panel-analysis-kebajikan
 'use client';
 import React, { useState, useEffect } from 'react';
+import { Skeleton } from '@nextui-org/react';
 
 const PanelAnalysis = ({ filteredForm }) => {
   const [categoryOneTotalPrice, setCategoryOneTotalPrice] = useState(0);
   const [categoryTwoTotalPrice, setCategoryTwoTotalPrice] = useState(0);
   const [categoryThreeTotalPrice, setCategoryThreeTotalPrice] = useState(0);
   const [categoryFourTotalPrice, setCategoryFourTotalPrice] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   // Calculate total price for each category based on filteredForm
   useEffect(() => {
-    if (!Array.isArray(filteredForm)) return;
+    try {
+      if (!Array.isArray(filteredForm)) return;
 
-    // Calculate Total of price Bantuan Kebajikan
-    const categoryOnePrice = filteredForm
-      .filter(form => form.category === "Bantuan Kebajikan")
-      .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
-    setCategoryOneTotalPrice(categoryOnePrice);
-
-    // Calculate Total Price for 'Peralatan & Tunai'
-    const categoryTwoPrice = filteredForm
-      .filter(form => form.category === "Bantuan Kebajikan" && form.help_type === "PERALATAN DAN TUNAI")
-      .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
-    setCategoryTwoTotalPrice(categoryTwoPrice);
-
-    // Calculate Total Price for 'Tunai'
-    const categoryThreePrice = filteredForm
-      .filter(form => form.category === "Bantuan Kebajikan" && form.help_type === "TUNAI")
-      .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
-    setCategoryThreeTotalPrice(categoryThreePrice);
-
-    // Calculate Total Price for 'Bantuan Peralatan'
-    const categoryFourPrice = filteredForm
-      .filter(form => form.category === "Bantuan Kebajikan" && form.help_type === "BANTUAN PERALATAN")
-      .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
-    setCategoryFourTotalPrice(categoryFourPrice);
+      // Calculate Total of price Bantuan Kebajikan
+      const categoryOnePrice = filteredForm
+        .filter(form => form.category === "Bantuan Kebajikan")
+        .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
+      setCategoryOneTotalPrice(categoryOnePrice);
+  
+      // Calculate Total Price for 'Peralatan & Tunai'
+      const categoryTwoPrice = filteredForm
+        .filter(form => form.category === "Bantuan Kebajikan" && form.help_type === "PERALATAN DAN TUNAI")
+        .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
+      setCategoryTwoTotalPrice(categoryTwoPrice);
+  
+      // Calculate Total Price for 'Tunai'
+      const categoryThreePrice = filteredForm
+        .filter(form => form.category === "Bantuan Kebajikan" && form.help_type === "TUNAI")
+        .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
+      setCategoryThreeTotalPrice(categoryThreePrice);
+  
+      // Calculate Total Price for 'Bantuan Peralatan'
+      const categoryFourPrice = filteredForm
+        .filter(form => form.category === "Bantuan Kebajikan" && form.help_type === "BANTUAN PERALATAN")
+        .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
+      setCategoryFourTotalPrice(categoryFourPrice);
+    } catch (error) {
+      console.error('Error calculating total price:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [filteredForm]);
 
   return (
-    <section id="analysis" className="w-full h-56 py-4 grid grid-cols-4 gap-4">
+    <Skeleton isLoaded={!loading}>
+      <section id="analysis" className="w-full h-56 py-4 grid grid-cols-4 gap-4">
       {/* Total Expenses PMR */}
       <article className="bg-slate-50 h-full rounded px-4 border-2 border-slate-300 shadow">
         <div className="inline-flex items-center justify-center p-2 mt-4 mb-8">
@@ -95,6 +104,7 @@ const PanelAnalysis = ({ filteredForm }) => {
         </div>
       </article>
     </section>
+    </Skeleton>
   );
 }
 

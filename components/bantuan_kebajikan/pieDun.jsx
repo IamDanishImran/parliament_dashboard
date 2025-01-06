@@ -1,12 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Chart, registerables } from "chart.js";
+import { Skeleton } from "@nextui-org/skeleton"; // Import Skeleton component
 import LegendDun from "@/components/legend-dun";
 
 // Register all necessary components for Chart.js
 Chart.register(...registerables);
 
 const PieDun = ({ filteredForm }) => {
+  const [loading, setLoading] = useState(true); // Loading state for Skeleton
   const [dunCounts, setDunCounts] = useState({
     "Rembia": 0,
     "Gadek": 0,
@@ -41,11 +43,13 @@ const PieDun = ({ filteredForm }) => {
 
     // Update the dun count
     setDunCounts(dun_counts);
+    setLoading(false); // Set loading to false once data is processed
   }, [filteredForm]);
 
   useEffect(() => {
     const ctx = document.getElementById("pmrChart");
     const dataValues = Object.values(dunCounts);
+
     // Initialize Chart.js
     const dunChart = new Chart(ctx, {
       type: "doughnut",
@@ -95,22 +99,27 @@ const PieDun = ({ filteredForm }) => {
     };
   }, [dunCounts]);
 
+  const currentYear = new Date().getFullYear();
   const hasData = Object.values(dunCounts).some(count => count > 0);
 
   return (
-    <article className="flex flex-col bg-slate-50 gap-y-4 p-4 justify-center items-center w-1/2 h-auto rounded border shadow shadow-gray-400">
-      <h1 className="text-xl text-center">Program Mesra Rakyat</h1>
+    <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
+      <Skeleton isLoaded={!loading}>
+      <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
+      <h1 className="text-xl text-center my-4">Bantuan Program Kebajikan Mengikut Dun {currentYear}</h1>
       <div className="chart-container w-[300px] h-[300px]">
-        {hasData ? (
-          <canvas id="pmrChart" className="w-full h-full"></canvas>
-        ) : (
-          <div className="flex justify-center items-center w-full h-full text-gray-500">
-            <p className="text-center text-black">No Data</p>
-          </div>
-        )}
+          {hasData ? (
+            <canvas id="pmrChart" className="w-full h-full"></canvas>
+          ) : (
+            <div className="flex justify-center items-center w-full h-full text-gray-500">
+              <p className="text-center text-black">No Data</p>
+            </div>
+          )}
       </div>
       <LegendDun />
     </article>
+      </Skeleton>
+    </main>
   );
 };
 

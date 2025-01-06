@@ -119,7 +119,7 @@ export default function Help() {
         return; // Return early after an error
       }
 
-      toast.success("Complaint submitted successfully!");
+      toast.success("Complaint submitted!");
       e.target.reset(); // Reset the form
       fetchEmails(); // Refresh emails after submitting a complaint
     } catch (error) {

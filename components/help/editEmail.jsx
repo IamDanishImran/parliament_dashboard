@@ -126,6 +126,8 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   if (!isOpen) return null;
 
   return (
+    <>
+    <ToastContainer />
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white rounded-lg w-11/12 max-w-4xl p-6 relative">
         <h2 className="text-3xl mb-4">Edit Email</h2>
@@ -201,6 +203,7 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

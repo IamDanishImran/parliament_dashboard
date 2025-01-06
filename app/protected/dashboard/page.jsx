@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Skeleton } from "@nextui-org/skeleton";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -14,7 +13,6 @@ import PanelAnalysis from "@/components/dashboard/panel-analysis";
 import Footer from "@/components/footer";
 
 export default function Dashboard() {
-  const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -22,9 +20,6 @@ export default function Dashboard() {
     console.log("Login status:", loginStatus);
     if (loginStatus && loginStatus.startsWith("success")) {
       toast.success("Welcome back!");
-      setLoading(true);
-    } else {
-      setLoading(false);
     }
   }, [searchParams]);
 
@@ -37,13 +32,11 @@ export default function Dashboard() {
       <br />
       <PanelAnalysis />
       <br />
-      <Skeleton isLoaded={!loading}>
-        <section id="chart-pie" className="flex w-full h-full gap-4">
-          <ChartPMR /> {/* Chart Program Mesra Rakyat */}
-          <ChartKebajikan /> {/* Chart Bantuan Kebajikan */}
-        </section>
-      </Skeleton>
-      <br />
+      <section id="chart-pie" className="flex w-full h-full gap-4">
+        <ChartPMR /> {/* Chart Program Mesra Rakyat */}
+        <ChartKebajikan /> {/* Chart Bantuan Kebajikan */}
+      </section>
+      <br /><br />
       <BarGraph /> {/* Bar Graph Section */}
       <Footer />
     </main>
