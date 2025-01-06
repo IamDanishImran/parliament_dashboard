@@ -111,7 +111,7 @@ const PieCategory = ({ filteredForm }) => {
     <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
       <Skeleton isLoaded={!loading}>
         <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
-          <h1 className="text-xl text-center">Bantuan Kebajikan Mengikut Kategori {currentYear}</h1>
+          <h1 className="text-xl text-center my-4">Bantuan Kebajikan Mengikut Kategori {currentYear}</h1>
           <div className="chart-container w-[300px] h-[300px]">
             {hasData ? (
               <canvas ref={canvasRef} id="categoryChart" className="w-full h-full"></canvas>

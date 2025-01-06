@@ -1,6 +1,6 @@
 const LegendDun = () => {
   return (
-      <div id="status" className="flex flex-wrap gap-2 justify-center items-center text-center w-auto">
+      <div id="status" className="flex flex-wrap gap-2 justify-center items-center text-center w-auto m-4">
         <div id="wrapper-process" className="flex justify-center items-center gap-x-1">
           <div id="dun-color" className="rounded-lg bg-purple-900 w-4 h-4"></div>
           <div id="dun-title">Rembia</div>

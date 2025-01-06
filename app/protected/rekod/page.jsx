@@ -2,11 +2,12 @@
 import Footer from "@/components/footer";
 import { useState, useEffect } from "react";
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Skeleton } from "@nextui-org/skeleton";
+import { createClient } from "@/utils/supabase/client";
 
 import Header from "@/components/header";
 import moment from 'moment';
-import { createClient } from "@/utils/supabase/client";
 import Modal from "@/components/rekod/modal";
 import EditModal from "@/components/rekod/editModal";
 
@@ -86,27 +87,43 @@ export default function Rekod() {
 
   // CSV Download function
   const downloadCSV = () => {
+    if (filteredForm.length === 0) {
+      toast.error("No data available to download.");
+      return;
+    }
+    // Define the headers for the CSV based on the table columns
     const headers = [
-      'Barang Bantuan', 'Kategori Bantuan', 'Kategori Penerima', 'No Telefon',
-      'Jenis Bantuan', 'Alamat', 'Kuantiti', 'Harga', 'Catatan',
+      'Bil', 'Catatan', 'Kategori Bantuan', 'Kategori Penerima', 'Kuantiti', 'Harga', 'Status', 'Alamat', 'No.Tel', 'Jenis Bantuan', 'Barang Bantuan', 'Tarikh Permohonan'
     ];
-    const rows = form.map((item) => [
-      item.barang_bantuan, item.kategori_bantuan, item.kategori_penerima,
-      item.no_tel, item.jenis_bantuan, item.alamat, item.kuantiti,
-      item.harga, item.catatan,
+    // Map over filteredForm to extract the data from each row
+    const rows = filteredForm.map((item, index) => [
+      index + 1, // Serial number
+      item.notes || '-',
+      item.category || '-',
+      item.category_type || '-',
+      item.quantity || '-',
+      item.price || '-',
+      item.form_status || '-',
+      // id_dun
+      item.address || '-',
+      item.phone || '-',
+      item.help_type || '-',
+      item.item || '-',
+      moment(item.inserted_at).format("DD/MM/YYYY") || '-',
     ]);
-    
+    // Create CSV content
     const csvContent = [
       headers.join(','), 
-      ...rows.map(row => row.join(','))
+      ...rows.map(row => row.map(value => `"${value}"`).join(','))
     ].join('\n');
-    
+    // Create a Blob and download the CSV file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'submission_data.csv';
+    link.download = 'rekod_data.csv';
     link.click();
   };
+  
   
 
     // Form List Section
@@ -253,7 +270,7 @@ export default function Rekod() {
             <thead className="text-gray-700 bg-gray-200">
               <tr className="border border-black">
                 <th className="border border-black px-4 py-1">Bil</th>
-                <th className="border border-black px-4 py-1">Penerima</th>
+                <th className="border border-black px-4 py-1">Kategori Penerima</th>
                 <th className="border border-black px-4 py-1">Tarikh Permohonan</th>
                 <th className="border border-black px-4 py-1">Kategori Bantuan</th>
                 <th className="border border-black px-4 py-1 max-w-[180px] truncate">Catatan Bantuan</th>
@@ -310,7 +327,6 @@ export default function Rekod() {
           items={items}
           handleDeleteItem={handleDeleteItem}
         />
-        <ToastContainer />
 
       {/* Edit Modal */}
       {editingForm && isEditModalOpen && (

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   const [formStatus, setFormStatus] = useState(formData.form_status || "");
   const [notes, setNotes] = useState(formData.notes || "");
   const [isLoading, setIsLoading] = useState(false);
+  const [hasCheckedDunUser, setHasCheckedDunUser] = useState(false);
 
   useEffect(() => {
     if (formData) {
@@ -18,8 +20,8 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          onClose();
           toast.error('You need to login first');
+          onClose();
           return;
         }
         const { data: getDun, error } = await supabase
@@ -28,25 +30,32 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
           .eq('email', user.email)
           .single();
         if (!error) {
-          onClose();
           toast.error(`DUN users can't access edit form`);
+          onClose();
           return;
         }
       } catch (error) {
-        onClose();
         toast.error('An unexpected error occurred.');
         console.error(error);
+        onClose();
       }
     };
 
-    if (isOpen) {
+    if (isOpen && !hasCheckedDunUser) {
+      setHasCheckedDunUser(true);
       checkDunUser();
     }
-  }, [isOpen, onClose, supabase]);
+  }, [isOpen, onClose, supabase, hasCheckedDunUser]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setHasCheckedDunUser(false); // Reset the state when the modal closes
+    }
+  }, [isOpen]);
 
   const handleSave = async () => {
     if (!formStatus || !notes) {
-      alert("Please fill in all fields");
+      toast.info('Please fill in all fields');
       return;
     }
 
@@ -57,12 +66,11 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
         .update({ form_status: formStatus, notes: notes })
         .eq("id", formData.id);
       if (error) throw error;
-
       toast.success("Form updated successfully");
       onClose();
     } catch (error) {
-      console.error("Error updating form:", error);
-      alert("An error occurred while updating the form.");
+      console.log("Error updating form:", error);
+      toast.error("An error occurred while updating the form.");
     } finally {
       setIsLoading(false);
     }
@@ -76,14 +84,12 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
           .from("form")
           .delete()
           .eq("id", formData.id);
-
         if (error) throw error;
-
         toast.success("Form deleted successfully");
         onClose();
       } catch (error) {
         console.error("Error deleting form:", error);
-        alert("An error occurred while deleting the form.");
+        toast.error("An error occurred while deleting the form.");
       } finally {
         setIsLoading(false);
       }
