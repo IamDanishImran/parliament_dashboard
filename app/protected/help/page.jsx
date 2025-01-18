@@ -137,7 +137,7 @@ export default function Help() {
       <ToastContainer />
       
       <Skeleton isLoaded={!loading}>
-        <Header title="Help Center" />
+        <Header title="Help Center" navigator="Help Center" />
       </Skeleton>
 
       <br />
@@ -149,7 +149,7 @@ export default function Help() {
           <table className="table-auto h-[100px] w-full border-collapse border border-slate-400">
             <thead className="bg-gray-200">
               <tr>
-                <th className="border border-slate-400 px-4 py-2">Bil</th>
+                <th className="border border-slate-400 px-4 py-2">No.</th>
                 <th className="border border-slate-400 px-4 py-2">Title</th>
                 <th className="border border-slate-400 px-4 py-2">Complaint</th>
                 <th className="border border-slate-400 px-4 py-2">Email</th>

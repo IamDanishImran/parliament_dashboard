@@ -5,14 +5,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Skeleton } from "@nextui-org/skeleton";
 import { createClient } from "@/utils/supabase/client";
-
 import Header from "@/components/header";
 import moment from 'moment';
 import Modal from "@/components/rekod/modal";
 import EditModal from "@/components/rekod/editModal";
 
 export default function Rekod() {
-  // First Modal Section (for adding items)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
@@ -30,7 +28,7 @@ export default function Rekod() {
         .eq('email', user.email)
         .single();
       if (error) {
-        toast.error(`Admin can't access add form`);
+        toast.error(`Access to the requested action is restricted.`);
         return;
       }
       setIsAddModalOpen(true);
@@ -70,18 +68,47 @@ export default function Rekod() {
 
   const handleDeleteItem = (index) => {
     // Handle item deletion logic
+    toast.success("Form deleted successfully!");
   };
 
-  const total = 100; // Example total value
-  const items = []; // Example items array
+  const total = 100;
+  const items = [];
   // Edit Modal Section
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for the edit modal
-  const [editingForm, setEditingForm] = useState(null); // Declare editingForm here, once, for use in the edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingForm, setEditingForm] = useState(null);
 
-  const handleEditClick = (item) => {
-    setEditingForm(item); // Set the form data to be edited
-    setIsEditModalOpen(true); // Open the edit modal
-  };
+  const handleEditClick = async (item) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('You need to login first');
+        return;
+      }
+
+      const { data: getAdmin, error: adminError } = await supabase
+        .from('admin')
+        .select('id')
+        .eq('email', user.email)
+        .single();
+      if (adminError) {
+        toast.error("Access to the requested action is restricted.");
+        console.log("Dun can't access this section");
+        return;
+      }
+  
+      const { data: getDun, error } = await supabase
+        .from('dun')
+        .select('registration:registration(description)')
+        .eq('email', user.email)
+        .single();
+  
+      setEditingForm(item); // Set the form data to be edited
+      setIsEditModalOpen(true); // Open the edit modal
+    } catch (error) {
+      toast.error('An unexpected error occurred.');
+      console.error(error);
+    }
+  };  
   const closeEditModal = () => setIsEditModalOpen(false); // Close the edit modal
 
 
@@ -93,7 +120,7 @@ export default function Rekod() {
     }
     // Define the headers for the CSV based on the table columns
     const headers = [
-      'Bil', 'Catatan', 'Kategori Bantuan', 'Kategori Penerima', 'Kuantiti', 'Harga', 'Status', 'Alamat', 'No.Tel', 'Jenis Bantuan', 'Barang Bantuan', 'Tarikh Permohonan'
+      'No', 'Application Notes', 'Program Category', 'Category', 'Quantity', 'Price', 'Status', 'Address', 'No.Phone', 'Assistance Type', 'Item Request', 'Date of Application'
     ];
     // Map over filteredForm to extract the data from each row
     const rows = filteredForm.map((item, index) => [
@@ -120,16 +147,16 @@ export default function Rekod() {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'rekod_data.csv';
+    link.download = 'data_parliament.csv';
     link.click();
   };
-  
-  
 
     // Form List Section
     const [statusSearch, setStatus] = useState('*'); 
-    const [categorySearch, setCategory] = useState('*');
+    const [programSearch, setProgram] = useState('*');
     const [dunSearch, setDun] = useState('*');
+    const [categorySearch, setCategory] = useState('*');
+    const [typeSearch, setType] = useState('*');
 
     const [form, setForm] = useState([]);
     const [filteredForm, setFilteredForm] = useState([]);
@@ -162,9 +189,11 @@ export default function Rekod() {
     const handleSearch = () => {
       const filteredResults = form.filter((item) => {
         const matchesStatus = statusSearch === '*' || item.form_status.toLowerCase() === statusSearch.toLowerCase();
-        const matchesCategory = categorySearch === '*' || item.category.toLowerCase() === categorySearch.toLowerCase();
-        const matchesDun = dunSearch === '*' || item.dun.id_register?.description.toLowerCase() === dunSearch.toLowerCase()
-        return matchesStatus && matchesCategory && matchesDun;
+        const matchesProgram = programSearch === '*' || item.category.toLowerCase() === programSearch.toLowerCase();
+        const matchesDun = dunSearch === '*' || item.dun.id_register?.description.toLowerCase() === dunSearch.toLowerCase();
+        const matchesCategory = categorySearch === '*' || item.category_type.toLowerCase() === categorySearch.toLowerCase();
+        const matchesType = typeSearch === '*' || item.help_type.toLowerCase() === typeSearch.toLowerCase(); 
+        return matchesStatus && matchesProgram && matchesDun && matchesCategory && matchesType;
       });
       setFilteredForm(filteredResults); // Update filtered data based on the status and category search
     };
@@ -172,15 +201,17 @@ export default function Rekod() {
     // Reset Search
     const resetSearch = () => {
       setStatus('*');
-      setCategory('*');
+      setProgram('*');
       setDun('*');
+      setCategory('*');
+      setType('*');
       setFilteredForm(form);
     };
     
     return (
       <main className="p-2 pl-10 pr-20">
         <ToastContainer />
-        <Header title="Rekod" />
+        <Header title="Record" navigator="Record" />
 
         <br />
 
@@ -188,35 +219,35 @@ export default function Rekod() {
         {/* Search Bar */}
         <section id="search" className="flex flex-col w-full h-auto rounded border shadow shadow-gray-400">
           <article>
-            <h1 className="mx-4 mt-4 text-2xl font-semibold">Panel Carian</h1>
+            <h1 className="mx-4 mt-4 text-2xl font-semibold">Search Panel</h1>
           </article>
 
-          <article className="mt-4 flex px-2">
-            <div className="w-2/4 m-2">
+          <article className="mt-4 grid grid-cols-3 gap-4 px-4">
+            <div className="">
               <label htmlFor="statusForm">Status</label>
               <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500 w-[540px]">
                 <select className="w-full h-full bg-sky-50" id="statusForm" value={statusSearch} onChange={(e) => setStatus(e.target.value)}>
                   <option value="*">All</option>
-                  <option value="MOHON">MOHON</option>
-                  <option value="LULUS">LULUS</option>
-                  <option value="DITOLAK">DITOLAK</option>
+                  <option value="IN PROGRESS">IN PROGRESS</option>
+                  <option value="APPROVED">APPROVED</option>
+                  <option value="REJECTED">REJECTED</option>
                   <option value="KIV">KIV</option>
                 </select>
               </div>
             </div>
 
-            <div className="w-2/4 m-2">
-              <label htmlFor="Kategori Bantuan">Kategori Bantuan</label>
+            <div className="">
+              <label htmlFor="Kategori Bantuan">Program Category</label>
               <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
-                <select className="w-full h-full bg-sky-50" id="categoryForm" value={categorySearch} onChange={(e) => setCategory(e.target.value)}>
+                <select className="w-full h-full bg-sky-50" id="programForm" value={programSearch} onChange={(e) => setProgram(e.target.value)}>
                   <option value="*">All</option>
-                  <option value="Program Mesra Rakyat">Program Mesra Rakyat</option>
-                  <option value="Bantuan Kebajikan">Bantuan Kebajikan</option>
+                  <option value="Community Outreach Program">Community Outreach Program</option>
+                  <option value="Welfare Assistance Program">Welfare Assistance Program</option>
                 </select>
               </div>
             </div>
 
-            <div className="w-2/4 m-2">
+            <div className="">
               <label htmlFor="Dun">Dun</label>
               <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
                 <select className="w-full h-full bg-sky-50" id="dun" value={dunSearch} onChange={(e) => setDun(e.target.value)}>
@@ -227,7 +258,34 @@ export default function Rekod() {
                   <option value="Asahan">Asahan</option>
                   <option value="Gadek">Gadek</option>
                   <option value="Luar Alor Gajah">Luar Alor Gajah</option>
-                  <option value="Luar Melaka">Luar Melaka</option>
+                  <option value="Outside Melaka">Outside Melaka</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="">
+              <label htmlFor="Kategori Bantuan">Category</label>
+              <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
+                <select className="w-full h-full bg-sky-50" id="categoryForm" value={categorySearch} onChange={(e) => setCategory(e.target.value)}>
+                  <option value="*">All</option>
+                  <option value="Public Well-Being">Public Well-Being</option>
+                  <option value="Education">Education</option>
+                  <option value="NGO/Organization">NGO/Organization</option>
+                  <option value="Disaster">Disaster</option>
+                  <option value="Religious">Religious</option>
+                  <option value="Service Center">Service Center</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="">
+              <label htmlFor="Kategori Bantuan">Assistance Type</label>
+              <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
+                <select className="w-full h-full bg-sky-50" id="typeForm" value={typeSearch} onChange={(e) => setType(e.target.value)}>
+                  <option value="*">All</option>
+                  <option value="CASH ASSISTANCE">Cash Assistance</option>
+                  <option value="EQUIPMENT ASSISTANCE">Equipment Assistance</option>
+                  <option value="EQUIPMENT & CASH ASSISTANCE">Equipment & Cash Assistance</option>
                 </select>
               </div>
             </div>
@@ -238,7 +296,8 @@ export default function Rekod() {
             onClick={handleSearch}>
             Search
           </button>
-          <button className="w-32 h-8 flex justify-center items-center rounded border border-slate-900 bg-slate-50 hover:bg-violet-500 text-slate-900 ease-in duration-200"
+          <button className="w-32 h-8 flex justify-center items-center rounded border border-slate-900 bg-slate-50
+          hover:bg-indigo-600 hover:border-lg hover:border-neutral-50 hover:text-slate-50 ease-in duration-200"
             onClick={resetSearch}>
             Reset Search
           </button>
@@ -259,7 +318,7 @@ export default function Rekod() {
           </div>
           <div>
           <button onClick={checkAdminAndOpenModal} className="text-indigo-700 font-bold bg-slate-50 border border-black px-4 py-2 rounded hover:bg-slate-300 ease-in duration-200">
-              Tambah Rekod
+              New Application
             </button>
           </div>
         </article>
@@ -269,13 +328,13 @@ export default function Rekod() {
           <table className="table-auto w-full text-left border-collapse">
             <thead className="text-gray-700 bg-gray-200">
               <tr className="border border-black">
-                <th className="border border-black px-4 py-1">Bil</th>
-                <th className="border border-black px-4 py-1">Kategori Penerima</th>
-                <th className="border border-black px-4 py-1">Tarikh Permohonan</th>
-                <th className="border border-black px-4 py-1">Kategori Bantuan</th>
-                <th className="border border-black px-4 py-1 max-w-[180px] truncate">Catatan Bantuan</th>
+                <th className="border border-black px-4 py-1">No.</th>
+                <th className="border border-black px-4 py-1">Category</th>
+                <th className="border border-black px-4 py-1">Date of Application</th>
+                <th className="border border-black px-4 py-1">Program Category</th>
+                <th className="border border-black px-4 py-1 max-w-[180px] truncate">Application Notes</th>
                 <th className="border border-black px-4 py-1 max-w-[100px] truncate">Dun</th>
-                <th className="border border-black px-4 py-1">Jenis Bantuan</th>
+                <th className="border border-black px-4 py-1">Assistance Type</th>
                 <th className="border border-black px-4 py-1">Status</th>
                 <th className="border border-black px-4 py-1">Info</th>
               </tr>
@@ -294,12 +353,12 @@ export default function Rekod() {
                     <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{item.category}</td>
                     <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px] truncate">{item.notes}</td>
                     <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap max-w-[100px] truncate">{item.dun.id_register?.description}</td>
-                    <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap">{item.help_type}</td>
-                    <td className={`border px-4 py-4 text-center 
-                      ${item.form_status === 'MOHON' ? 'bg-yellow-200' : ''}
-                      ${item.form_status === 'LULUS' ? 'bg-green-400' : ''}
+                    <td className="border px-4 py-4 overflow-hidden text-ellipsis whitespace-nowrap max-w-[100px] truncate">{item.help_type}</td>
+                    <td className={`border py-4 text-center min-w-[120px]
+                      ${item.form_status === 'IN PROGRESS' ? 'bg-yellow-200' : ''}
+                      ${item.form_status === 'APPROVED' ? 'bg-green-400' : ''}
                       ${item.form_status === 'KIV' ? 'bg-cyan-400' : ''}
-                      ${item.form_status === 'DITOLAK' ? 'bg-red-500' : ''}`}>
+                      ${item.form_status === 'REJECTED' ? 'bg-red-500' : ''}`}>
                       {item.form_status}
                     </td>
                     <td className="border px-4 py-2 text-center">
@@ -337,6 +396,7 @@ export default function Rekod() {
             supabase={supabase}
           />
         )}
+        <ToastContainer />
       <Footer />
     </main>
   );

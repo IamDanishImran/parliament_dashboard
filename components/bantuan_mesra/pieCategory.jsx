@@ -10,12 +10,12 @@ Chart.register(...registerables);
 const PieCategory = ({ filteredForm }) => {
   const [loading, setLoading] = useState(true);
   const [categoryCounts, setCategoryCounts] = useState({
-    "Kesejahteraan Rakyat": 0,
-    "Pendidikan": 0,
-    "Keagamaan": 0,
-    "NGO/Pertubuhan": 0,
-    "Bencana": 0,
-    "Pusat Khidmat": 0,
+    "Public Well-Being": 0,
+    "Education": 0,
+    "Religious": 0,
+    "NGO/Organization": 0,
+    "Disaster": 0,
+    "Service Center": 0,
   });
 
   const canvasRef = useRef(null);
@@ -26,22 +26,22 @@ const PieCategory = ({ filteredForm }) => {
       if (!Array.isArray(filteredForm)) return;
 
     const category_counts = {
-      "Kesejahteraan Rakyat": 0,
-      "Pendidikan": 0,
-      "Keagamaan": 0,
-      "NGO/Pertubuhan": 0,
-      "Bencana": 0,
-      "Pusat Khidmat": 0,
+      "Public Well-Being": 0,
+      "Education": 0,
+      "Religious": 0,
+      "NGO/Organization": 0,
+      "Disaster": 0,
+      "Service Center": 0,
     };
 
     // Loop through the filteredForm data
     filteredForm.forEach((form) => {
-      if (form?.category_type === "Kesejahteraan Rakyat") category_counts["Kesejahteraan Rakyat"]++;
-      if (form?.category_type === "Pendidikan") category_counts["Pendidikan"]++;
-      if (form?.category_type === "Keagamaan") category_counts["Keagamaan"]++;
-      if (form?.category_type === "NGO/Pertubuhan") category_counts["NGO/Pertubuhan"]++;
-      if (form?.category_type === "Bencana") category_counts["Bencana"]++;
-      if (form?.category_type === "Pusat Khidmat") category_counts["Pusat Khidmat"]++;
+      if (form?.category_type === "Public Well-Being") category_counts["Public Well-Being"]++;
+      if (form?.category_type === "Education") category_counts["Education"]++;
+      if (form?.category_type === "Religious") category_counts["Religious"]++;
+      if (form?.category_type === "NGO/Organization") category_counts["NGO/Organization"]++;
+      if (form?.category_type === "Disaster") category_counts["Disaster"]++;
+      if (form?.category_type === "Service Center") category_counts["Service Center"]++;
     });
     setCategoryCounts(category_counts);
     } catch(error) {
@@ -71,12 +71,12 @@ const PieCategory = ({ filteredForm }) => {
           {
             data: dataValues,
             backgroundColor: [
-              "#f59e0b", // Kesejahteraan Rakyat
-              "#f43f5e", // Pendidikan
-              "#1d4ed8", // Keagamaan
-              "#d946ef", // NGO/Pertubuhan
-              "#a855f7", // Bencana
-              "#0ea5e9", // Pusat Khidmat
+              "#f59e0b", // Public Well-Being
+              "#f43f5e", // Education
+              "#1d4ed8", // Religious
+              "#d946ef", // NGO/Organization
+              "#a855f7", // Disaster
+              "#0ea5e9", // Service Center
             ],
             hoverOffset: 4,
           },
@@ -129,7 +129,7 @@ const PieCategory = ({ filteredForm }) => {
     <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
       <Skeleton isLoaded={!loading}>
       <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
-      <h1 className="text-xl text-center my-4">Program Mesra Rakyat Mengikut Kategori {currentYear}</h1>
+      <h1 className="text-xl text-center my-4">Community Outreach Program by Category {currentYear}</h1>
       <div className="chart-container w-[300px] h-[300px]">
         {hasData ? (
           <canvas ref={canvasRef} id="categoryChart" className="w-full h-full"></canvas>

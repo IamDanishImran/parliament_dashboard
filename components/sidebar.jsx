@@ -73,7 +73,7 @@ export default function Sidebar({ userRole }) {
                 : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"
             } duration-200`}
           >
-            <Link href="/protected/rekod">Rekod</Link>
+            <Link href="/protected/rekod">Record</Link>
           </div>
         </Skeleton>
 
@@ -85,7 +85,7 @@ export default function Sidebar({ userRole }) {
                 : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"
             } duration-200`}
           >
-            <Link href="/protected/bantuan_kebajikan">Bantuan Kebajikan</Link>
+            <Link href="/protected/bantuan_kebajikan">Welfare Assistance</Link>
           </div>
         </Skeleton>
 
@@ -97,7 +97,7 @@ export default function Sidebar({ userRole }) {
                 : "bg-slate-50 hover:bg-indigo-100 text-slate-700 hover:text-indigo-600"
             } duration-200`}
           >
-            <Link href="/protected/bantuan_mesra">Program Mesra Rakyat (PMR)</Link>
+            <Link href="/protected/bantuan_mesra">Community Outreach Program (COP)</Link>
           </div>
         </Skeleton>
       </nav>

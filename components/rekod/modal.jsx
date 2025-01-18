@@ -67,15 +67,6 @@ const Modal = ({ open, onClose }) => {
     }
   };
 
-  const notify = () => {
-    toast("Form Submitted!", {
-      autoClose: 10000,
-      closeButton: true,
-      pauseOnHover: true,
-      draggable: false,
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -108,13 +99,20 @@ const Modal = ({ open, onClose }) => {
           item: formData.barang_bantuan,
         });
   
-      if (formSubmissionError) {
-        toast.error("Failed to submit the form.");
-        console.error(formSubmissionError);
-      } else {
-        toast.success("Form submitted successfully!");
-        onClose();
-      }
+      if (formSubmissionError) throw error;
+      onClose();
+      toast.success("Form submitted successfully!");
+      setFormData({
+        barang_bantuan: '',
+        kategori_bantuan: '',
+        kategori_penerima: '',
+        no_tel: '',
+        jenis_bantuan: '',
+        kuantiti: '',
+        harga: '',
+        alamat: '',
+        catatan: ''
+      });
     } catch (error) {
       toast.error("An unexpected error occurred.");
       console.error("Unexpected error:", error);
@@ -122,7 +120,6 @@ const Modal = ({ open, onClose }) => {
       setLoading(false);
     }
   };
-  
 
   if (!open) return null;
 
@@ -154,9 +151,9 @@ const Modal = ({ open, onClose }) => {
                   className="h-8 rounded border border-gray-400"
                   value={formData.kategori_bantuan}
                   onChange={handleChange}>
-                  <option value="">Pilih</option>
-                  <option value="Bantuan Kebajikan">Bantuan Kebajikan</option>
-                  <option value="Program Mesra Rakyat">Program Mesra Rakyat</option>
+                  <option value="">Choose</option>
+                  <option value="Welfare Assistance Program">Welfare Assistance Program</option>
+                  <option value="Community Engagement Program">Community Engagement Program</option>
                 </select>
               </article>
 
@@ -168,27 +165,27 @@ const Modal = ({ open, onClose }) => {
                   className="h-8 rounded border border-gray-400"
                   value={formData.kategori_penerima}
                   onChange={handleChange}>
-                  <option value="">Pilih</option>
-                  <option value="Kesejahteraan Rakyat">Kesejahteraan Rakyat</option>
-                  <option value="Pendidikan">Pendidikan</option>
-                  <option value="NGO/Pertubuhan">NGO/Pertubuhan</option>
-                  <option value="Bencana">Bencana</option>
-                  <option value="Keagamaan">Keagamaan</option>
-                  <option value="Pusat Khidmat">Pusat Khidmat</option>
+                  <option value="">Choose</option>
+                  <option value="Public Well-Being">Public Well-Being</option>
+                  <option value="Education">Education</option>
+                  <option value="NGO/Organization">NGO/Organization</option>
+                  <option value="Disaster">Disaster</option>
+                  <option value="Religious">Religious</option>
+                  <option value="Service Center">Service Center</option>
                 </select>
               </article>
 
               <article className="flex flex-col gap-1">
-                <label className="text-indigo-700">Jenis Bantuan</label>
+                <label className="text-indigo-700">Assistance Type</label>
                 <select
                   name="jenis_bantuan"
                   className="h-8 rounded border border-gray-400"
                   value={formData.jenis_bantuan}
                   onChange={handleChange}>
-                  <option value="">Pilih</option>
-                  <option value="TUNAI">Tunai</option>
-                  <option value="BANTUAN PERALATAN">Bantuan Peralatan</option>
-                  <option value="PERALATAN DAN TUNAI">Peralatan dan Tunai</option>
+                  <option value="">Choose</option>
+                  <option value="Cash Assistance">Cash Assistance</option>
+                  <option value="Equipment Assistance">Equipment Assistance</option>
+                  <option value="Equipment & Cash Assistance">Equipment & Cash Assistance</option>
                 </select>
               </article>
 
@@ -200,7 +197,7 @@ const Modal = ({ open, onClose }) => {
                   value={formData.kuantiti}
                   onChange={handleChange}
                   className="h-8 rounded border border-gray-400">
-                  <option value="">Pilih</option>
+                  <option value="">Choose</option>
                   {Array.from({ length: 50 }, (_, i) => (
                     <option key={i + 1} value={i + 1}> 
                       {i + 1}
@@ -251,39 +248,35 @@ const Modal = ({ open, onClose }) => {
             </div>
 
             <div className='grid grid-cols-2 gap-4'>
-  {/* First Article */}
-  <article className="flex flex-col col-span-2 gap-1 py-0">
-    <label className="text-indigo-700">Catatan</label>
-    <textarea
-      name="catatan"
-      value={formData.catatan}
-      onChange={handleChange}
-      className="rounded border border-gray-400 p-2 h-[120px]"
-      placeholder="Catatan tambahan"
-    />
-    <Divider className="my-4" />
-    <p className="text-lg font-semibold">
-      Total Harga: <span className="text-indigo-600">RM {totalPrice.toFixed(2)}</span>
-    </p>
-    <Divider className="my-4" />
-    {/* Final Actions */}
-  <div className="flex justify-end gap-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="bg-gray-300 w-1/2 px-4 py-2 rounded text-black hover:bg-gray-400">
-                Close
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                onClick={notify}
-                className="bg-indigo-600 w-1/2 text-white px-4 py-2 rounded hover:bg-indigo-500">
-                {loading ? 'Submitting...' : 'Submit'}
-              </button>
-              <ToastContainer />
-            </div>
-  </article>
+              {/* First Article */}
+              <article className="flex flex-col col-span-2 gap-1 py-0">
+                <label className="text-indigo-700">Catatan</label>
+                <textarea name="catatan" value={formData.catatan}
+                  onChange={handleChange}
+                  className="rounded border border-gray-400 p-2 h-[120px]"
+                  placeholder="Catatan tambahan"
+                />
+                <Divider className="my-4" />
+                  <p className="text-lg font-semibold">
+                    Total Harga: <span className="text-indigo-600">RM {totalPrice.toFixed(2)}</span>
+                  </p>
+                <Divider className="my-4" />
+                {/* Final Actions */}
+                <div className="flex justify-end gap-4">
+                  <button type="button" onClick={onClose}
+                    className="bg-gray-300 w-1/2 px-4 py-2 rounded text-black hover:bg-gray-400">
+                    Close
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={`bg-indigo-600 w-1/2 px-4 py-2 rounded text-white hover:bg-indigo-700 ${
+                      loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}>
+                      {loading ? 'Submitting...' : 'Submit'}
+                  </button>
+                </div>
+              </article>
             </div>
           </section>
         </form>

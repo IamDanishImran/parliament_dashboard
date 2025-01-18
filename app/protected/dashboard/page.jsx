@@ -20,22 +20,22 @@ export default function Dashboard() {
     const loginStatus = searchParams.get("login");
     console.log("Login status:", loginStatus);
     if (loginStatus && loginStatus.startsWith("success")) {
-      toast.success("Welcome back!");
+      toast.success("Welcome To Parliament Dashboard!");
     }
   }, [searchParams]);
 
   return (
     <main className="pt-4 p-2 pl-10 pr-20">
       <ToastContainer />
-      <Header title="Dashboard" />
+      <Header title="Dashboard" navigator="Dashboard" />
       <br />
       <PanelStatus />
       <br />
       <PanelAnalysis />
       <br />
       <section id="chart-pie" className="flex w-full h-full gap-4">
-        <ChartPMR /> {/* Chart Program Mesra Rakyat */}
-        <ChartKebajikan /> {/* Chart Bantuan Kebajikan */}
+        <ChartPMR /> {/* Chart Community Engagement Program */}
+        <ChartKebajikan /> {/* Chart Welfare Assistance Program */}
       </section>
       <br /><br />
       <BarGraph /> {/* Bar Graph Section */}

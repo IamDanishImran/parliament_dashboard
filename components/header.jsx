@@ -5,7 +5,7 @@ import { Skeleton } from "@nextui-org/skeleton";
 import Breadcrumbs from "@mui/material/Breadcrumbs"; // Assuming you're using Material UI's Breadcrumbs component
 import Link from "next/link"; // For navigation links in breadcrumbs
 
-export default function Header({ title }) {
+export default function Header({ title, navigator }) {
   const supabase = createClient();
   const [userDetails, setUserDetails] = useState({
     email: "Loading...",
@@ -106,10 +106,10 @@ export default function Header({ title }) {
               <Link href="/" className="text-slate-600">
                 Home
               </Link>
-              <p className="text-sm font-medium text-neutral-900">{title}</p>
+              <p className="text-sm font-medium text-neutral-900">{navigator}</p>
             </Breadcrumbs>
             <h1 className="text-3xl font-semibold mt-4">{title}</h1>
-            <p className="font-semibold text-gray-700">Dashboard Parlimen Alor Gajah</p>
+            <p className="font-semibold text-gray-700">Parliament Dashboard Alor Gajah</p>
           </article>
           <article className="flex flex-col items-end justify-start w-full">
             <div className="bg-slate-50 border border-black rounded px-2 py-1 font-semibold">

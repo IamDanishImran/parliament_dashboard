@@ -1,106 +1,171 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const AdminModal = ({ isOpen, onClose, dunData = {}, supabase }) => {
-  const [dunStatus, setDunStatus] = useState(dunData.status || "");
-  const [name, setName] = useState(dunData.name || "");
-  const [email, setEmail] = useState(dunData.email || "");
+const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
+  const [adminName, setAdminName] = useState(formData?.name || "");
+  const [adminStatus, setAdminStatus] = useState(formData?.status || "");
+  const [adminEmail, setAdminEmail] = useState(formData?.email || "");
+  const [adminIC, setAdminIC] = useState(formData?.ic || "");
   const [isLoading, setIsLoading] = useState(false);
 
+  if (!isOpen || !formData) return null;
+
+  console.log("formData.id:", formData.id);
+
   useEffect(() => {
-    if (dunData) {
-      setDunStatus(dunData.status || "");
-      setName(dunData.name || "");
-      setEmail(dunData.email || "");
+    if (formData) {
+      setAdminName(formData.name);
+      setAdminStatus(formData.status);
+      setAdminEmail(formData.email);
+      setAdminIC(formData.ic);
     }
-  }, [dunData]);
+  }, [formData]);
 
   const handleSave = async () => {
-    if (!dunStatus) {
-      alert("Please fill in all fields");
+    if (!adminName || !adminEmail || !adminStatus || !adminIC) {
+      toast.error("Please fill in all fields");
       return;
     }
-
+  
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from("dun")
-        .update({ status: dunStatus })
-        .eq("id", dunData.id);
-
-      if (error) throw error;
-
-      alert("Dun updated successfully");
-      onClose();
+        .from("admin")
+        .update({ name: adminName, email: adminEmail, status: adminStatus, ic: adminIC, status: 'Approved' })
+        .eq("id", formData.id)
+        .select();
+  
+      if (error) {
+        console.error("Supabase Error:", error.message);
+        toast.error("An error occurred while updating the admin request.");
+      } else {
+        console.log("Updated Record:", data);
+        toast.success("Approved admin request successfully");
+        onClose();
+      }
     } catch (error) {
-      console.error("Error updating dun:", error);
-      alert("An error occurred while updating the dun.");
+      console.error("Error updating admin request:", error);
+      toast.error("An error occurred while updating the admin request.");
     } finally {
       setIsLoading(false);
     }
   };
+  
 
-  if (!isOpen) return null; // Don't render if modal is closed
+  const handleDelete = async () => {
+    if (
+      typeof window !== "undefined" &&
+      window.confirm("Are you sure you want to delete this request?")
+    ) {
+      setIsLoading(true);
+      try {
+        const { error } = await supabase
+          .from("admin")
+          .delete()
+          .eq("id", formData.id);
+
+        if (error) throw error;
+
+        toast.success("admin request deleted successfully");
+        console.log(`FormData: ${formData}`);
+        onClose();
+      } catch (error) {
+        console.error("Error deleting admin request:", error);
+        toast.error("An error occurred while deleting the request.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg w-11/12 max-w-4xl p-6">
-        <h2 className="text-3xl mb-4">Admin Management</h2>
-
-        <section className="grid grid-flow-col grid-row-6 gap-4 mb-4">
-          <article className="flex flex-col">
-            <label htmlFor="name">Name</label>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white rounded shadow p-6 w-1/3">
+        <h2 className="text-xl font-semibold mb-4">admin Details</h2>
+        <div className="grid grid-cols-3 gap-4">
+          <article className="flex flex-col col-span-1 gap-1">
+            <label htmlFor="status" className="text-indigo-700">
+              Status
+            </label>
+            <input
+              type="text"
+              value={adminStatus}
+              disabled
+              className={`h-8 rounded border border-gray-400 px-2 ${
+                adminStatus === "Pending"
+                  ? "bg-yellow-300"
+                  : adminStatus === "Approved"
+                  ? "bg-green-300"
+                  : "bg-gray-200"
+              }`}
+            />
+          </article>
+          <article className="flex flex-col col-span-2 gap-1">
+            <label htmlFor="name" className="text-indigo-700">
+              Name
+            </label>
             <input
               type="text"
               id="name"
               name="name"
-              aria-label="Name"
-              value={name}
-              readOnly
-              className="h-8 rounded border border-gray-400"
+              className="h-8 rounded border border-gray-400 px-2"
+              value={adminName}
+              disabled
+              onChange={(e) => setAdminName(e.target.value)}
             />
           </article>
-
-          <article className="flex flex-col">
-            <label htmlFor="email">Email</label>
+          <article className="flex flex-col col-span-2 gap-1">
+            <label htmlFor="email" className="text-indigo-700">
+              Email
+            </label>
             <input
               type="text"
               id="email"
               name="email"
-              aria-label="Email"
-              value={email}
-              readOnly
-              className="h-8 rounded border border-gray-400"
+              className="h-8 rounded border border-gray-400 px-2"
+              value={adminEmail}
+              disabled
+              onChange={(e) => setAdminEmail(e.target.value)}
             />
           </article>
-
-          <article className="flex flex-col">
-            <label htmlFor="status">Status</label>
+          <article className="flex flex-col col-span-2 gap-1">
+            <label htmlFor="ic" className="text-indigo-700">
+              IC
+            </label>
             <input
               type="text"
-              id="status"
-              name="status"
-              value={dunStatus}
-              onChange={(e) => setDunStatus(e.target.value)}
-              className="h-8 rounded border border-gray-400"
+              id="ic"
+              name="ic"
+              className="h-8 rounded border border-gray-400 px-2"
+              value={adminIC}
+              disabled
+              onChange={(e) => setAdminIC(e.target.value)}
             />
           </article>
-        </section>
-
-        <div className="flex justify-between">
+        </div>
+        <div className="mt-4 flex justify-end gap-4">
           <button
-            onClick={onClose}
-            className="w-1/2 mr-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 "
+            onClick={handleDelete}
+            disabled={isLoading}
+            className="w-1/2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:bg-gray-400"
           >
-            Close
+            {isLoading ? "Deleting..." : "Delete"}
           </button>
           <button
             onClick={handleSave}
             disabled={isLoading}
-            className="w-1/2 ml-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+            className="w-1/2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
           >
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? "Approving..." : "Approve"}
           </button>
         </div>
+        <button
+          onClick={onClose}
+          className="bg-gray-600 text-white w-1/4 py-2 rounded mt-4"
+        >
+          Close
+        </button>
       </div>
     </div>
   );

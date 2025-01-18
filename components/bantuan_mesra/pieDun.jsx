@@ -15,8 +15,8 @@ const PieDun = ({ filteredForm }) => {
     "Machap Jaya": 0,
     "Asahan": 0,
     "Durian Tunggal": 0,
-    "Luar Alor_Gajah": 0,
-    "Luar Melaka": 0,
+    "Outside Alor Gajah": 0,
+    "Outside Melaka": 0,
   });
 
   useEffect(() => {
@@ -27,8 +27,8 @@ const PieDun = ({ filteredForm }) => {
         "Machap Jaya": 0,
         "Asahan": 0,
         "Durian Tunggal": 0,
-        "Luar Alor_Gajah": 0,
-        "Luar Melaka": 0,
+        "Outside Alor Gajah": 0,
+        "Outside Melaka": 0,
       };
   
       // Loop through the filteredForm data
@@ -38,8 +38,8 @@ const PieDun = ({ filteredForm }) => {
         if (form?.dun?.id_register?.description === "Machap Jaya") dun_counts["Machap Jaya"]++;
         if (form?.dun?.id_register?.description === "Asahan") dun_counts["Asahan"]++;
         if (form?.dun?.id_register?.description === "Durian Tunggal") dun_counts["Durian Tunggal"]++;
-        if (form?.dun?.id_register?.description === "Luar Alor Gajah") dun_counts["Luar Alor_Gajah"]++;
-        if (form?.dun?.id_register?.description === "Luar Melaka") dun_counts["Luar Melaka"]++;
+        if (form?.dun?.id_register?.description === "Luar Alor Gajah") dun_counts["Outside Alor Gajah"]++;
+        if (form?.dun?.id_register?.description === "Outside Melaka") dun_counts["Outside Melaka"]++;
       });
   
       // Update the dun count
@@ -71,7 +71,7 @@ const PieDun = ({ filteredForm }) => {
               "#bfdbfe", // Asahan
               "#fb923c", // Durian Tunggal
               "#fca5a5",   // Luar Alor Gajah
-              "#2e1065", // Luar Melaka
+              "#2e1065", // Outside Melaka
             ],
             hoverOffset: 4,
           },
@@ -119,7 +119,7 @@ const PieDun = ({ filteredForm }) => {
     <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
       <Skeleton isLoaded={!loading}>
         <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
-      <h1 className="text-xl text-center my-4">Program Mesra Rakyat Mengikut Dun {currentYear}</h1>
+      <h1 className="text-xl text-center my-4">Community Outreach Program by Dun {currentYear}</h1>
       <div className="chart-container w-[300px] h-[300px]">
         {hasData ? (
           <canvas id="pmrChart" className="w-full h-full"></canvas>

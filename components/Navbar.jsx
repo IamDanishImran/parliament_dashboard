@@ -25,23 +25,8 @@ export default function Navbar() {
 
   return (
     <nav className="absolute w-full flex justify-center h-16 opacity-100 z-10">
-      <div className="w-full w-7xl flex justify-between items-center py-3 px-20 text-sm">
-        <div className="flex gap-5 items-center font-semibold">
-          <Link href="/">Parliament Dashboard</Link>
-        </div>
-        <div className="flex gap-10">
-          <div>
-            <p><Link href="/">Home</Link></p>
-          </div>
-          <div>
-            <p><Link href="/about/">About Us</Link></p>
-          </div>
-          <div>
-            <p><Link href="/contact/">Contact Us</Link></p>
-          </div>
-        </div>
+      <article className="w-full w-7xl flex justify-end items-center py-3 px-20 text-sm">
         <div>
-          {/* Conditionally render buttons based on login status */}
           {!isLoggedIn ? (
             <>
               <Button asChild size="sm" variant={"outline"} className="mr-1">
@@ -57,7 +42,7 @@ export default function Navbar() {
             </Button>
           )}
         </div>
-      </div>
+      </article>
     </nav>
   );
 }

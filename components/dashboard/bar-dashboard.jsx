@@ -17,7 +17,8 @@ const BarGraph = () => {
       try {
         const { data, error } = await supabase
           .from("form")
-          .select("inserted_at, price");
+          .select("inserted_at, price")
+          // .eq('form_status', "LULUS");
         if (error) {
           throw new Error(error.message);
         }
@@ -90,7 +91,7 @@ const BarGraph = () => {
           y: {
             ticks: {
               callback: function(value) {
-                return "RM " + value.toFixed(2); // Format the Y-axis as currency
+                return "RM " + parseFloat(value).toFixed(2);
               },
             },
           },
@@ -103,7 +104,7 @@ const BarGraph = () => {
     <>
       <Skeleton isLoaded={!loading}>
         <div className="bg-slate-50 w-full h-auto px-14 py-6 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
-          <h1 className="text-xl mb-4">Total Perbelanjaan Mengikut Bulanan</h1>
+          <h1 className="text-xl mb-4">Total Expenditure by Month</h1>
           <canvas id="barChart" className="bg-slate-50" height="300" width="600"></canvas>
         </div>
       </Skeleton>

@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Skeleton } from "@nextui-org/skeleton";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Header from "@/components/header";
 import DunModal from "@/components/user_management/DunModal";
@@ -93,8 +95,8 @@ const UserManagement = () => {
 
   return (
     <main className="p-2 pl-10 pr-20">
-      <Header title="User Management" />
-
+      <Header title="User Management" navigator="User Managment" />
+      <ToastContainer />
       <Skeleton isLoaded={!loading}>
       {adminRole === "Manager" && (
         <div className="flex flex-col">

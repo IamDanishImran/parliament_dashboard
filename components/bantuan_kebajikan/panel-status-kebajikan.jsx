@@ -6,9 +6,9 @@ const PanelStatus = ({ filteredForm = [] }) => {
   const [loading, setLoading] = useState(true);
   const [statusCounts, setStatusCounts] = useState({
     TOTAL: 0,
-    MOHON: 0,
-    LULUS: 0,
-    DITOLAK: 0,
+    APPLICATION: 0,
+    APPROVED: 0,
+    REJECTED: 0,
     KIV: 0,
   });
 
@@ -16,9 +16,9 @@ const PanelStatus = ({ filteredForm = [] }) => {
     try {
       const newStatusCounts = {
         TOTAL: 0,
-        MOHON: 0,
-        LULUS: 0,
-        DITOLAK: 0,
+        APPLICATION: 0,
+        APPROVED: 0,
+        REJECTED: 0,
         KIV: 0,
       };
 
@@ -28,16 +28,16 @@ const PanelStatus = ({ filteredForm = [] }) => {
       }
 
       filteredForm.forEach((form) => {
-        if (form.form_status === 'MOHON') newStatusCounts.MOHON++;
-        if (form.form_status === 'LULUS') newStatusCounts.LULUS++;
-        if (form.form_status === 'DITOLAK') newStatusCounts.DITOLAK++;
+        if (form.form_status === 'IN PROGRESS') newStatusCounts.APPLICATION++;
+        if (form.form_status === 'APPROVED') newStatusCounts.APPROVED++;
+        if (form.form_status === 'REJECTED') newStatusCounts.REJECTED++;
         if (form.form_status === 'KIV') newStatusCounts.KIV++;
       });
 
       newStatusCounts.TOTAL =
-        newStatusCounts.MOHON +
-        newStatusCounts.LULUS +
-        newStatusCounts.DITOLAK +
+        newStatusCounts.APPLICATION +
+        newStatusCounts.APPROVED +
+        newStatusCounts.REJECTED +
         newStatusCounts.KIV;
 
       setStatusCounts(newStatusCounts);
@@ -54,36 +54,36 @@ const PanelStatus = ({ filteredForm = [] }) => {
         id="status"
         className="bg-blue-200 w-full h-32 p-4 grid grid-cols-5 gap-4 rounded shadow-md"
       >
-        {/* Status Permohonan */}
+        {/* Status APPLICATION */}
         <article className="h-full rounded bg-blue-700 text-center">
           <h1 className="items-center text-center mt-2 text-lg font-semi text-slate-50">
-            PERMOHONAN
+            APPLICATION
           </h1>
           <p className="text-2xl mt-2 font-medium text-slate-50">{statusCounts.TOTAL}</p>
         </article>
 
-        {/* Status Sedang Diproses */}
+        {/* Status IN PROGRESS */}
         <article className="h-full rounded bg-yellow-200 text-center">
           <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">
-            SEDANG DIPROSES
+            IN PROGRESS
           </h1>
-          <p className="text-2xl mt-2 font-medium">{statusCounts.MOHON}</p>
+          <p className="text-2xl mt-2 font-medium">{statusCounts.APPLICATION}</p>
         </article>
 
-        {/* Status Diluluskan */}
+        {/* Status APPROVED */}
         <article className="h-full rounded bg-green-400 text-center">
           <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">
-            DILULUSKAN
+            APPROVED
           </h1>
-          <p className="text-2xl mt-2 font-medium">{statusCounts.LULUS}</p>
+          <p className="text-2xl mt-2 font-medium">{statusCounts.APPROVED}</p>
         </article>
 
-        {/* Status Ditolak */}
+        {/* Status REJECTED */}
         <article className="h-full rounded bg-red-500 text-center">
           <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">
-            DITOLAK
+            REJECTED
           </h1>
-          <p className="text-2xl mt-2 font-medium">{statusCounts.DITOLAK}</p>
+          <p className="text-2xl mt-2 font-medium">{statusCounts.REJECTED}</p>
         </article>
 
         {/* Status KIV */}

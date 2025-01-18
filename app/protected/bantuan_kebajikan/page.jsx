@@ -28,16 +28,17 @@ export default function Bantuan_Kebajikan() {
         const { data, error } = await supabase
           .from('form')
           .select('*, dun(id_register(*))')
-          .eq('category', 'Bantuan Kebajikan');
+          .eq('category', 'Welfare Assistance Program')
+          // .eq('form_status', "LULUS");
         if (error) {
-          console.error("Error fetching data:", error);
+          console.log("Error fetching data:", error);
         } else {
           console.log("Fetched Data:", data);
           setForm(data);
           setFilteredForm(data);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
         toast.error("Error fetching data");
       } finally {
         setLoading(false);
@@ -62,23 +63,23 @@ export default function Bantuan_Kebajikan() {
 
   return (
     <main className="p-2 pl-10 pr-20">
-      <Header title="Rumusan Program Kebajikan" />
+      <Header title="Welfare Assistance Program Summary" navigator="Welfare Assistance Program" />
       <br />
       {/* Search Bar */}
       <Skeleton isLoaded={!loading}>
       <section id="search" className="flex flex-col w-full h-auto rounded border shadow shadow-gray-400">
         <article>
-          <h1 className="mx-4 mt-4 text-2xl font-semibold">Panel Carian</h1>
+          <h1 className="mx-4 mt-4 text-2xl font-semibold">Search Panel</h1>
         </article>
         <article className="flex justify-around px-2">
           <div className="w-2/4 m-2">
-            <label htmlFor="kategori_bantuan">Jenis Bantuan</label>
+            <label htmlFor="kategori_bantuan">Assistance Type</label>
             <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500">
               <select className="w-full h-full bg-sky-50" id="kategori_bantuan" value={jenisBantuanSearch} onChange={(e) => setJenisBantuan(e.target.value)}>
                 <option value="*">All</option>
-                <option value="TUNAI">Tunai</option>
-                <option value="BANTUAN PERALATAN">Bantuan Peralatan</option>
-                <option value="PERALATAN DAN TUNAI">Peralatan dan Tunai</option>
+                <option value="Cash Assistance">Cash Assistance</option>
+                <option value="Equipment Assistance">Equipment Assistance</option>
+                <option value="Equipment & Cash Assistance">Equipment & Cash Assistance</option>
               </select>
             </div>
           </div>
@@ -94,7 +95,7 @@ export default function Bantuan_Kebajikan() {
                 <option value="Asahan">Asahan</option>
                 <option value="Gadek">Gadek</option>
                 <option value="Luar Alor Gajah">Luar Alor Gajah</option>
-                <option value="Luar Melaka">Luar Melaka</option>
+                <option value="Outside Melaka">Outside Melaka</option>
               </select>
             </div>
           </div>
@@ -104,7 +105,8 @@ export default function Bantuan_Kebajikan() {
             onClick={handleSearch}>
             Search
           </button>
-          <button className="w-32 h-8 flex justify-center items-center rounded border border-slate-900 bg-slate-50 hover:bg-violet-500 text-slate-900 ease-in duration-200"
+          <button className="w-32 h-8 flex justify-center items-center rounded border border-slate-900 bg-slate-50
+          hover:bg-indigo-600 hover:border-lg hover:border-neutral-50 hover:text-slate-50 ease-in duration-200"
             onClick={resetSearch}>
             Reset Search
           </button>

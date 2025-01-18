@@ -9,12 +9,12 @@ Chart.register(...registerables);
 const PieCategory = ({ filteredForm }) => {
   const [loading, setLoading] = useState(true);
   const [categoryCounts, setCategoryCounts] = useState({
-    "Kesejahteraan Rakyat": 0,
-    Pendidikan: 0,
-    Keagamaan: 0,
-    "NGO/Pertubuhan": 0,
-    Bencana: 0,
-    "Pusat Khidmat": 0,
+    "Public Well-Being": 0,
+    Education: 0,
+    Religious: 0,
+    "NGO/Organization": 0,
+    Disaster: 0,
+    "Service Center": 0,
   });
 
   const canvasRef = useRef(null);
@@ -27,12 +27,12 @@ const PieCategory = ({ filteredForm }) => {
     }
 
     const category_counts = {
-      "Kesejahteraan Rakyat": 0,
-      Pendidikan: 0,
-      Keagamaan: 0,
-      "NGO/Pertubuhan": 0,
-      Bencana: 0,
-      "Pusat Khidmat": 0,
+      "Public Well-Being": 0,
+      Education: 0,
+      Religious: 0,
+      "NGO/Organization": 0,
+      Disaster: 0,
+      "Service_Center": 0,
     };
 
     try {
@@ -114,7 +114,7 @@ const PieCategory = ({ filteredForm }) => {
     <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
       <Skeleton isLoaded={!loading}>
         <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
-          <h1 className="text-xl text-center my-4">Bantuan Kebajikan Mengikut Kategori {currentYear}</h1>
+          <h1 className="text-xl text-center my-4">Welfare Assistance by Category {currentYear}</h1>
           <div className="chart-container w-[300px] h-[300px]">
             {hasData ? (
               <canvas ref={canvasRef} id="categoryChart" className="w-full h-full"></canvas>

@@ -23,11 +23,11 @@ const LegendDun = () => {
         </div>
         <div id="wrapper-process" className="flex justify-center items-center gap-x-1">
           <div id="dun-color" className="rounded-lg bg-red-300 w-4 h-4"></div>
-          <div id="dun-title">Luar Alor Gajah</div>
+          <div id="dun-title">Outside Alor Gajah</div>
         </div>
         <div id="wrapper-process" className="flex justify-center items-center gap-x-1">
           <div id="dun-color" className="rounded-lg bg-violet-950 w-4 h-4"></div>
-          <div id="dun-title">Luar Melaka</div>
+          <div id="dun-title">Outside Melaka</div>
         </div>
       </div>
   );

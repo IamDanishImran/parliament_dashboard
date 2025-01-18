@@ -11,7 +11,7 @@ export default function Footer() {
     <footer className="h-48 w-full py-5 flex flex-col gap-4 items-center justify-center">
       <Divider className="my-4" />
       <div className="flex gap-4 text-slate-600">
-        <p>@Dashboard Parlimen Alor Gajah {currentYear}</p>
+        <p>@Parliament Dashboard Alor Gajah {currentYear}</p>
       </div>
     </footer>
   </> 

@@ -7,7 +7,6 @@
 4. npm install nodemailer
 5. npm install chart.js
 6. npm install react-loading-skeleton
-
 7. npm install @types/react@latest
 8. npm install @types/react-dom@latest
 9. npm install autoprefixer@latest
@@ -19,5 +18,46 @@
 15. npm install react-toastify@latest
 16. npm install tailwindcss@latest
 17. npm install typescript@latest
-npm update
+18. npm update
+
+-- Programs --
+Program Mesra Rakyat = Community Engagement Program
+Program Bantuan Kebajikan = Welfare Assistance Program
+
+-- Category --
+Kesejahteraan Rakyat = Public_Well_Being
+Pendidikan = Education
+Bencana = Disaster
+Keagamaan = Religious
+NGO/Pertubuhan = NGO/Organization
+Pusat Khidmat = Service_Center
+
+-- Assistance Type --
+Tunai = Cash Assistance
+Bantuan Peralatan = Equipment Assistance
+Peralatan dan tunai = Equipment & Cash Assistance
+
+Tambah Rekod = Add Submission
+
+Mohon = Apply
+Lulus = Approved
+Ditolak = Rejected
+KIV = KIV
+Permohonan = APPLICATION 
+sedang process = IN PROGRESS
+dululuskan = APPROVED
+ditolak = REJECTED
+
+-- Dashboard Analysis --
+Jumlah Perbelanjaan Kebajikan = Total Expenditure for Community Outreach Program
+Jumlah Bantuan Kebajikan = Total Assistance for Community Outreach Program
+Jumlah Perbelanjaan Bantuan Kebajikan = Total Expenditure for Welfare Assistance
+
+-- Bantuan Kebajikan Analysis --
+Jumlah Perbelanjaan Bantuan Kebajikan = Total Welfare Assistance Expenditure
+Jumlah Bantuan Jenis Tunai dan Peralatan = Total Assistance for Cash and Equipment
+Jumlah Tunai Diberi Sahaja = Total Cash Assistance Given
+Nilai Peralatan Sahaja Diberi = Value of Equipment Assistance Given
+
+-- Program Mesra rakyat Analysis --
 

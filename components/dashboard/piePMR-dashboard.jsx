@@ -12,7 +12,10 @@ const ChartPMR = () => {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [statusCounts, setStatusCounts] = useState({
-    Mohon: 0, Lulus: 0, Ditolak: 0, KIV: 0,
+    "IN PROGRESS": 0, 
+    "APPROVED": 0, 
+    "REJECTED": 0, 
+    "KIV": 0,
   });
 
   useEffect(() => {
@@ -21,20 +24,20 @@ const ChartPMR = () => {
         const { data, error } = await supabase
           .from("form")
           .select("form_status")
-          .eq("category", "Program Mesra Rakyat");
+          .eq("category", "Community Outreach Program");
         if (error) throw new Error(error.message);
 
-        const counts = { Mohon: 0, Lulus: 0, Ditolak: 0, KIV: 0 };
+        const counts = { "IN PROGRESS": 0, "APPROVED": 0, "REJECTED": 0, "KIV": 0 };
         data.forEach((form) => {
           const status = form.form_status?.toUpperCase();
-          if (status === "MOHON") counts.Mohon++;
-          if (status === "LULUS") counts.Lulus++;
-          if (status === "DITOLAK") counts.Ditolak++;
-          if (status === "KIV") counts.KIV++;
+          if (status === "IN PROGRESS") counts["IN PROGRESS"]++;
+          if (status === "APPROVED") counts["APPROVED"]++;
+          if (status === "REJECTED") counts["REJECTED"]++;
+          if (status === "KIV") counts["KIV"]++;
         });
         setStatusCounts(counts);
       } catch (error) {
-        console.error("Error fetching form status counts:", error);
+        console.log("Error fetching form status counts:", error);
       } finally {
         setLoading(false);
       }
@@ -78,14 +81,21 @@ const ChartPMR = () => {
 
     return () => chart?.destroy();
   }, [statusCounts]);
+  const hasData = Object.values(statusCounts).some((count) => count > 0);
 
   return (
     <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
       <Skeleton isLoaded={!loading}>
         <article className="flex flex-col gap-y-8 p-4 justify-center items-center w-full h-full">
-          <h1 className="text-xl">Program Mesra Rakyat</h1>
+          <h1 className="text-xl">Community Engagement Program</h1>
           <div className="chart-container w-[300px] h-[300px]">
-            <canvas id="pmrChart" className="w-full h-full"></canvas>
+            {hasData ? (
+              <canvas id="pmrChart" className="w-full h-full"></canvas>
+            ) : (
+              <div className="flex justify-center items-center w-full h-full text-gray-500">
+                <p className="text-center text-black">No Data</p>
+              </div>
+            )}
           </div>
           <LegendStatus />
         </article>

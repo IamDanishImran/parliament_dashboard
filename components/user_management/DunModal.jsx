@@ -1,138 +1,198 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const DunModal = ({ isOpen, onClose, dunData, supabase }) => {
-  const [dunStatus, setDunStatus] = useState("");
-  const [dunName, setDunName] = useState("");
-  const [dunEmail, setDunEmail] = useState("");
+const DunModal = ({ isOpen, onClose, formData, supabase }) => {
+  const [dunName, setDunName] = useState(formData?.name || "");
+  const [dunStatus, setDunStatus] = useState(formData?.status || "");
+  const [dunEmail, setDunEmail] = useState(formData?.email || "");
+  const [dunIC, setDunIC] = useState(formData?.ic || "");
+  const [dun, setDun] = useState(formData?.registration.description || "");
+  const [roleCode, setRoleCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+
+  if (!isOpen || !formData) return null;
 
   useEffect(() => {
-    console.log("dunData", dunData);
-    if (dunData) {
-      console.log("dunData inside useEffect:", dunData);
-      setDunStatus(dunData.status || "");
-      setDunName(dunData.name || "");
-      setDunEmail(dunData.email || "");
+    if (formData) {
+      setDunName(formData.name);
+      setDunStatus(formData.status);
+      setDunEmail(formData.email);
+      setDunIC(formData.ic);
+      setDun(formData.dun);
+      if(dun === 'Rembia') { setRoleCode('10598878');}
+      if(dun === 'Machap Jaya') { setRoleCode('12345678');}
+      if(dun === 'Durian Tunggal') { setRoleCode('98765432');}
+      if(dun === 'Asahan') { setRoleCode('45671234');}
+      if(dun === 'Gadek') { setRoleCode('31415926');}
+      if(dun === 'Outside Alor Gajah') { setRoleCode('74035216');}
+      if(dun === 'Outside Melaka') { setRoleCode('20479352');}
     }
-  }, [dunData]);
+  }, [formData]);
 
-  // Handle Save action
   const handleSave = async () => {
-    if (!dunStatus || !dunName || !dunEmail) {
-      alert("Please fill in all fields");
-      return;
-    }
     setIsLoading(true);
-    setError(null);
-
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("dun")
-        .update({ status: "Approved", name, email })
-        .eq("id", dunData.id);
+        .update({
+          name: dunName,
+          email: dunEmail,
+          status: "Approved",
+          ic: dunIC,
+        })
+        .eq("id", formData.id);
 
       if (error) throw error;
-      alert("Data updated successfully");
-    } catch (err) {
-      console.error("Error:", err);
-      alert("An error occurred while processing your request.");
+
+      const response = await fetch("/api/user-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: dunEmail,
+          subject: "Your Application Has Been Approved",
+          text: `Dear ${dunName},\n\nYour registration has been approved successfully.\n\nBest regards,\nParliament Team Support
+          here's the registration code ${roleCode}`,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send approval email");
+
+      toast.success("Dun request approved and email sent successfully.");
+      onClose();
+    } catch (error) {
+      console.log("Error:", error.message);
+      toast.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle Delete action
   const handleDelete = async () => {
-    if (typeof window !== "undefined" && window.confirm("Are you sure you want to delete this dun?")) {
+    if (window.confirm("Are you sure you want to delete this request?")) {
       setIsLoading(true);
       try {
         const { error } = await supabase
           .from("dun")
           .delete()
-          .eq("id", dunData.id);
+          .eq("id", formData.id);
 
         if (error) throw error;
-        alert("Dun deleted successfully");
+
+        toast.success("Dun request deleted successfully.");
         onClose();
-      } catch (err) {
-        console.error("Error deleting dun:", err);
-        alert("An error occurred while deleting the dun.");
+      } catch (error) {
+        console.error("Error:", error.message);
+        toast.error("Failed to delete Dun request.");
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg w-11/12 max-w-4xl p-6 relative">
-        <h2 className="text-3xl mb-4">Dun Management</h2>
-        <div className="mt-6">
-          <section className="grid grid-rows-1 grid-flow-col gap-x-2">
-            <div className="col-span-1">
-              <label className="text-gray-600">Status</label>
-              <input
-                type="text"
-                value={dunStatus}
-                disabled
-                className={`w-full p-2 border rounded mb-4 mt-2 ${
-                  dunStatus === "Pending"
-                    ? "bg-yellow-300"
-                    : dunStatus === "Approved"
-                    ? "bg-green-300"
-                    : ""
-                }`}
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="text-gray-600">Email</label>
-              <input
-                type="text"
-                value={dunEmail}
-                disabled
-                className="w-full p-2 border rounded mb-4 mt-2"
-              />
-            </div>
-          </section>
-          <label className="text-gray-600">Name</label>
-          <input
-            type="text"
-            value={dunName}
-            onChange={(e) => setDunName(e.target.value)}
-            disabled
-            className="w-full p-2 border rounded mb-4 mt-2"
-          />
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white rounded shadow p-6 w-1/3">
+        <h2 className="text-xl font-semibold mb-4">Dun Details</h2>
+        <div className="grid grid-cols-3 gap-4">
+          <article className="flex flex-col col-span-1 gap-1">
+            <label htmlFor="status" className="text-indigo-700">
+              Status
+            </label>
+            <input
+              type="text"
+              value={dunStatus}
+              disabled
+              className={`h-8 rounded border px-2 ${
+                dunStatus === "Pending"
+                  ? "bg-yellow-300"
+                  : dunStatus === "Approved"
+                  ? "bg-green-300"
+                  : "bg-gray-200"
+              }`}
+            />
+          </article>
+          <article className="col-span-2"></article>
+          <article className="flex flex-col col-span-2 gap-1">
+            <label htmlFor="name" className="text-indigo-700">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              className="h-8 rounded border border-gray-400 px-2"
+              value={dunName}
+              disabled
+              onChange={(e) => setDunName(e.target.value)}
+            />
+          </article>
+          <article className="flex flex-col col-span-2 gap-1">
+            <label htmlFor="email" className="text-indigo-700">
+              Email
+            </label>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              className="h-8 rounded border border-gray-400 px-2"
+              value={dunEmail}
+              disabled
+              onChange={(e) => setDunEmail(e.target.value)}
+            />
+          </article>
+          <article className="col-span-1"></article>
+          <article className="flex flex-col col-span-1 gap-1">
+            <label htmlFor="ic" className="text-indigo-700">
+              IC
+            </label>
+            <input
+              type="text"
+              id="ic"
+              name="ic"
+              className="h-8 rounded border border-gray-400 px-2"
+              value={dunIC}
+              disabled
+              onChange={(e) => setDunIC(e.target.value)}
+            />
+          </article>
+          <article className="flex flex-col col-span-1 gap-1">
+            <label htmlFor="dun" className="text-indigo-700">
+              Dun
+            </label>
+            <input
+              type="text"
+              id="dun"
+              name="dun"
+              className="h-8 rounded border border-gray-400 px-2"
+              value={dun}
+              disabled
+              onChange={(e) => setDun(e.target.value)}
+            />
+          </article>
         </div>
         <div className="mt-4 flex justify-end gap-4">
           <button
-            onClick={handleSave}
-            disabled={isLoading}
-            className={`btn btn-primary text-white w-full p-2 rounded mt-4 ${
-              isLoading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-500"
-            }`}
-          >
-            {isLoading ? "Saving..." : "Save"}
-          </button>
-          <button
             onClick={handleDelete}
             disabled={isLoading}
-            className="btn bg-red-500 text-white w-full p-2 rounded mt-4 hover:bg-red-400"
+            className="w-1/2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:bg-gray-400"
           >
             {isLoading ? "Deleting..." : "Delete"}
           </button>
-        </div>
-        <div className="mt-2 w-full">
           <button
-            type="button"
-            onClick={onClose}
-            className="bg-gray-300 px-4 py-2 rounded text-black w-full hover:bg-gray-400"
+            onClick={handleSave}
+            disabled={isLoading}
+            className="w-1/2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
           >
-            Close
+            {isLoading ? "Approving..." : "Approve"}
           </button>
         </div>
+        <button
+          onClick={onClose}
+          className="bg-gray-600 text-white w-1/4 py-2 rounded mt-4"
+        >
+          Close
+        </button>
       </div>
     </div>
   );

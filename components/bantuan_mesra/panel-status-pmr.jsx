@@ -4,7 +4,11 @@ import { Skeleton } from '@nextui-org/skeleton';
 
 const PanelStatus = ({ filteredForm }) => {
   const [statusCounts, setStatusCounts] = useState({
-    TOTAL: 0, MOHON: 0, LULUS: 0, DITOLAK: 0, KIV: 0,
+    TOTAL: 0, 
+    APPLICATION: 0, 
+    APPROVED: 0, 
+    REJECTED: 0, 
+    KIV: 0,
   });
   const [loading, setLoading] = useState(true)
 
@@ -12,7 +16,7 @@ const PanelStatus = ({ filteredForm }) => {
     try {
       const calculateStatusCounts = () => {
         const newStatusCounts = {
-          TOTAL: 0, MOHON: 0, LULUS: 0, DITOLAK: 0, KIV: 0,
+          TOTAL: 0, APPLICATION: 0, APPROVED: 0, REJECTED: 0, KIV: 0,
         };
   
         // Check if filteredForm is empty and directly set all counts to 0
@@ -23,13 +27,13 @@ const PanelStatus = ({ filteredForm }) => {
   
         // Loop through filteredForm data and count each status
         filteredForm.forEach((form) => {
-          if (form.form_status === 'MOHON') newStatusCounts.MOHON++;
-          if (form.form_status === 'LULUS') newStatusCounts.LULUS++;
-          if (form.form_status === 'DITOLAK') newStatusCounts.DITOLAK++;
+          if (form.form_status === 'IN PROGRESS') newStatusCounts.APPLICATION++;
+          if (form.form_status === 'APPROVED') newStatusCounts.APPROVED++;
+          if (form.form_status === 'REJECTED') newStatusCounts.REJECTED++;
           if (form.form_status === 'KIV') newStatusCounts.KIV++;
         });
   
-        newStatusCounts.TOTAL = newStatusCounts.MOHON + newStatusCounts.LULUS + newStatusCounts.DITOLAK + newStatusCounts.KIV;
+        newStatusCounts.TOTAL = newStatusCounts.APPLICATION + newStatusCounts.APPROVED + newStatusCounts.REJECTED + newStatusCounts.KIV;
         setStatusCounts(newStatusCounts);
       };
       calculateStatusCounts();
@@ -43,25 +47,25 @@ const PanelStatus = ({ filteredForm }) => {
   return (
     <Skeleton isLoaded={!loading}>
     <section id="status" className="bg-blue-200 w-full h-32 mt-4 mb-6 p-4 grid grid-cols-5 gap-4 rounded shadow-md">
-      {/* Status Permohonan */}
+      {/* Status APPLICATION */}
       <article className="h-full rounded bg-blue-700 text-center">
-        <h1 className="items-center text-center mt-2 text-lg font-semi text-slate-50">PERMOHONAN</h1>
+        <h1 className="items-center text-center mt-2 text-lg font-semi text-slate-50">APPLICATION</h1>
         <p className="text-2xl mt-2 font-medium text-slate-50">{statusCounts.TOTAL}</p>
       </article>
-      {/* Status Sedang Diproses */}
+      {/* Status IN PROGRESS */}
       <article className="h-full rounded bg-yellow-200 text-center">
-        <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">SEDANG DIPROSES</h1>
-        <p className="text-2xl mt-2 font-medium">{statusCounts.MOHON}</p>
+        <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">IN PROGRESS</h1>
+        <p className="text-2xl mt-2 font-medium">{statusCounts.APPLICATION}</p>
       </article>
-      {/* Status Diluluskan */}
+      {/* Status APPROVED */}
       <article className="h-full rounded bg-green-400 text-center">
-        <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">DILULUSKAN</h1>
-        <p className="text-2xl mt-2 font-medium">{statusCounts.LULUS}</p>
+        <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">APPROVED</h1>
+        <p className="text-2xl mt-2 font-medium">{statusCounts.APPROVED}</p>
       </article>
-      {/* Status Ditolak */}
+      {/* Status REJECTED */}
       <article className="h-full rounded bg-red-500 text-center">
-        <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">DITOLAK</h1>
-        <p className="text-2xl mt-2 font-medium">{statusCounts.DITOLAK}</p>
+        <h1 className="items-center text-center mt-2 text-xl font-semi text-slate-900">REJECTED</h1>
+        <p className="text-2xl mt-2 font-medium">{statusCounts.REJECTED}</p>
       </article>
       {/* Status KIV */}
       <article className="h-full rounded bg-cyan-400 text-center">

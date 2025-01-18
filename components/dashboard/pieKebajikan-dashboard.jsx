@@ -12,12 +12,12 @@ const ChartKebajikan = () => {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [statusCounts, setStatusCounts] = useState({
-    "Kesejahteraan Rakyat": 0,
-    "Pendidikan": 0,
-    "Keagamaan": 0,
+    "Public Well-Being": 0,
+    "Education": 0,
+    "Religious": 0,
     "NGO Pertubuhan": 0,
-    "Bencana": 0,
-    "Pusat Khidmat": 0,
+    "Disaster": 0,
+    "Service Center": 0,
   });
 
   useEffect(() => {
@@ -26,32 +26,32 @@ const ChartKebajikan = () => {
         const { data, error } = await supabase
           .from("form")
           .select("category_type")
-          .eq("category", "Bantuan Kebajikan");
+          .eq("category", "Welfare Assistance Program");
         if (error) {
           throw new Error(error.message);
         }
 
         const category_type_counts = {
-          "Kesejahteraan Rakyat": 0,
-          "Pendidikan": 0,
-          "Keagamaan": 0,
-          "NGO/Pertubuhan": 0,
-          "Bencana": 0,
-          "Pusat Khidmat": 0,
+          "Public Well-Being": 0,
+          "Education": 0,
+          "Religious": 0,
+          "NGO/Organization": 0,
+          "Disaster": 0,
+          "Service Center": 0,
         };
 
         data.forEach((form) => {
-          if (form.category_type === "Kesejahteraan Rakyat") category_type_counts["Kesejahteraan Rakyat"]++;
-          if (form.category_type === "Pendidikan") category_type_counts["Pendidikan"]++;
-          if (form.category_type === "Bencana") category_type_counts["Bencana"]++;
-          if (form.category_type === "NGO/Pertubuhan") category_type_counts["NGO/Pertubuhan"]++;
-          if (form.category_type === "Keagamaan") category_type_counts["Keagamaan"]++;
-          if (form.category_type === "Pusat Khidmat") category_type_counts["Pusat Khidmat"]++;
+          if (form.category_type === "Public Well-Being") category_type_counts["Public Well-Being"]++;
+          if (form.category_type === "Education") category_type_counts["Education"]++;
+          if (form.category_type === "Disaster") category_type_counts["Disaster"]++;
+          if (form.category_type === "NGO/Organization") category_type_counts["NGO/Organization"]++;
+          if (form.category_type === "Religious") category_type_counts["Religious"]++;
+          if (form.category_type === "Service Center") category_type_counts["Service Center"]++;
         });
 
         setStatusCounts(category_type_counts);
       } catch (error) {
-        console.error("Error fetching category type counts:", error);
+        console.log("Error fetching category type counts:", error);
       } finally {
         setLoading(false);
       }
@@ -62,7 +62,7 @@ const ChartKebajikan = () => {
   useEffect(() => {
     const canvas = document.getElementById("kebajikanChart");
     if (!canvas) {
-      console.error("Canvas element not found");
+      console.log("Canvas element not found");
       return;
     }
     const ctx = canvas.getContext("2d");
@@ -77,12 +77,12 @@ const ChartKebajikan = () => {
             {
               data: dataValues,
               backgroundColor: [
-                "#f59e0b", // Kesejahteraan Rakyat
-                "#f43f5e", // Pendidikan
-                "#1d4ed8", // Keagamaan
-                "#d946ef", // NGO/Pertubuhan
-                "#a855f7", // Bencana
-                "#0ea5e9", // Pusat Khidmat
+                "#f59e0b", // Public Well-Being
+                "#f43f5e", // Education
+                "#1d4ed8", // Religious
+                "#d946ef", // NGO/Organization
+                "#a855f7", // Disaster
+                "#0ea5e9", // Service Center
               ],
               hoverOffset: 4,
             },
@@ -116,21 +116,28 @@ const ChartKebajikan = () => {
         try {
           chart.destroy();
         } catch (error) {
-          console.error("Error destroying chart:", error);
+          console.log("Error destroying chart:", error);
         }
       };
     } catch (error) {
-      console.error("Error initializing chart:", error);
+      console.log("Error initializing chart:", error);
     }
   }, [statusCounts]);
+  const hasData = Object.values(statusCounts).some((count) => count > 0);
 
   return (
     <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
       <Skeleton isLoaded={!loading}>
         <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
-          <h1 className="text-xl">Bantuan Kebajikan</h1>
+          <h1 className="text-xl">Welfare Assistance Program</h1>
           <div className="chart-container w-[300px] h-[300px]">
-            <canvas id="kebajikanChart" className="w-full h-full"></canvas>
+            {hasData ? (
+              <canvas id="kebajikanChart" className="w-full h-full"></canvas>
+            ) : (
+              <div className="flex justify-center items-center w-full h-full text-gray-500">
+                <p className="text-center text-black">No Data</p>
+              </div>
+            )}
           </div>
           <LegendCategory />
         </article>
