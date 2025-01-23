@@ -7,57 +7,80 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
   const [adminStatus, setAdminStatus] = useState(formData?.status || "");
   const [adminEmail, setAdminEmail] = useState(formData?.email || "");
   const [adminIC, setAdminIC] = useState(formData?.ic || "");
+  const [admin, setAdmin] = useState(formData?.registration.description || "");
+  const [roleCode, setRoleCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!isOpen || !formData) return null;
 
-  console.log("formData.id:", formData.id);
+  // Role code mapping
+  const roleCodeMapping = {
+    "Rembia": "10598878",
+    "Machap Jaya": "12345678",
+    "Durian Tunggal": "98765432",
+    "Asahan": "45671234",
+    "Gadek": "31415926",
+    "Outside Alor Gajah": "74035216",
+    "Outside Melaka": "20479352",
+    "Supervisor": "80845621"
+  };
 
   useEffect(() => {
     if (formData) {
-      setAdminName(formData.name);
-      setAdminStatus(formData.status);
-      setAdminEmail(formData.email);
-      setAdminIC(formData.ic);
+      setAdminName(formData.name || "");
+      setAdminStatus(formData.status || "");
+      setAdminEmail(formData.email || "");
+      setAdminIC(formData.ic || "");
+      setAdmin(formData.registration.description || "");
     }
   }, [formData]);
 
+  useEffect(() => {
+    setRoleCode(roleCodeMapping[admin] || "");
+  }, [admin]);
+
   const handleSave = async () => {
-    if (!adminName || !adminEmail || !adminStatus || !adminIC) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-  
-    setIsLoading(true);
+    setIsSaving(true);
     try {
+      // Update admin information
       const { data, error } = await supabase
         .from("admin")
-        .update({ name: adminName, email: adminEmail, status: adminStatus, ic: adminIC, status: 'Approved' })
-        .eq("id", formData.id)
-        .select();
-  
-      if (error) {
-        console.error("Supabase Error:", error.message);
-        toast.error("An error occurred while updating the admin request.");
-      } else {
-        console.log("Updated Record:", data);
-        toast.success("Approved admin request successfully");
-        onClose();
-      }
+        .update({
+          name: adminName,
+          email: adminEmail,
+          status: "Approved",
+          ic: adminIC,
+        })
+        .eq("id", formData.id);
+
+      if (error) throw error;
+
+      // Send approval email
+      const response = await fetch("/api/user-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: adminEmail,
+          subject: "Your Application Has Been Approved",
+          text: `Dear ${adminName},\n\nYour registration has been approved successfully.\n\nBest regards,\nParliament Team Support\nHere's the registration code ${roleCode}`,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send approval email");
+
+      toast.success("admin request approved and email sent successfully.");
+      onClose();
     } catch (error) {
-      console.error("Error updating admin request:", error);
-      toast.error("An error occurred while updating the admin request.");
+      console.error("Error:", error.message);
+      toast.error("An error occurred. Please try again.");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
-  
 
   const handleDelete = async () => {
-    if (
-      typeof window !== "undefined" &&
-      window.confirm("Are you sure you want to delete this request?")
-    ) {
+    if (window.confirm("Are you sure you want to delete this request?")) {
       setIsLoading(true);
       try {
         const { error } = await supabase
@@ -67,12 +90,11 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
 
         if (error) throw error;
 
-        toast.success("admin request deleted successfully");
-        console.log(`FormData: ${formData}`);
+        toast.success("admin request deleted successfully.");
         onClose();
       } catch (error) {
-        console.error("Error deleting admin request:", error);
-        toast.error("An error occurred while deleting the request.");
+        console.error("Error:", error.message);
+        toast.error("Failed to delete admin request.");
       } finally {
         setIsLoading(false);
       }
@@ -80,9 +102,9 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded shadow p-6 w-1/3">
-        <h2 className="text-xl font-semibold mb-4">admin Details</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white rounded shadow p-6 w-[600px]">
+        <h2 className="text-2xl text-center text-indigo-600 font-semibold mb-4">Admin Details</h2>
         <div className="grid grid-cols-3 gap-4">
           <article className="flex flex-col col-span-1 gap-1">
             <label htmlFor="status" className="text-indigo-700">
@@ -91,8 +113,9 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
             <input
               type="text"
               value={adminStatus}
+              aria-disabled="true"
               disabled
-              className={`h-8 rounded border border-gray-400 px-2 ${
+              className={`h-8 rounded border px-2 ${
                 adminStatus === "Pending"
                   ? "bg-yellow-300"
                   : adminStatus === "Approved"
@@ -101,6 +124,7 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
               }`}
             />
           </article>
+          <article className="col-span-2"></article>
           <article className="flex flex-col col-span-2 gap-1">
             <label htmlFor="name" className="text-indigo-700">
               Name
@@ -109,10 +133,10 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
               type="text"
               id="name"
               name="name"
-              className="h-8 rounded border border-gray-400 px-2"
               value={adminName}
+              aria-disabled="true"
               disabled
-              onChange={(e) => setAdminName(e.target.value)}
+              className="h-8 rounded border border-gray-400 px-2"
             />
           </article>
           <article className="flex flex-col col-span-2 gap-1">
@@ -123,13 +147,14 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
               type="text"
               id="email"
               name="email"
-              className="h-8 rounded border border-gray-400 px-2"
               value={adminEmail}
+              aria-disabled="true"
               disabled
-              onChange={(e) => setAdminEmail(e.target.value)}
+              className="h-8 rounded border border-gray-400 px-2"
             />
           </article>
-          <article className="flex flex-col col-span-2 gap-1">
+          <article className="col-span-1"></article>
+          <article className="flex flex-col col-span-1 gap-1">
             <label htmlFor="ic" className="text-indigo-700">
               IC
             </label>
@@ -137,10 +162,24 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
               type="text"
               id="ic"
               name="ic"
-              className="h-8 rounded border border-gray-400 px-2"
               value={adminIC}
+              aria-disabled="true"
               disabled
-              onChange={(e) => setAdminIC(e.target.value)}
+              className="h-8 rounded border border-gray-400 px-2"
+            />
+          </article>
+          <article className="flex flex-col col-span-1 gap-1">
+            <label htmlFor="admin" className="text-indigo-700">
+              admin
+            </label>
+            <input
+              type="text"
+              id="admin"
+              name="admin"
+              value={admin}
+              aria-disabled="true"
+              disabled
+              className="h-8 rounded border border-gray-400 px-2"
             />
           </article>
         </div>
@@ -154,15 +193,15 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
           </button>
           <button
             onClick={handleSave}
-            disabled={isLoading}
-            className="w-1/2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+            disabled={isSaving}
+            className="w-1/2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-500 disabled:bg-gray-400"
           >
-            {isLoading ? "Approving..." : "Approve"}
+            {isSaving ? "Approving..." : "Approve"}
           </button>
         </div>
         <button
           onClick={onClose}
-          className="bg-gray-600 text-white w-1/4 py-2 rounded mt-4"
+          className="bg-gray-600 text-white w-1/4 py-2 rounded mt-4 disabled:bg-gray-400"
         >
           Close
         </button>

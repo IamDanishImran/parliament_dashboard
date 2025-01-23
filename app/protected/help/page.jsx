@@ -1,8 +1,9 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { Skeleton } from "@nextui-org/skeleton";
 
 import Header from "@/components/header";
@@ -44,11 +45,15 @@ export default function Help() {
   };
 
   useEffect(() => {
-    // Fetch user role logic here
+    // Fetch user role logic
     const fetchData = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error("User not logged in");
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          toast.warning('User not logged in');
+          setLoading(false);
+          return;
+        }
 
         const roles = ["admin", "dun"];
         for (const role of roles) {
@@ -83,13 +88,12 @@ export default function Help() {
     if (userRole === "25048082") {
       fetchEmails();
     }
-  }, [supabase, userRole]);
+  }, [userRole]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
     setLoading(true);
-    setError(null); // Clear any previous error
+    setError(null);
 
     const formData = new FormData(e.target);
     const { title, complaint } = Object.fromEntries(formData.entries());
@@ -116,12 +120,12 @@ export default function Help() {
       if (error) {
         console.error("Error inserting email:", error);
         toast.error("Failed to submit complaint. Please try again.");
-        return; // Return early after an error
+        return;
       }
 
       toast.success("Complaint submitted!");
-      e.target.reset(); // Reset the form
-      fetchEmails(); // Refresh emails after submitting a complaint
+      e.target.reset();
+      fetchEmails();
     } catch (error) {
       console.error("Error submitting complaint:", error);
       toast.error("Failed to submit complaint. Please try again.");
@@ -135,7 +139,7 @@ export default function Help() {
   return (
     <main className="p-4">
       <ToastContainer />
-      
+
       <Skeleton isLoaded={!loading}>
         <Header title="Help Center" navigator="Help Center" />
       </Skeleton>
@@ -144,101 +148,94 @@ export default function Help() {
 
       {userRole === "25048082" ? (
         <>
-       <Skeleton isLoaded={!loading}>
-        <div className="table-container max-h-[300px] overflow-y-auto border-1 shadow rounded">
-          <table className="table-auto h-[100px] w-full border-collapse border border-slate-400">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="border border-slate-400 px-4 py-2">No.</th>
-                <th className="border border-slate-400 px-4 py-2">Title</th>
-                <th className="border border-slate-400 px-4 py-2">Complaint</th>
-                <th className="border border-slate-400 px-4 py-2">Email</th>
-                <th className="border border-slate-400 px-4 py-2">Send Date</th>
-                <th className="border border-slate-400 px-4 py-2">Status</th>
-                <th className="border border-slate-400 px-4 py-2">Info</th>
-              </tr>
-            </thead>
-            <tbody>
-              {emails.map((email, index) => (
-                <tr
-                  key={email.id || index}
-                  className={index % 2 === 0 ? "bg-slate-50 hover:bg-slate-200 ease-out transition-200" : "bg-slate-100 hover:bg-slate-200 ease-out transition-200"}
-                >
-                  <td className="border border-slate-400 px-4 py-2 overflow-hidden">{index + 1}</td>
-                  <td className="border border-slate-400 px-4 py-2 overflow-hidden">{email.title || "N/A"}</td>
-                  <td className="border border-slate-400 px-4 py-2 overflow-hidden">{email.complaint || "N/A"}</td>
-                  <td className="border border-slate-400 px-4 py-2">{email.id_dun || "N/A"}</td>
-                  <td className="border border-slate-400 px-4 py-2 overflow-hidden">
-                    {email.inserted_at
-                      ? new Date(email.inserted_at).toLocaleString()
-                      : "N/A"}
-                  </td>
-                  <td
-                    className={`border border-slate-400 px-4 py-2 overflow-hidden
-                    ${email.status === "Pending" ? "bg-yellow-200" : ""}
-                    ${email.status === "Complete" ? "bg-green-400" : ""}`}
-                  >
-                    {email.status || "Pending"}
-                  </td>
-                  <td className="border border-slate-400 px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleEditClick(email)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Skeleton>
-      </>
+          <Skeleton isLoaded={!loading}>
+            <div className="table-container max-h-[300px] overflow-y-auto border-1 shadow rounded">
+              <table className="table-auto w-full border-collapse border border-slate-400">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="border border-slate-400 px-4 py-2">No.</th>
+                    <th className="border border-slate-400 px-4 py-2">Title</th>
+                    <th className="border border-slate-400 px-4 py-2">Complaint</th>
+                    <th className="border border-slate-400 px-4 py-2">Email</th>
+                    <th className="border border-slate-400 px-4 py-2">Send Date</th>
+                    <th className="border border-slate-400 px-4 py-2">Status</th>
+                    <th className="border border-slate-400 px-4 py-2">Info</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {emails.map((email, index) => (
+                    <tr key={email.id || index} className={index % 2 === 0 ? "bg-slate-50 hover:bg-slate-200" : "bg-slate-100 hover:bg-slate-200"}>
+                      <td className="border border-slate-400 px-4 py-2">{index + 1}</td>
+                      <td className="border border-slate-400 px-4 py-2">{email.title || "N/A"}</td>
+                      <td className="border border-slate-400 px-4 py-2">{email.complaint || "N/A"}</td>
+                      <td className="border border-slate-400 px-4 py-2">{email.id_dun || "N/A"}</td>
+                      <td className="border border-slate-400 px-4 py-2">
+                        {email.inserted_at
+                          ? new Date(email.inserted_at).toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td className={`border border-slate-400 px-4 py-2 ${email.status === "Pending" ? "bg-yellow-200" : "bg-green-400"}`}>
+                        {email.status || "Pending"}
+                      </td>
+                      <td className="border border-slate-400 px-4 py-2 text-center">
+                        <button
+                          onClick={() => handleEditClick(email)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          More
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Skeleton>
+        </>
       ) : (
         <>
-        <Skeleton isLoaded={!loading}>
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8 bg-white shadow-md rounded px-8 pt-6 pb-8">
-          <h2 className="text-lg font-bold mb-4">
-            Get in touch with our team support
-          </h2>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Title
-            </label>
-            <input
-              name="title"
-              type="text"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Complaint
-            </label>
-            <textarea
-              name="complaint"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-              required
-            ></textarea>
-          </div>
-          <div className="flex items-center justify-between">
-            <button
-              type="submit"
-              className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${
-                loading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={loading}
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
-          </div>
-        </form>
-        </Skeleton>
+          <Skeleton isLoaded={!loading}>
+            <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8 bg-white shadow-md rounded px-8 pt-6 pb-8">
+              <h2 className="text-lg font-bold mb-4">
+                Get in touch with our team support
+              </h2>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Title
+                </label>
+                <input
+                  name="title"
+                  type="text"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Complaint
+                </label>
+                <textarea
+                  name="complaint"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                  required
+                ></textarea>
+              </div>
+              <div className="flex items-center justify-between">
+                <button
+                  type="submit"
+                  className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loading}
+                >
+                  {loading ? "Submitting..." : "Submit"}
+                </button>
+              </div>
+            </form>
+          </Skeleton>
         </>
       )}
-      {/* Edit Modal */}
+
       {editingForm && isEditModalOpen && (
         <EditModal
           isOpen={isEditModalOpen}

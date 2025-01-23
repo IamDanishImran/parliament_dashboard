@@ -9,29 +9,38 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
   const [dunIC, setDunIC] = useState(formData?.ic || "");
   const [dun, setDun] = useState(formData?.registration.description || "");
   const [roleCode, setRoleCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // For delete button
+  const [isSaving, setIsSaving] = useState(false); // For save/approve button
 
   if (!isOpen || !formData) return null;
 
+  // Role code mapping
+  const roleCodeMapping = {
+    "Rembia": "10598878",
+    "Machap Jaya": "12345678",
+    "Durian Tunggal": "98765432",
+    "Asahan": "45671234",
+    "Gadek": "31415926",
+    "Outside Alor Gajah": "74035216",
+    "Outside Melaka": "20479352",
+  };
+
   useEffect(() => {
     if (formData) {
-      setDunName(formData.name);
-      setDunStatus(formData.status);
-      setDunEmail(formData.email);
-      setDunIC(formData.ic);
-      setDun(formData.dun);
-      if(dun === 'Rembia') { setRoleCode('10598878');}
-      if(dun === 'Machap Jaya') { setRoleCode('12345678');}
-      if(dun === 'Durian Tunggal') { setRoleCode('98765432');}
-      if(dun === 'Asahan') { setRoleCode('45671234');}
-      if(dun === 'Gadek') { setRoleCode('31415926');}
-      if(dun === 'Outside Alor Gajah') { setRoleCode('74035216');}
-      if(dun === 'Outside Melaka') { setRoleCode('20479352');}
+      setDunName(formData.name || "");
+      setDunStatus(formData.status || "");
+      setDunEmail(formData.email || "");
+      setDunIC(formData.ic || "");
+      setDun(formData.registration.description || "");
     }
   }, [formData]);
 
+  useEffect(() => {
+    setRoleCode(roleCodeMapping[dun] || "");
+  }, [dun]);
+
   const handleSave = async () => {
-    setIsLoading(true);
+    setIsSaving(true); // Start loading for save button
     try {
       const { data, error } = await supabase
         .from("dun")
@@ -51,8 +60,7 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
         body: JSON.stringify({
           to: dunEmail,
           subject: "Your Application Has Been Approved",
-          text: `Dear ${dunName},\n\nYour registration has been approved successfully.\n\nBest regards,\nParliament Team Support
-          here's the registration code ${roleCode}`,
+          text: `Dear ${dunName},\n\nYour registration has been approved successfully.\n\nBest regards,\nParliament Team Support\nHere's the registration code ${roleCode}`,
         }),
       });
 
@@ -61,16 +69,16 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
       toast.success("Dun request approved and email sent successfully.");
       onClose();
     } catch (error) {
-      console.log("Error:", error.message);
+      console.error("Error:", error.message);
       toast.error("An error occurred. Please try again.");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false); // Stop loading for save button
     }
   };
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this request?")) {
-      setIsLoading(true);
+      setIsLoading(true); // Start loading for delete button
       try {
         const { error } = await supabase
           .from("dun")
@@ -85,15 +93,15 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
         console.error("Error:", error.message);
         toast.error("Failed to delete Dun request.");
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Stop loading for delete button
       }
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded shadow p-6 w-1/3">
-        <h2 className="text-xl font-semibold mb-4">Dun Details</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white rounded shadow p-6 w-[600px]">
+        <h2 className="text-2xl text-center text-indigo-600 font-semibold mb-4">Dun Details</h2>
         <div className="grid grid-cols-3 gap-4">
           <article className="flex flex-col col-span-1 gap-1">
             <label htmlFor="status" className="text-indigo-700">
@@ -102,6 +110,7 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
             <input
               type="text"
               value={dunStatus}
+              aria-disabled="true"
               disabled
               className={`h-8 rounded border px-2 ${
                 dunStatus === "Pending"
@@ -121,10 +130,10 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
               type="text"
               id="name"
               name="name"
-              className="h-8 rounded border border-gray-400 px-2"
               value={dunName}
+              aria-disabled="true"
               disabled
-              onChange={(e) => setDunName(e.target.value)}
+              className="h-8 rounded border border-gray-400 px-2"
             />
           </article>
           <article className="flex flex-col col-span-2 gap-1">
@@ -135,10 +144,10 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
               type="text"
               id="email"
               name="email"
-              className="h-8 rounded border border-gray-400 px-2"
               value={dunEmail}
+              aria-disabled="true"
               disabled
-              onChange={(e) => setDunEmail(e.target.value)}
+              className="h-8 rounded border border-gray-400 px-2"
             />
           </article>
           <article className="col-span-1"></article>
@@ -150,10 +159,10 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
               type="text"
               id="ic"
               name="ic"
-              className="h-8 rounded border border-gray-400 px-2"
               value={dunIC}
+              aria-disabled="true"
               disabled
-              onChange={(e) => setDunIC(e.target.value)}
+              className="h-8 rounded border border-gray-400 px-2"
             />
           </article>
           <article className="flex flex-col col-span-1 gap-1">
@@ -164,10 +173,10 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
               type="text"
               id="dun"
               name="dun"
-              className="h-8 rounded border border-gray-400 px-2"
               value={dun}
+              aria-disabled="true"
               disabled
-              onChange={(e) => setDun(e.target.value)}
+              className="h-8 rounded border border-gray-400 px-2"
             />
           </article>
         </div>
@@ -181,15 +190,16 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
           </button>
           <button
             onClick={handleSave}
-            disabled={isLoading}
-            className="w-1/2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+            disabled={isSaving}
+            className="w-1/2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-500 disabled:bg-gray-400"
           >
-            {isLoading ? "Approving..." : "Approve"}
+            {isSaving ? "Approving..." : "Approve"}
           </button>
         </div>
         <button
           onClick={onClose}
-          className="bg-gray-600 text-white w-1/4 py-2 rounded mt-4"
+          // disabled={isLoading || isSaving}
+          className="bg-gray-600 text-white w-1/4 py-2 rounded mt-4 disabled:bg-gray-400"
         >
           Close
         </button>

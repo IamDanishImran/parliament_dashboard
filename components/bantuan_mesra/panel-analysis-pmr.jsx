@@ -23,19 +23,19 @@ const PanelAnalysis = ({ filteredForm }) => {
   
       // Calculate Total Price for 'Equipment & Cash Assistance'
       const categoryTwoPrice = filteredForm
-        .filter(form => form.category === "Community Outreach Program" && form.help_type === "EQUIPMENT & CASH ASSISTANCE")
+        .filter(form => form.category === "Community Outreach Program" && form.help_type === "Equipment & Cash Assistance")
         .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
       setCategoryTwoTotalPrice(categoryTwoPrice);
   
       // Calculate Total Price for 'Cash Assistance'
       const categoryThreePrice = filteredForm
-        .filter(form => form.category === "Community Outreach Program" && form.help_type === "CASH ASSISTANCE")
+        .filter(form => form.category === "Community Outreach Program" && form.help_type === "Cash Assistance")
         .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
       setCategoryThreeTotalPrice(categoryThreePrice);
   
       // Calculate Total Price for 'Equipment Assistance'
       const categoryFourPrice = filteredForm
-        .filter(form => form.category === "Community Outreach Program" && form.help_type === "EQUIPMENT ASSISTANCE")
+        .filter(form => form.category === "Community Outreach Program" && form.help_type === "Equipment Assistance")
         .reduce((acc, row) => acc + parseFloat(row.price || 0), 0);
       setCategoryFourTotalPrice(categoryFourPrice);
     } catch (error) {

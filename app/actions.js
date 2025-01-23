@@ -111,7 +111,7 @@ export const signInAction = async (formData) => {
   }
 
   if (userError) {
-    return encodedRedirect("error", "/sign-in", "User not found.");
+    return encodedRedirect("error", "/sign-in", "The credentials you entered are incorrect. Please check and try again.");
   }
   if (user.status !== "Approved") {
     return encodedRedirect("error", "/sign-in", "User not approved.");
@@ -130,6 +130,7 @@ export const signInAction = async (formData) => {
     "Welcome back! You have successfully signed in."
   );
 };
+
 
 
 // Forgot Password Action
@@ -215,3 +216,23 @@ export const signOutAction = async () => {
   await supabase.auth.signOut();
   return redirect("/");
 };
+
+// export const signOutAction = async () => {
+//   try {
+//     const supabase = await createClient();
+//     const { error } = await supabase.auth.signOut();
+//     if (error) {
+//       console.error("Sign-out error:", error);
+//       throw error; // Handle genuine errors
+//     }
+//     return redirect("/"); // This will throw NEXT_REDIRECT
+//   } catch (err) {
+//     if (err?.digest?.startsWith("NEXT_REDIRECT")) {
+//       // Ignore NEXT_REDIRECT errors since they are part of the redirect mechanism
+//       console.log("Redirecting to / after sign-out.");
+//       return;
+//     }
+//     console.error("Unexpected error during sign-out:", err);
+//     return redirect("/error"); // Optional: Redirect to an error page
+//   }
+// };

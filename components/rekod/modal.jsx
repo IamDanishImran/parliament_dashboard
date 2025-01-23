@@ -48,7 +48,7 @@ const Modal = ({ open, onClose }) => {
         setDunData(getDun);
       } catch (error) {
         toast.error('An unexpected error occurred.');
-        console.error(error);
+        console.log(error);
       }
     };
 
@@ -91,7 +91,7 @@ const Modal = ({ open, onClose }) => {
           category_type: formData.kategori_penerima,
           quantity: parseInt(formData.kuantiti, 10),
           price: totalPrice,
-          form_status: 'MOHON',
+          form_status: 'IN PROGRESS',
           id_dun: dunData.id,
           address: formData.alamat,
           phone: formData.no_tel,
@@ -99,7 +99,7 @@ const Modal = ({ open, onClose }) => {
           item: formData.barang_bantuan,
         });
   
-      if (formSubmissionError) throw error;
+      if (formSubmissionError) throw formSubmissionError;
       onClose();
       toast.success("Form submitted successfully!");
       setFormData({
@@ -114,8 +114,8 @@ const Modal = ({ open, onClose }) => {
         catatan: ''
       });
     } catch (error) {
-      toast.error("An unexpected error occurred.");
-      console.error("Unexpected error:", error);
+      toast.error("An unexpected error occurred!.");
+      console.log("Unexpected error:", error);
     } finally {
       setLoading(false);
     }
@@ -127,25 +127,25 @@ const Modal = ({ open, onClose }) => {
     <main className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-90">
       <section className="bg-white rounded-lg w-[1000px] h-auto p-6 pt-12 pb-20">
         <article className="text-center text-3xl pb-14 font-semibold text-indigo-600">
-          <h1>Borang Serahan Bantuan</h1>
+          <h1>Application Form</h1>
         </article>
         <form onSubmit={handleSubmit}>
           <section className='grid grid-cols-2 gap-4'>
             <div className='grid grid-cols-2 gap-4'>
               {/* Form fields */}
               <article className="flex flex-col col-span-2 gap-1">
-                <label htmlFor="barang_bantuan" className="text-indigo-700">Barang Bantuan</label>
+                <label htmlFor="barang_bantuan" className="text-indigo-700">Assistance Item</label>
                 <input type="text" id="barang_bantuan"
                   name="barang_bantuan"
                   className="h-8 rounded border border-gray-400 px-2"
-                  placeholder="&nbsp;Contoh: Kerusi Roda, Katil Hospital"
+                  placeholder="&nbsp;Example: Wheelchair, Hospital Bed"
                   value={formData.barang_bantuan}
                   onChange={handleChange}
                 />
               </article>
               {/* Other fields */}
               <article className="flex flex-col gap-1">
-                <label className="text-indigo-700">Kategori Bantuan</label>
+                <label className="text-indigo-700">Program Category</label>
                 <select
                   name="kategori_bantuan"
                   className="h-8 rounded border border-gray-400"
@@ -153,13 +153,13 @@ const Modal = ({ open, onClose }) => {
                   onChange={handleChange}>
                   <option value="">Choose</option>
                   <option value="Welfare Assistance Program">Welfare Assistance Program</option>
-                  <option value="Community Engagement Program">Community Engagement Program</option>
+                  <option value="Community Outreach Program">Community Outreach Program</option>
                 </select>
               </article>
 
               {/* Kategori Penerima */}
               <article className="flex flex-col col-span-1 gap-1">
-                <label className="text-indigo-700">Kategori Penerima</label>
+                <label className="text-indigo-700">Category</label>
                 <select
                   name="kategori_penerima"
                   className="h-8 rounded border border-gray-400"
@@ -190,7 +190,7 @@ const Modal = ({ open, onClose }) => {
               </article>
 
               <article className="flex flex-col gap-1">
-                <label className="text-indigo-700">Kuantiti</label>
+                <label className="text-indigo-700">Quantity</label>
                 <select
                   id="kuantiti"
                   name="kuantiti"
@@ -207,27 +207,27 @@ const Modal = ({ open, onClose }) => {
               </article>
 
               <article className="flex flex-col gap-1">
-              <label className="text-indigo-700">Harga</label>
+              <label className="text-indigo-700">Price</label>
               <input
                 type="text"
                 id="harga"
                 name="harga"
                 value={formData.harga}
                 onChange={handleChange}
-                placeholder='&nbsp;Contoh: 890.00'
+                placeholder='&nbsp;Example: 890.00'
                 className="h-8 rounded border border-gray-400 px-2"/>
             </article>
 
             {/* No Telefon */}
             <article className="flex flex-col col-span-1 gap-1">
-              <label className="text-indigo-700">No Telefon</label>
+              <label className="text-indigo-700">Phone Number</label>
               <input
                 type="text"
                 id="no_tel"
                 name="no_tel"
                 aria-label="No Telefon"
                 className="h-8 rounded border border-gray-400 px-2"
-                placeholder="&nbsp;0109992938"
+                placeholder="&nbsp;0123456789"
                 value={formData.no_tel}
                 onChange={handleChange}
               />
@@ -235,14 +235,14 @@ const Modal = ({ open, onClose }) => {
 
             {/* Alamat */}
             <article className="flex flex-col col-span-2 gap-1">
-              <label className="text-indigo-700">Alamat</label>
+              <label className="text-indigo-700">Address</label>
               <input
               type="text"
               id="alamat"
               name="alamat"
               value={formData.alamat}
               onChange={handleChange}
-              placeholder='&nbsp;Contoh: No Jalan, Daerah'
+              placeholder='&nbsp;Example: Street Number, District'
               className="h-8 rounded border border-gray-400 px-2"/>
             </article>
             </div>
@@ -250,15 +250,15 @@ const Modal = ({ open, onClose }) => {
             <div className='grid grid-cols-2 gap-4'>
               {/* First Article */}
               <article className="flex flex-col col-span-2 gap-1 py-0">
-                <label className="text-indigo-700">Catatan</label>
+                <label className="text-indigo-700">Notes</label>
                 <textarea name="catatan" value={formData.catatan}
                   onChange={handleChange}
                   className="rounded border border-gray-400 p-2 h-[120px]"
-                  placeholder="Catatan tambahan"
+                  placeholder="Additional notes"
                 />
                 <Divider className="my-4" />
                   <p className="text-lg font-semibold">
-                    Total Harga: <span className="text-indigo-600">RM {totalPrice.toFixed(2)}</span>
+                    Total Price: <span className="text-indigo-600">RM {totalPrice.toFixed(2)}</span>
                   </p>
                 <Divider className="my-4" />
                 {/* Final Actions */}

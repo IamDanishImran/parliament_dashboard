@@ -27,8 +27,10 @@ export default function Rekod() {
         .select('id')
         .eq('email', user.email)
         .single();
-      if (error) {
+      if (error || !getDun) {
+        setIsAddModalOpen(false);
         toast.error(`Access to the requested action is restricted.`);
+        console.log("can't access");
         return;
       }
       setIsAddModalOpen(true);
@@ -91,17 +93,19 @@ export default function Rekod() {
         .eq('email', user.email)
         .single();
       if (adminError) {
-        toast.error("Access to the requested action is restricted.");
-        console.log("Dun can't access this section");
-        return;
-      }
+        // toast.error("Access to the requested action is restricted.");
+        // console.log("Dun can't access this section");
+        // return;
+      
   
       const { data: getDun, error } = await supabase
         .from('dun')
         .select('registration:registration(description)')
         .eq('email', user.email)
         .single();
-  
+        setEditingForm(item); // Set the form data to be edited
+        setIsEditModalOpen(true); // Open the edit modal
+      }
       setEditingForm(item); // Set the form data to be edited
       setIsEditModalOpen(true); // Open the edit modal
     } catch (error) {
@@ -149,6 +153,7 @@ export default function Rekod() {
     link.href = URL.createObjectURL(blob);
     link.download = 'data_parliament.csv';
     link.click();
+    toast.success("Data downloaded successfully!");
   };
 
     // Form List Section
@@ -396,7 +401,6 @@ export default function Rekod() {
             supabase={supabase}
           />
         )}
-        <ToastContainer />
       <Footer />
     </main>
   );

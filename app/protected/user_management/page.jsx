@@ -101,12 +101,13 @@ const UserManagement = () => {
       {adminRole === "Manager" && (
         <div className="flex flex-col">
           {/* Manage Admins */}
-          <section className="border mt-4 rounded shadow">
+          <section className="border-1 border-gray-400 mt-4 rounded shadow">
+            <div className='py-4 px-4'><h1 className='text-xl font-medium'>Administrator Management</h1></div>
             <article className="h-[300px] overflow-y-auto">
               <table className="table-auto w-full text-left border-collapse">
                 <thead className="text-gray-700 bg-gray-200">
                   <tr className="border border-black">
-                    <th className="border border-black px-4 py-1">Bil</th>
+                    <th className="border border-black px-4 py-1">No</th>
                     <th className="border border-black px-4 py-1">Name</th>
                     <th className="border border-black px-4 py-1">Email</th>
                     <th className="border border-black px-4 py-1">IC</th>
@@ -123,7 +124,7 @@ const UserManagement = () => {
                       <td className="border border-black px-4 py-1">{item.ic}</td>
                       <td className="border border-black px-4 py-1">{item.status}</td>
                       <td className="border border-black px-4 py-1">
-                        <button onClick={() => handleAdminModal(item)} className="text-blue-600 hover:text-blue-800">Edit</button>
+                        <button onClick={() => handleAdminModal(item)} className="text-blue-600 hover:text-blue-800">More</button>
                       </td>
                     </tr>
                   ))}
@@ -133,12 +134,13 @@ const UserManagement = () => {
           </section>
           
           {/* Manage Duns */}
-          <section className="border mt-4 rounded shadow">
+          <section className="border-1 border-gray-400 mt-4 rounded shadow">
+          <div className='py-4 px-4'><h1 className='text-xl font-medium'>DUN Management</h1></div>
             <article className="h-[300px] overflow-y-auto">
               <table className="table-auto w-full text-left border-collapse">
                 <thead className="text-gray-700 bg-gray-200">
                   <tr className="border border-black">
-                    <th className="border border-black px-4 py-1">Bil</th>
+                    <th className="border border-black px-4 py-1">No</th>
                     <th className="border border-black px-4 py-1">Name</th>
                     <th className="border border-black px-4 py-1">Email</th>
                     <th className="border border-black px-4 py-1">IC</th>
@@ -157,7 +159,7 @@ const UserManagement = () => {
                       <td className="border border-black px-4 py-1">{item.status}</td>
                       <td className="border border-black px-4 py-1">{item.registration.description}</td>
                       <td className="border border-black px-4 py-1">
-                        <button onClick={() => handleDunModal(item)} className="text-blue-600 hover:text-blue-800">Edit</button>
+                        <button onClick={() => handleDunModal(item)} className="text-blue-600 hover:text-blue-800">More</button>
                       </td>
                     </tr>
                   ))}
@@ -173,12 +175,13 @@ const UserManagement = () => {
       {adminRole === "Supervisor" && (
         <div>
           {/* Manage Duns */}
-          <section className="border mt-4 rounded shadow">
+          <section className="border-1 border-gray-400 mt-4 rounded shadow">
+          <div className='py-4 px-4'><h1 className='text-xl font-medium'>DUN Management</h1></div>
             <article className="h-[500px] overflow-y-auto">
               <table className="table-auto w-full text-left border-collapse">
                 <thead className="text-gray-700 bg-gray-200">
                   <tr className="border border-black">
-                    <th className="border border-black px-4 py-1">Bil Dun</th>
+                    <th className="border border-black px-4 py-1">No</th>
                     <th className="border border-black px-4 py-1">Name</th>
                     <th className="border border-black px-4 py-1">Email</th>
                     <th className="border border-black px-4 py-1">IC</th>
@@ -195,7 +198,7 @@ const UserManagement = () => {
                       <td className="border border-black px-4 py-1">{item.ic}</td>
                       <td className="border border-black px-4 py-1">{item.registration.description}</td>
                       <td className="border border-black px-4 py-1">
-                        <button onClick={() => handleDunModal(item)} className="text-blue-600 hover:text-blue-800">Edit</button>
+                        <button onClick={() => handleDunModal(item)} className="text-blue-600 hover:text-blue-800">More</button>
                       </td>
                     </tr>
                   ))}

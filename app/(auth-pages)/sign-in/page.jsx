@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
 export default function Login({ searchParams }) {
+  const errorMessage = searchParams?.error;
+  const successMessage = searchParams?.success;
   return (
-    <form className="flex flex-col mx-auto justify-center h-auto w-1/4 p-5 rounded bg-orange-300">
+    <form className="flex flex-col mx-auto justify-center h-auto w-1/4 p-5 rounded rounded bg-white border border-black">
       <div className="flex text-center justify-center items-center">
-        <img src="/svgtopng/logo.png" alt="logo-parliament" className=" w-68 h-24" />
+        <img src="/parliament_logo.svg" alt="logo-parliament" className=" w-68 h-24" />
       </div>
       <h1 className="text-2xl font-medium">Sign in</h1>
       <p className="text-sm text-foreground">
@@ -47,10 +49,14 @@ export default function Login({ searchParams }) {
           Back
         </Link>
         <FormMessage message={searchParams} />
+        {/* Display error or success message from query params */}
+        {errorMessage && <FormMessage message={errorMessage} />}
+        {successMessage && <FormMessage message={successMessage} />}
       </div>
     </form>
   );
 }
+
 
 // import { signInAction } from "@/app/actions";
 // import { FormMessage } from "@/components/form-message";

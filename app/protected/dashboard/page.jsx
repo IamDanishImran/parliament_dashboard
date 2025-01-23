@@ -34,7 +34,7 @@ export default function Dashboard() {
       <PanelAnalysis />
       <br />
       <section id="chart-pie" className="flex w-full h-full gap-4">
-        <ChartPMR /> {/* Chart Community Engagement Program */}
+        <ChartPMR /> {/* Chart Community Outreach Program */}
         <ChartKebajikan /> {/* Chart Welfare Assistance Program */}
       </section>
       <br /><br />
