@@ -1,15 +1,24 @@
+// app\(auth-pages)\sign-up\page.jsx
 "use client"; 
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation"; 
 import { signUpAction } from "@/app/actions";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useState } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function Signup() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const searchParams = useSearchParams(); // Access search params
   const message = searchParams.get("message") || null; // Get message parameter
   const [errorMessage, setErrorMessage] = useState(""); // State for error messages
@@ -20,9 +29,9 @@ export default function Signup() {
     
     try {
       await signUpAction(formData); // Assuming this function is handling the sign-up process
-      toast.error("Failed to sign up. Please try again.");
-    } catch (error) {
       toast.success("Sign up successful! Check your email for the verification link.");
+    } catch (error) {
+      toast.error("Failed to sign up. Please try again.");
     }
   };
 
@@ -114,6 +123,7 @@ export default function Signup() {
     </main>
   );
 }
+
 
 // import { signUpAction } from "@/app/actions";
 // import { FormMessage } from "@/components/form-message";
