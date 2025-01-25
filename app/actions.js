@@ -214,6 +214,10 @@ export const resetPasswordAction = async (formData) => {
 export const signOutAction = async () => {
   const supabase = await createClient();
   const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error(error);
+    return redirect('/protected/dashboard');
+  }
   return redirect("/");
 };
 
