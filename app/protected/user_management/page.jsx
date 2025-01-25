@@ -10,7 +10,7 @@ import DunModal from "@/components/user_management/DunModal";
 import AdminModal from "@/components/user_management/AdminModal";
 import Footer from "@/components/footer";
 
-const UserManagement = () => {
+export default function UserManagement() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -234,5 +234,3 @@ const UserManagement = () => {
     </main>
   );
 };
-
-export default UserManagement;
