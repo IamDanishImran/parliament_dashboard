@@ -114,7 +114,7 @@ export default function Help() {
       }
 
       const { error } = await supabase.from("email").insert([
-        { title, complaint, id_dun: user.email, status: "Pending" },
+        { title, complaint, id_dun: user.email, status: "Pending", admin_notes: "" },
       ]);
 
       if (error) {

@@ -102,8 +102,8 @@ const AdminModal = ({ isOpen, onClose, formData, supabase }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded shadow p-6 w-[600px]">
+    <div className="fixed inset-0 flex items-center justify-center px-2 sm:p-0 bg-black bg-opacity-50">
+      <div className="bg-white rounded shadow py-6 px-2 sm:p-6 w-[600px]">
         <h2 className="text-2xl text-center text-indigo-600 font-semibold mb-4">Admin Details</h2>
         <div className="grid grid-cols-3 gap-4">
           <article className="flex flex-col col-span-1 gap-1">

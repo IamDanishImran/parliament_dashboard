@@ -94,7 +94,7 @@ const UserManagement = () => {
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
   return (
-    <main className="p-2 pl-10 pr-20">
+    <main className="pt-6 sm:pt-4 sm:p-2 sm:pl-10 sm:pr-20">
       <Header title="User Management" navigator="User Managment" />
       <ToastContainer />
       <Skeleton isLoaded={!loading}>

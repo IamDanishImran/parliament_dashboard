@@ -126,13 +126,13 @@ const ChartKebajikan = () => {
   const hasData = Object.values(statusCounts).some((count) => count > 0);
 
   return (
-    <main className="w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
+    <main className="w-full sm:w-1/2 bg-slate-50 rounded border shadow shadow-gray-400">
       <Skeleton isLoaded={!loading}>
         <article className="flex flex-col gap-y-4 p-4 justify-center items-center w-full h-full">
-          <h1 className="text-xl">Welfare Assistance Program</h1>
-          <div className="chart-container w-[300px] h-[300px]">
+          <h1 className="text-xl text-center">Welfare Assistance Program</h1>
+          <div className="chart-container w-[200px] h-[200px] sm:w-[300px] sm:h-[300px]">
             {hasData ? (
-              <canvas id="kebajikanChart" className="w-full h-full"></canvas>
+              <canvas id="kebajikanChart" className="w-full h-full aspect-square"></canvas>
             ) : (
               <div className="flex justify-center items-center w-full h-full text-gray-500">
                 <p className="text-center text-black">No Data</p>
@@ -141,8 +141,8 @@ const ChartKebajikan = () => {
           </div>
           <LegendCategory />
         </article>
-      </Skeleton>
-    </main>
+  </Skeleton>
+</main>
   );
 };
 

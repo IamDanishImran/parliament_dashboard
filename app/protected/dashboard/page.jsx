@@ -25,7 +25,7 @@ export default function Dashboard() {
   }, [searchParams]);
 
   return (
-    <main className="pt-4 p-2 pl-10 pr-20">
+    <main className="pt-6 sm:pt-4 sm:p-2 sm:pl-10 sm:pr-20">
       <ToastContainer />
       <Header title="Dashboard" navigator="Dashboard" />
       <br />
@@ -33,7 +33,7 @@ export default function Dashboard() {
       <br />
       <PanelAnalysis />
       <br />
-      <section id="chart-pie" className="flex w-full h-full gap-4">
+      <section id="chart-pie" className="flex flex-col sm:flex-row sm:w-full sm:h-full gap-4">
         <ChartPMR /> {/* Chart Community Outreach Program */}
         <ChartKebajikan /> {/* Chart Welfare Assistance Program */}
       </section>

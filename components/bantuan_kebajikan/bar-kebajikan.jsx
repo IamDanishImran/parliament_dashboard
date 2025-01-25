@@ -115,7 +115,7 @@ const BarGraph = ({ filteredForm }) => {
 
   return (
     <Skeleton isLoaded={!loading}>
-      <section className="bg-slate-50 w-full h-auto px-14 py-12 flex flex-col justify-center items-center rounded border shadow shadow-gray-400">
+      <section className="hidden sm:bg-slate-50 sm:w-full sm:h-auto sm:px-14 sm:py-6 sm:flex sm:flex-col sm:justify-center sm:items-center sm:rounded sm:border sm:shadow sm:shadow-gray-400">
         <h1 className="text-xl mb-4">{`Total Expenditure by Month for (${currentYear})`}</h1>
         <canvas id="barChart" className="bg-slate-50" height="300" width="600"></canvas>
       </section>

@@ -31,12 +31,11 @@ export default function Index() {
     <>
       <main className="flex flex-col min-h-screen bg-slate-200">
         <section className="relative w-full h-screen">
-          <Navbar />
-
+          <Navbar/>
           <video src="/parliament.mp4" autoPlay muted loop
-            className="absolute inset-0 w-full h-full object-cover transform"
-          />
-          <div className="absolute top-14 left-20">
+            className="absolute inset-0 w-full h-full object-cover object-left" style={{ objectPosition: '20% center' }}>
+          </video>
+          <div className="absolute top-32 sm:top-14 sm:left-20 p-2 sm:p-0">
             <h1 className="text-white text-5xl font-bold">Parliament Alor Gajah <br />Dashboard</h1>
             <p className="text-white mb-6">Enhancing data management for Alor Gajah's governance.</p>
             {/* <Link className="text-foreground font-medium underline" href="/sign-up">Get Started</Link> */}
@@ -44,8 +43,8 @@ export default function Index() {
               Get Started
             </Link>
           </div>
-          <div className="absolute bottom-20 right-32">
-            <p className="text-white">This system is designed to assist government <br /> 
+          <div className="absolute w-auto bottom-28 right-10 sm:right-32 p-2 sm:p-0">
+            <p className="bg-black bg-opacity-40 p-2 rounded text-white">This system is designed to assist government <br /> 
               staff in streamlining administrative workflows and ensuring efficient <br /> data management.</p>
           </div>
         </section>

@@ -100,18 +100,26 @@ export default function Header({ title, navigator }) {
   return (
     <>
         <Skeleton isLoaded={!loading}>
-        <header className="grid grid-rows-1 grid-flow-col w-full h-[120px] p-2 rounded shadow border border-gray-900">
-          <article className="px-2 justify-end items-center w-full">
-            <Breadcrumbs aria-label="breadcrumb" separator="›">
-              <Link href="/" className="text-slate-600">
-                Home
-              </Link>
-              <p className="text-sm font-medium text-neutral-900">{navigator}</p>
-            </Breadcrumbs>
-            <h1 className="text-3xl font-semibold mt-4">{title}</h1>
-            <p className="font-semibold text-gray-700">Parliament Dashboard Alor Gajah</p>
-          </article>
-          <article className="flex flex-col items-end justify-start w-full">
+        <header className="w-full h-full p-2 rounded border border-gray-900 shadow
+          sm:grid sm:grid-rows-1 sm:grid-flow-col sm:w-full sm:h-[120px] sm:p-2 sm:rounded sm:shadow sm:border sm:border-gray-900">
+          <article className="mb-4 sm:mb-0 px-2 flex flex-col items-center sm:items-start w-full">
+  <div className="flex justify-end sm:justify-start w-full">
+    <Breadcrumbs aria-label="breadcrumb" separator="›">
+      <Link href="/" className="text-slate-600">
+        Home
+      </Link>
+      <p className="text-sm font-medium text-neutral-900">{navigator}</p>
+    </Breadcrumbs>
+  </div>
+  <h1 className="text-center sm:text-left text-3xl font-semibold mt-4">
+    {title}
+  </h1>
+  <p className="text-center sm:text-left font-semibold text-gray-700">
+    Parliament Dashboard Alor Gajah
+  </p>
+</article>
+
+          <article className="hidden sm:inline flex-col sm:flex sm:flex-col sm:items-end sm:justify-start sm:w-full">
             <div className="bg-slate-50 border border-black rounded px-2 py-1 font-semibold">
               <p>{userDetails.name}</p>
             </div>

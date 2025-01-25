@@ -214,7 +214,7 @@ export default function Rekod() {
     };
     
     return (
-      <main className="p-2 pl-10 pr-20">
+      <main className="pt-6 sm:pt-4 sm:p-2 sm:pl-10 sm:pr-20">
         <ToastContainer />
         <Header title="Record" navigator="Record" />
 
@@ -227,7 +227,7 @@ export default function Rekod() {
             <h1 className="mx-4 mt-4 text-2xl font-semibold">Search Panel</h1>
           </article>
 
-          <article className="mt-4 grid grid-cols-3 gap-4 px-4">
+          <article className="grid-cols-2 mt-4 grid sm:grid-cols-3 gap-4 px-4">
             <div className="">
               <label htmlFor="statusForm">Status</label>
               <div className="w-full h-8 rounded bg-sky-50 border-2 border-slate-500 w-[540px]">

@@ -49,7 +49,7 @@ export default function Sidebar({ userRole }) {
     <div className="bg-slate-50 w-60 h-screen flex flex-col">
       <nav className="flex-1 p-4">
         <div>
-          <img src="/parliament_logo.svg" alt="dashboard-logo" className="w-full h-18" />
+          <img src="/parliament_logo.svg" alt="dashboard-logo" className="w-full h-18" draggable="false" />
         </div>
         <div className="bg-slate-300 w-full h-0.5"></div>
 

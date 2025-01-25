@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   const [formStatus, setFormStatus] = useState("");
@@ -8,21 +8,20 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   const [title, setTitle] = useState("");
   const [dunEmail, setDunEmail] = useState("");
   const [adminNotes, setAdminNotes] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSave, setIsSave] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
   const [error, setError] = useState(null);
 
-  // Effect to update local state when formData changes
   useEffect(() => {
     if (formData) {
-      console.log("Form Data received:", formData); // Debugging statement
       setFormStatus(formData.status || "");
       setComplaint(formData.complaint || "");
       setTitle(formData.title || "");
       setDunEmail(formData.id_dun || "");
+      setAdminNotes(formData.admin_notes || "");
     }
   }, [formData]);
 
-  // Effect to fetch email data from Supabase when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchData();
@@ -30,14 +29,13 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
   }, [isOpen]);
 
   const fetchData = async () => {
-    setIsLoading(true);
+    setIsSave(true);
     setError(null);
     try {
       const { data: user, error: userError } = await supabase.auth.getUser();
       if (userError || !user?.email) {
         throw new Error("User not authenticated or email not available");
       }
-      console.log("User fetched:", user); // Debugging statement
 
       const { data, error } = await supabase
         .from("email")
@@ -48,13 +46,11 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
       if (error || !data) {
         throw new Error("No email data found or an error occurred");
       }
-
-      console.log("Fetched email data:", data); // Debugging statement
       setAdminNotes(data.admin_notes || "");
     } catch (err) {
       setError(err.message || "Failed to fetch email data.");
     } finally {
-      setIsLoading(false);
+      setIsSave(false);
     }
   };
 
@@ -64,35 +60,40 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
       return;
     }
 
-    setIsLoading(true);
+    setIsSave(true);
     try {
-      // Update the email record in Supabase
       const { error } = await supabase
         .from("email")
-        .update({ status: "Complete", title, complaint, id_dun: dunEmail, admin_notes: adminNotes })
+        .update({
+          status: "Complete",
+          title,
+          complaint,
+          id_dun: dunEmail,
+          admin_notes: adminNotes,
+        })
         .eq("id", formData.id);
 
       if (error) throw error;
 
-      // Fetch the email template
       const templateResponse = await fetch("/sendEmail.html");
       if (!templateResponse.ok) throw new Error("Failed to load email template");
 
       let emailTemplate = await templateResponse.text();
-
-      // Replace placeholders with actual values
       emailTemplate = emailTemplate
         .replace(/{{title}}/g, title)
         .replace(/{{status}}/g, formStatus)
         .replace(/{{complaint}}/g, complaint)
         .replace(/{{adminNotes}}/g, adminNotes);
 
-      // Send the email
-      const subject = "Help Support Parliament Alor Gajah:";
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipient: dunEmail, subject, body: emailTemplate, contentType: "text/html" }),
+        body: JSON.stringify({
+          recipient: dunEmail,
+          subject: "Help Support Parliament Alor Gajah:",
+          body: emailTemplate,
+          contentType: "text/html",
+        }),
       });
 
       if (!response.ok) {
@@ -103,16 +104,15 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
       toast.success("Email sent successfully!");
       onClose();
     } catch (err) {
-      console.error("Error:", err);
       toast.error("An error occurred while processing your request.");
     } finally {
-      setIsLoading(false);
+      setIsSave(false);
     }
   };
 
   const handleDelete = async () => {
-    if (typeof window !== "undefined" && window.confirm("Are you sure you want to delete this form?")) {
-      setIsLoading(true);
+    if (window.confirm("Are you sure you want to delete this form?")) {
+      setIsDelete(true);
       try {
         const { error } = await supabase
           .from("email")
@@ -124,10 +124,9 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
         toast.success("Email deleted successfully");
         onClose();
       } catch (err) {
-        console.error("Error deleting form:", err);
         toast.error("An error occurred while deleting the email.");
       } finally {
-        setIsLoading(false);
+        setIsDelete(false);
       }
     }
   };
@@ -138,8 +137,10 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
     <>
       <ToastContainer />
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white rounded-lg w-11/12 max-w-4xl p-6 relative">
-          <h2 className="text-center text-3xl text-indigo-600 font-semibold mb-4">Email Submission</h2>
+        <div className="bg-white rounded-lg h-[600px] sm:h-auto w-11/12 max-w-4xl p-6 relative overflow-y-auto">
+          <h2 className="text-center text-3xl text-indigo-600 font-semibold mb-4">
+            Email Submission
+          </h2>
           <div className="mt-6">
             <section className="grid grid-rows-1 grid-flow-col gap-x-2">
               <div className="col-span-1">
@@ -148,7 +149,13 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
                   type="text"
                   value={formStatus}
                   readOnly
-                  className={`w-full p-2 border rounded mb-4 mt-2 ${formStatus === "Pending" ? "bg-yellow-300" : formStatus === "Complete" ? "bg-green-300" : ""}`}
+                  className={`w-full p-2 border rounded mb-4 mt-2 ${
+                    formStatus === "Pending"
+                      ? "bg-yellow-300"
+                      : formStatus === "Complete"
+                      ? "bg-green-300"
+                      : ""
+                  }`}
                 />
               </div>
               <div className="col-span-2">
@@ -178,27 +185,29 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
             />
           </div>
           <label className="text-indigo-600">Admin Notes</label>
-            <input
-              type="text"
-              value={adminNotes}
-              placeholder="Admin Notes"
-              onChange={(e) => setAdminNotes(e.target.value)}
-              className="w-full p-2 border rounded mb-4 mt-2"
-            />
+          <input
+            type="text"
+            value={adminNotes}
+            placeholder="Admin Notes"
+            onChange={(e) => setAdminNotes(e.target.value)}
+            className="w-full p-2 border rounded mb-4 mt-2"
+          />
           <div className="mt-4 flex justify-end gap-4">
             <button
               onClick={handleDelete}
-              disabled={isLoading}
+              disabled={isDelete}
               className="btn bg-red-500 text-white w-full p-2 rounded mt-4 hover:bg-red-400"
             >
-              {isLoading ? "Deleting..." : "Delete"}
+              {isDelete ? "Deleting..." : "Delete"}
             </button>
             <button
               onClick={handleSave}
-              disabled={isLoading}
-              className={`btn btn-primary text-white w-full p-2 rounded mt-4 ${isLoading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-500"}`}
+              disabled={isSave}
+              className={`btn btn-primary text-white w-full p-2 rounded mt-4 ${
+                isSave ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-500"
+              }`}
             >
-              {isLoading ? "Saving..." : "Save"}
+              {isSave ? "Saving..." : "Save"}
             </button>
           </div>
           <div className="mt-2 w-full">

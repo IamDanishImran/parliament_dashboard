@@ -62,7 +62,7 @@ export default function Bantuan_Kebajikan() {
   };
 
   return (
-    <main className="p-2 pl-10 pr-20">
+    <main className="pt-6 sm:pt-4 sm:p-2 sm:pl-10 sm:pr-20">
       <Header title="Welfare Assistance Program Summary" navigator="Welfare Assistance Program" />
       <br />
       {/* Search Bar */}
@@ -118,7 +118,7 @@ export default function Bantuan_Kebajikan() {
       <PanelStatus filteredForm={filteredForm} /> {/* Panel Status */}
         <br />
       <PanelAnalysis filteredForm={filteredForm} /> {/* Panel Analysis */}
-      <section id="chart-pie" className="flex w-full h-full mt-4 gap-4">
+      <section id="chart-pie" className="flex flex-col sm:flex-row sm:w-full sm:h-full gap-4">
         <PieDun filteredForm={filteredForm} /> {/* Pie Chart Dun */}
         <PieCategory filteredForm={filteredForm} /> {/* Pie Chart Category */}
       </section>     

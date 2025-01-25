@@ -122,15 +122,15 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
 
   return (
     <main className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <section className="bg-white rounded-lg w-[800px] p-6">
+      <section className="bg-white rounded-lg h-[600px] sm:h-auto w-11/12 max-w-4xl p-6 relative overflow-y-auto">
             {modalEdit ? (
               <>
               <article className="text-center text-3xl pb-14 font-semibold text-indigo-600">
                 <h1>Application Management</h1>
               </article>
               <form onSubmit={handleSave}>
-      <section className="grid grid-cols-2 gap-4">
-        <div className="grid grid-cols-2 gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
           {/* Dun */}
           <article className="flex flex-col col-span-2 gap-1">
             <label className="text-indigo-700">Dun</label>
@@ -249,12 +249,12 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
               </>
             ) : (
               <>
-              <article className="text-center text-3xl pb-14 font-semibold text-indigo-600">
+              <article className="text-center text-3xl pb-10 sm:pb-14 font-semibold text-indigo-600">
                 <h1>Review Application</h1>
               </article>
               <form onSubmit={handleSave}>
-      <section className="grid grid-cols-2 gap-4">
-        <div className="grid grid-cols-2 gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
           {/* Dun */}
           <article className="flex flex-col col-span-2 gap-1">
             <label className="text-indigo-700">Dun</label>

@@ -8,8 +8,8 @@ import Link from "next/link";
 export default async function ForgotPassword(props) {
   const searchParams = await props.searchParams;
   return (
-    <main>
-      <form className="flex flex-col gap-4 mx-auto justify-center w-1/3 h-auto w-1/4 p-5 rounded bg-white border border-black">
+    <main className="px-2 sm:px-0">
+      <form className="flex flex-col gap-4 mx-auto justify-center w-full sm:w-1/3 h-auto w-1/4 sm:m-0 p-2 sm:p-5 rounded bg-white border border-black">
         <div className="flex text-center justify-center items-center">
           <img src="/parliament_logo.svg" alt="logo-parliament" className=" w-68 h-24" />
         </div>

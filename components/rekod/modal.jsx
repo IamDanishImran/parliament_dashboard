@@ -124,13 +124,14 @@ const Modal = ({ open, onClose }) => {
   if (!open) return null;
 
   return (
-    <main className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-90">
-      <section className="bg-white rounded-lg w-[1000px] h-auto p-6 pt-12 pb-20">
+      <main className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <section className="bg-white justify-center items-center rounded w-[400px] h-[600px] mx-4 sm:m-0 py-8 px-2 overflow-y-auto 
+        sm:w-auto sm:h-auto sm:p-6 sm:pt-12 sm:pb-20 ">
         <article className="text-center text-3xl pb-14 font-semibold text-indigo-600">
           <h1>Application Form</h1>
         </article>
         <form onSubmit={handleSubmit}>
-          <section className='grid grid-cols-2 gap-4'>
+          <section className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             <div className='grid grid-cols-2 gap-4'>
               {/* Form fields */}
               <article className="flex flex-col col-span-2 gap-1">

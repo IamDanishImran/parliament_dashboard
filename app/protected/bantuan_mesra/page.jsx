@@ -59,7 +59,7 @@ export default function Program_Mesra() {
   };
 
   return (
-    <main className="p-2 pl-10 pr-20">
+    <main className="pt-6 sm:pt-4 sm:p-2 sm:pl-10 sm:pr-20">
       <Header title="Community Outreach Program Summary" navigator="Community Outreach Program" />
       <br />
       {/* Search Bar */}
@@ -119,7 +119,7 @@ export default function Program_Mesra() {
       <PanelAnalysis filteredForm={filteredForm} /> {/* Panel Analysis */}
 
       <br />
-      <section id="chart-pie" className="flex w-full h-full gap-4">
+      <section id="chart-pie" className="flex flex-col sm:flex-row sm:w-full sm:h-full gap-4">
         <PieDun filteredForm={filteredForm} /> {/* Pie Chart Dun */}
         <PieCategory filteredForm={filteredForm} /> {/* Pie Chart Category */}
       </section>

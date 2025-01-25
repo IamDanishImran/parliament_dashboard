@@ -9,7 +9,7 @@ export default function Login({ searchParams }) {
   const errorMessage = searchParams?.error;
   const successMessage = searchParams?.success;
   return (
-    <form className="flex flex-col mx-auto justify-center h-auto w-1/4 p-5 rounded rounded bg-white border border-black">
+    <form className="p-2 flex flex-col mx-auto justify-center h-auto sm:w-1/4 sm:p-5 rounded rounded bg-white border border-black">
       <div className="flex text-center justify-center items-center">
         <img src="/parliament_logo.svg" alt="logo-parliament" className=" w-68 h-24" />
       </div>

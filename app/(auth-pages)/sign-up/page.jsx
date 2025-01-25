@@ -27,11 +27,8 @@ export default function Signup() {
   };
 
   return (
-    <>
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 gap-4 mx-auto justify-center h-auto w-full max-w-md p-5 rounded bg-white border border-black"
-      >
+    <main className="px-2 sm:p-0">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 mx-auto justify-center h-auto w-full max-w-md p-5 rounded bg-white border border-black">
         <div id="title" className="col-span-full">
           <div className="flex text-center justify-center items-center">
             <img src="/parliament_logo.svg" alt="logo-parliament" className="w-68 h-24" />
@@ -114,7 +111,7 @@ export default function Signup() {
         </div>
       </form>
       <ToastContainer />
-    </>
+    </main>
   );
 }
 
