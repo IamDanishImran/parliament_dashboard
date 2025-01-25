@@ -213,9 +213,15 @@ export const resetPasswordAction = async (formData) => {
 // Sign Out Action
 export const signOutAction = async () => {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.log("Sign-out error:", error);
+    throw error;
+  }
+  // await supabase.auth.signOut();
   return redirect("/");
 };
+
 
 // export const signOutAction = async () => {
 //   try {
