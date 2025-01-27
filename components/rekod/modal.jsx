@@ -6,9 +6,9 @@ import { Divider } from "@nextui-org/divider";
 
 const supabase = createClient(); // Initialize Supabase client once
 
-const Modal = ({ open, onClose }) => {
+const Modal = ({ open, onClose, handleAddItem }) => {
   const [loading, setLoading] = useState(false);
-  const [dunData, setDunData] = useState([]);
+  const [dunData, setDunData] = useState(null); // Null to check if data exists
   const [formData, setFormData] = useState({
     barang_bantuan: '',
     kategori_bantuan: '',
@@ -71,13 +71,17 @@ const Modal = ({ open, onClose }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (!dunData) {
+      if (!dunData?.id) { // Check for valid dunData
         toast.error("DUN data is missing. Please check your account.");
         setLoading(false);
         return;
       }
+      
       const { barang_bantuan, kategori_bantuan, kategori_penerima, no_tel, alamat, harga, kuantiti } = formData;
-      if (!barang_bantuan || !kategori_bantuan || !kategori_penerima || !no_tel || !alamat || !harga || !kuantiti) {
+      // List of required fields for cleaner validation
+      const requiredFields = [barang_bantuan, kategori_bantuan, kategori_penerima, no_tel, alamat, harga, kuantiti];
+      
+      if (requiredFields.some(field => !field)) {
         toast.error("Please fill in all required fields.");
         setLoading(false);
         return;
@@ -100,8 +104,7 @@ const Modal = ({ open, onClose }) => {
         });
   
       if (formSubmissionError) throw formSubmissionError;
-      onClose();
-      toast.success("Form submitted successfully!");
+      handleAddItem();
       setFormData({
         barang_bantuan: '',
         kategori_bantuan: '',

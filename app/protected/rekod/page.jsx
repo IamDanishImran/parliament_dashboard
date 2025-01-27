@@ -69,7 +69,6 @@ export default function Rekod() {
   };
 
   const handleDeleteItem = (index) => {
-    // Handle item deletion logic
     toast.success("Form deleted successfully!");
   };
 
@@ -126,6 +125,7 @@ export default function Rekod() {
     const headers = [
       'No', 'Application Notes', 'Program Category', 'Category', 'Quantity', 'Price', 'Status', 'Address', 'No.Phone', 'Assistance Type', 'Item Request', 'Date of Application'
     ];
+    toast.success("Data downloaded successfully!");
     // Map over filteredForm to extract the data from each row
     const rows = filteredForm.map((item, index) => [
       index + 1, // Serial number
@@ -153,7 +153,6 @@ export default function Rekod() {
     link.href = URL.createObjectURL(blob);
     link.download = 'data_parliament.csv';
     link.click();
-    toast.success("Data downloaded successfully!");
   };
 
     // Form List Section

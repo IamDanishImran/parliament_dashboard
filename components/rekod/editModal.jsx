@@ -336,7 +336,11 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
                 <label className="text-indigo-700">Form Status</label>
                 <input type="text" id="admin_notes" name="admin_notes" value={formStatus}
                   readOnly disabled
-                  className="h-8 rounded border border-gray-400 px-2" 
+                  className={`h-8 rounded border border-gray-400 px-2 
+                    ${formStatus === 'IN PROGRESS' ? 'bg-yellow-200' : 
+                    formStatus === 'APPROVED' ? 'bg-green-400' :
+                    formStatus === 'KIV' ? 'bg-cyan-400' : 
+                    formStatus === 'REJECTED' ? 'bg-red-500' : ''}`}
                 />
               </article>
               
