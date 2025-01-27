@@ -398,6 +398,7 @@ export default function Rekod() {
             onClose={closeEditModal}
             formData={editingForm}
             supabase={supabase}
+            handleDeleteItem={handleDeleteItem}
           />
         )}
       <Footer />

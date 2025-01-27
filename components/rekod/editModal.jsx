@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const EditModal = ({ isOpen, onClose, formData, supabase }) => {
+const EditModal = ({ isOpen, onClose, formData, supabase, handleDeleteItem }) => {
   const [formStatus, setFormStatus] = useState(formData?.form_status || "");
   const [notes, setNotes] = useState(formData?.notes || "");
   const [category, setCategory] = useState(formData?.category || "");
@@ -105,10 +105,12 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
           .from("form")
           .delete()
           .eq("id", formData.id);
-
+  
         if (error) throw error;
-        toast.success("Form deleted successfully.");
-        onClose();
+  
+        // Only trigger success if delete is successful
+        handleDeleteItem();  // Callback to handle deletion to prompt toast success
+        onClose();  // Close the modal after deletion
       } catch (error) {
         console.error("Error deleting form:", error);
         toast.error("An error occurred while deleting the form.");
@@ -117,6 +119,7 @@ const EditModal = ({ isOpen, onClose, formData, supabase }) => {
       }
     }
   };
+  
 
   if (!isOpen) return null;
 
