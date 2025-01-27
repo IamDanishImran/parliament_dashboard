@@ -1,6 +1,6 @@
 // app\(auth-pages)\sign-up\page.jsx
 "use client"; 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation"; 
 import { signUpAction } from "@/app/actions";
 import { SubmitButton } from "@/components/submit-button";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useRouter } from "next/navigation";
 
 export default function Signup() {
   return (
@@ -19,21 +20,39 @@ export default function Signup() {
 }
 
 function SignupForm() {
-  const searchParams = useSearchParams(); // Access search params
-  const message = searchParams.get("message") || null; // Get message parameter
-  const [errorMessage, setErrorMessage] = useState(""); // State for error messages
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message") || null;
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isClient, setIsClient] = useState(false);
+  const router = useRouter(); // useRouter should be used only on the client side
+
+  useEffect(() => {
+    setIsClient(true); // Set to true after the component mounts
+  }, []);
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent form submission
-    const formData = new FormData(event.target); // Collect form data
-    
-    try {
-      await signUpAction(formData); // Assuming this function is handling the sign-up process
-      toast.success("Sign up successful! Check your email for the verification link.");
-    } catch (error) {
-      toast.error("Failed to sign up. Please try again.");
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const password = formData.get("password");
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+
+    const result = await signUpAction(formData);
+
+    if (result.status === "error") {
+      toast.error(result.message);
+    } else {
+      toast.success(result.message);
+      setTimeout(() => {
+        router.push("/sign-in"); // Redirect after a successful sign-up
+      }, 2000); // Wait for 2 seconds to show the success message
     }
   };
+
+  if (!isClient) return null; // Only render after the component mounts
 
   return (
     <main className="px-2 sm:p-0">

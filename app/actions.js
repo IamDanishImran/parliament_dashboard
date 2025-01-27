@@ -13,11 +13,8 @@ export const signUpAction = async (formData) => {
   const register_code = formData.get("register_code")?.toString();
   const supabase = await createClient();
 
-  console.log("Received form data:", { email, password, name, ic, register_code });
-
   if (!email || !password || !name || !ic || !register_code) {
-    console.log("Missing required fields.");
-    return encodedRedirect("error", "/sign-up", "All fields are required.");
+    return { status: "error", message: "All fields are required." };
   }
 
   const { data: registerRole, error: registerRoleError } = await supabase
@@ -26,11 +23,8 @@ export const signUpAction = async (formData) => {
     .eq("description", register_code)
     .single();
 
-  console.log("Role lookup result:", { registerRole, registerRoleError });
-
   if (registerRoleError || !registerRole) {
-    console.log("Invalid registration code.");
-    return encodedRedirect("error", "/sign-up", "Invalid or missing registration code.");
+    return { status: "error", message: "Invalid or missing registration code." };
   }
 
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -38,47 +32,45 @@ export const signUpAction = async (formData) => {
     password,
   });
 
-  console.log("Sign-up result:", { signUpData, signUpError });
-
   const user_id = signUpData?.user?.id;
   if (signUpError || !user_id) {
-    console.log("Sign-up failed:", signUpError.message);
-    return encodedRedirect("error", "/sign-up", signUpError.message);
+    return { status: "error", message: signUpError?.message || "Sign-up failed." };
   }
 
-  const userRole = registerRole.id; // Assuming `id` is numeric
-  console.log("Determined user role:", userRole);
+  const userRole = registerRole.id;
 
   const insertUserData = async (tableName, data) => {
-    console.log(`Inserting into table ${tableName}:`, data);
     const { error } = await supabase.from(tableName).insert(data);
     if (error) throw new Error(`Error inserting into ${tableName}: ${error.message}`);
   };
 
   try {
-    if (userRole === "Supervisor") { // Admin Role
+    if (userRole === "Supervisor") {
       await insertUserData("admin", {
-        user_id, name, email, ic, id_register: userRole, status: "Pending",
+        user_id,
+        name,
+        email,
+        ic,
+        id_register: userRole,
+        status: "Pending",
       });
-    } else { // DUN Role
+    } else {
       await insertUserData("dun", {
-        user_id, name, email, ic, id_register: userRole, status: "Pending",
+        user_id,
+        name,
+        email,
+        ic,
+        id_register: userRole,
+        status: "Pending",
       });
     }
   } catch (error) {
-    console.error("Error inserting user data:", error.message);
-    return encodedRedirect("error", "/sign-up", "Error inserting user data.");
+    await supabase.auth.admin.deleteUser(user_id);
+    return { status: "error", message: "Sign-up failed during database insertion." };
   }
 
-  console.log("User successfully signed up and data inserted.");
-  return encodedRedirect(
-    "success",
-    "/sign-up",
-    "Thanks for signing up! Check your email for a verification link."
-  );
+  return { status: "success", message: "Thanks for signing up! Check your email for a verification link." };
 };
-
-
 
 
 // Sign In Action
