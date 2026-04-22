@@ -13,63 +13,57 @@ export const signUpAction = async (formData) => {
   const register_code = formData.get("register_code")?.toString();
   const supabase = await createClient();
 
-  if (!email || !password || !name || !ic || !register_code) {
-    return { status: "error", message: "All fields are required." };
-  }
-
-  const { data: registerRole, error: registerRoleError } = await supabase
-    .from("registration")
-    .select("id")
-    .eq("description", register_code)
-    .single();
-
-  if (registerRoleError || !registerRole) {
-    return { status: "error", message: "Invalid or missing registration code." };
-  }
-
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-
-  const user_id = signUpData?.user?.id;
-  if (signUpError || !user_id) {
-    return { status: "error", message: signUpError?.message || "Sign-up failed." };
-  }
-
-  const userRole = registerRole.id;
-
-  const insertUserData = async (tableName, data) => {
-    const { error } = await supabase.from(tableName).insert(data);
-    if (error) throw new Error(`Error inserting into ${tableName}: ${error.message}`);
-  };
-
   try {
-    if (userRole === "Supervisor") {
-      await insertUserData("admin", {
-        user_id,
-        name,
-        email,
-        ic,
-        id_register: userRole,
-        status: "Pending",
-      });
-    } else {
-      await insertUserData("dun", {
-        user_id,
-        name,
-        email,
-        ic,
-        id_register: userRole,
-        status: "Pending",
-      });
+    if (!email || !password || !name || !ic || !register_code) {
+      return { status: "error", message: "All fields are required." };
     }
+  
+    const { data: registerRole, error: registerRoleError } = await supabase
+      .from("registration")
+      .select("id")
+      .eq("description", register_code)
+      .single();
+  
+    if (registerRoleError || !registerRole) {
+      return { status: "error", message: "Invalid or missing registration code." };
+    }
+  
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+  
+    const user_id = signUpData?.user?.id;
+    if (signUpError || !user_id) {
+      return { status: "error", message: signUpError?.message || "Sign-up failed." };
+    }
+  
+    const userRole = registerRole.id;
+  
+      if (register_code === "Supervisor") {
+        await insertUserData("admin", {
+          user_id,
+          name,
+          email,
+          ic,
+          id_register: userRole,
+          status: "Pending",
+        });
+      } else {
+        await insertUserData("dun", {
+          user_id,
+          name,
+          email,
+          ic,
+          id_register: userRole,
+          status: "Pending",
+        });
+      }
+    return { status: "success", message: "Thanks for signing up! Check your email for a verification link." };
   } catch (error) {
-    await supabase.auth.admin.deleteUser(user_id);
-    return { status: "error", message: "Sign-up failed during database insertion." };
+    console.error("Sign-up error:", error);
+    return { status: "error", message: "Sign-up failed." };
   }
-
-  return { status: "success", message: "Thanks for signing up! Check your email for a verification link." };
 };
 
 
