@@ -4,10 +4,16 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/server";
 
-export default function Login({ searchParams }) {
-  const errorMessage = searchParams?.error;
-  const successMessage = searchParams?.success;
+export default async function Login({ searchParams }) {
+  const params = await searchParams;
+  const supabase = await createClient();
+  const { data: registrationRows } = await supabase
+    .from("registration")
+    .select("role_code,description")
+    .order("id", { ascending: true });
+
   return (
     <form className="p-2 flex flex-col mx-auto justify-center h-auto sm:w-1/4 sm:p-5 rounded rounded bg-white border border-black">
       <div className="flex text-center justify-center items-center">
@@ -21,8 +27,23 @@ export default function Login({ searchParams }) {
         </Link>
       </p>
       <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-        <Label htmlFor="email">Registration Code</Label>
-        <Input name="register_code" placeholder="xxx-xxx" required />
+        <Label htmlFor="register_code">Registration Code</Label>
+        <select
+          id="register_code"
+          name="register_code"
+          className="h-10 border rounded px-2"
+          defaultValue=""
+          required
+        >
+          <option value="" disabled>
+            Select your registration code
+          </option>
+          {(registrationRows || []).map((row) => (
+            <option key={row.role_code} value={row.role_code}>
+              {row.role_code} - {row.description}
+            </option>
+          ))}
+        </select>
 
         <Label htmlFor="email">Email</Label>
         <Input name="email" placeholder="you@example.com" required />
@@ -48,10 +69,7 @@ export default function Login({ searchParams }) {
         <Link href={"/"} className="bg-neutral-900 text-slate-50 justify-center text-center p-2 rounded-sm hover:bg-neutral-800">
           Back
         </Link>
-        <FormMessage message={searchParams} />
-        {/* Display error or success message from query params */}
-        {errorMessage && <FormMessage message={errorMessage} />}
-        {successMessage && <FormMessage message={successMessage} />}
+        <FormMessage message={params} />
       </div>
     </form>
   );

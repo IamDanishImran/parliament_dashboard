@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { approveDunAction } from "@/app/actions";
 
 const DunModal = ({ isOpen, onClose, formData, supabase }) => {
   const [dunName, setDunName] = useState(formData?.name || "");
@@ -8,22 +9,10 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
   const [dunEmail, setDunEmail] = useState(formData?.email || "");
   const [dunIC, setDunIC] = useState(formData?.ic || "");
   const [dun, setDun] = useState(formData?.registration.description || "");
-  const [roleCode, setRoleCode] = useState("");
   const [isLoading, setIsLoading] = useState(false); // For delete button
   const [isSaving, setIsSaving] = useState(false); // For save/approve button
 
   if (!isOpen || !formData) return null;
-
-  // Role code mapping
-  const roleCodeMapping = {
-    "Rembia": "10598878",
-    "Machap Jaya": "12345678",
-    "Durian Tunggal": "98765432",
-    "Asahan": "45671234",
-    "Gadek": "31415926",
-    "Outside Alor Gajah": "74035216",
-    "Outside Melaka": "20479352",
-  };
 
   useEffect(() => {
     if (formData) {
@@ -35,42 +24,18 @@ const DunModal = ({ isOpen, onClose, formData, supabase }) => {
     }
   }, [formData]);
 
-  useEffect(() => {
-    setRoleCode(roleCodeMapping[dun] || "");
-  }, [dun]);
-
   const handleSave = async () => {
     setIsSaving(true); // Start loading for save button
     try {
-      const { data, error } = await supabase
-        .from("dun")
-        .update({
-          name: dunName,
-          email: dunEmail,
-          status: "Approved",
-          ic: dunIC,
-        })
-        .eq("id", formData.id);
-
-      if (error) throw error;
-
-      const response = await fetch("/api/user-verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: dunEmail,
-          subject: "Your Application Has Been Approved",
-          text: `Dear ${dunName},\n\nYour registration has been approved successfully.\n\nBest regards,\nParliament Team Support\nHere's the registration code ${roleCode}`,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to send approval email");
-
-      toast.success("Dun request approved and email sent successfully.");
+      const result = await approveDunAction({ dunId: formData.id });
+      if (result.status === "error") {
+        throw new Error(result.message);
+      }
+      toast.success(result.message);
       onClose();
     } catch (error) {
       console.error("Error:", error.message);
-      toast.error("An error occurred. Please try again.");
+      toast.error(error.message || "An error occurred. Please try again.");
     } finally {
       setIsSaving(false); // Stop loading for save button
     }

@@ -26,6 +26,7 @@ export default function UserManagement() {
   const [dunModalData, setDunModalData] = useState(null);
   const [isAdminModalOpen, setAdminModalOpen] = useState(false);
   const [adminModalData, setAdminModalData] = useState(null);
+  const canManageDun = ["Admin", "Supervisor", "Manager"].includes(adminRole);
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -172,7 +173,7 @@ export default function UserManagement() {
       </Skeleton>
 
       <Skeleton isLoaded={!loading}>
-      {adminRole === "Supervisor" && (
+      {adminRole !== "Manager" && canManageDun && (
         <div>
           {/* Manage Duns */}
           <section className="border-1 border-gray-400 mt-4 rounded shadow">
